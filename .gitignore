@@ -13,3 +13,6 @@
 # frontend code
 node_modules/
 dist/
+
+# Target
+target/

@@ -1,26 +1,10 @@
 {
   "canisters": {
-    "Dab": {
-      "main": "src/Dab/main.mo",
-      "type": "motoko"
-    },
-    "Dab_assets": {
-      "dependencies": [
-        "Dab"
-      ],
-      "frontend": {
-        "entrypoint": "src/Dab_assets/src/index.html"
-      },
-      "source": [
-        "src/Dab_assets/assets",
-        "dist/Dab_assets/"
-      ],
-      "type": "assets"
-    }
-  },
-  "defaults": {
-    "build": {
-      "packtool": ""
+    "dab": {
+      "build": "cargo build --target wasm32-unknown-unknown --package dab --release",
+      "candid": "src/dab/candid.did",
+      "wasm": "target/wasm32-unknown-unknown/release/dab.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.7.1",

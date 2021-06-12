@@ -1,20 +1,11 @@
-# Dab
+# Dfinity Address Book (Dab)
 
-Welcome to your new Dab project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+## Overview
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+The Dfinity Address Book (also known as the Dab) is a decentralized application and canister based on the Internet Computer.
 
-To learn more before you start working with Dab, see the following documentation available online:
+What Dab does is not much different from a classic phone book. With either, you can look up for different addresses and the names associated with them. Dab acts as a phone book for canisters based on the Internet Computer. Each canister has a name and a principal ID, it is Dab’s responsibility to store them and return the ID when a call is made for the name.
 
-- [Quick Start](https://sdk.dfinity.org/docs/quickstart/quickstart-intro.html)
-- [SDK Developer Tools](https://sdk.dfinity.org/docs/developers-guide/sdk-guide.html)
-- [Motoko Programming Language Guide](https://sdk.dfinity.org/docs/language-guide/motoko.html)
-- [Motoko Language Quick Reference](https://sdk.dfinity.org/docs/language-guide/language-manual.html)
+For storing the information, Big Map is used. Big Map is a very minimalistic insert/update only auto-scalable key-value storage for the I.C.
 
-If you want to start working on your project right away, you might want to try the following commands:
-
-```bash
-cd Dab/
-dfx help
-dfx config --help
-```
+Work in progress, this repository will be updated soon.
