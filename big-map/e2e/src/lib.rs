@@ -1,28 +1,25 @@
-use ic_cdk_macros::*;
-use ic_cdk::export::candid;
+use big_map;
 use ic_cdk::export::candid::CandidType;
 use ic_cdk::export::Principal;
 use ic_cdk::*;
+use ic_cdk_macros::*;
 use serde::Deserialize;
-use big_map;
 
-struct Data(big_map::BigMap<String, Option<Principal>>);
+struct Data(big_map::BigMap<u32, u32>);
 impl Default for Data {
     fn default() -> Self {
         Self(big_map::BigMap::new(5, 2 * 1024 * 1024))
     }
 }
 
-fn name() -> String {
-    String::from("Dfinity Address Book");
-}
-
-async fn add_canister(key: String, value: Option<Principal>) -> () {
+#[update]
+async fn set(key: u32, value: u32) {
     let data = storage::get_mut::<Data>();
     data.0.insert(key, value).await;
 }
 
-async fn get_canister(key: String) -> Option<Principal> {
+#[query]
+async fn get(key: u32) -> Option<u32> {
     let data = storage::get::<Data>();
-    data.0.get(key).await;
+    data.0.get(key).await
 }

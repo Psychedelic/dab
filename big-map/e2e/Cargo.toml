@@ -1,0 +1,16 @@
+[package]
+name = "big-map-e2e"
+version = "0.1.0"
+authors = ["Parsa Ghadimi <parsa@fleek.co>"]
+edition = "2018"
+
+[dependencies]
+big-map = { path = "../big-map" }
+ic-types = "0.1.2"
+ic-cdk = "0.2.3"
+ic-cdk-macros = "0.2.3"
+serde = "1.0.116"
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"

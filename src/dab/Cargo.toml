@@ -10,3 +10,6 @@ crate-type = ["cdylib"]
 [dependencies]
 ic-cdk = "0.3"
 ic-cdk-macros = "0.3"
+ic-types = "0.1.2"
+big-map = { path = "../../big-map/big-map" }
+serde = "1.0.116"
