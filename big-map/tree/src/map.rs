@@ -101,47 +101,64 @@ impl<
         }
     }
 
-    pub async fn insert(&mut self, key: Key, value: Value) {
-        match self.binary_search(&key) {
-            Ok(index) => {
-                self.data[index].value = value;
-            }
-            Err(0) if self.tail.is_none() => self.data.insert(
-                0,
-                BigMapNode {
-                    key,
-                    value,
+    /// This is a low-level pai to optimize value updates, only use it when you know what you're doing.
+    /// split must be called after calling this method.
+    pub async fn update(&mut self, key: &Key, default: Value) -> Result<&mut Value, &Address> {
+        self.split().await; // Recovery.
+
+        match self.binary_search(key) {
+            Ok(index) => Ok(&mut self.data[index].value),
+            Err(0) if self.tail.is_none() => {
+                let node = BigMapNode {
+                    key: key.clone(),
+                    value: default,
                     child: None,
-                },
-            ),
-            Err(0) => {
-                Storage::insert(self.tail.as_ref().unwrap(), &key, &value).await;
+                };
+
+                self.data.insert(0, node);
+
+                Ok(&mut self.data[0].value)
             }
+            Err(0) => Err(self.tail.as_ref().unwrap()),
             // Is self.data[index - 1] always defined? YES
             // yes if { index - 1 < len() }
             //        { index < len() + 1 }
             //        { index <= len()    }
             // from BS we know 0 <= index <= len(), so the condition is met, and we proved it.
-            Err(index) if self.data[index - 1].child.is_none() => self.data.insert(
-                index,
-                BigMapNode {
-                    key,
-                    value,
+            Err(index) if self.data[index - 1].child.is_none() => {
+                let node = BigMapNode {
+                    key: key.clone(),
+                    value: default,
                     child: None,
-                },
-            ),
+                };
+
+                self.data.insert(index, node);
+
+                Ok(&mut self.data[index].value)
+            }
             Err(index) => {
                 let node = self.data[index - 1].child.as_ref().unwrap();
-                Storage::insert(node, &key, &value).await;
+                Err(node)
             }
-        }
-
-        if self.data.len() == self.deg {
-            self.split().await;
         }
     }
 
+    pub async fn insert(&mut self, key: Key, value: Value) {
+        match self.update(&key, value.clone()).await {
+            Ok(v) => {
+                *v = value;
+            }
+            Err(node) => {
+                Storage::insert(node, &key, &value).await;
+            }
+        };
+
+        self.split().await;
+    }
+
     pub async fn insert_upward(&mut self, key: Key, value: Value, child: Address) {
+        self.split().await; // Recovery.
+
         let element = BigMapNode {
             key,
             value,
@@ -157,9 +174,7 @@ impl<
             }
         }
 
-        if self.data.len() == self.deg {
-            self.split().await;
-        }
+        self.split().await;
     }
 
     pub fn get_raw(&self, from: usize, limit: usize) -> &[BigMapNode<Key, Value, Address>] {
@@ -174,7 +189,11 @@ impl<
         self.parent = Some(address);
     }
 
-    async fn split(&mut self) {
+    pub async fn split(&mut self) {
+        if self.data.len() != self.deg {
+            return;
+        }
+
         if self.is_root() {
             return self.split_root().await;
         }

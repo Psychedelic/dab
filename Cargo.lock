@@ -204,6 +204,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "big-map-node"
+version = "0.1.0"
+dependencies = [
+ "ic-cdk 0.2.4",
+ "ic-cdk-macros 0.2.4",
+ "ic-types",
+ "serde",
+ "tree",
+]
+
+[[package]]
 name = "bit-set"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -784,17 +795,6 @@ name = "new_debug_unreachable"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4a24736216ec316047a1fc4252e27dabb04218aa4a3f37c6e7ddbf1f9782b54"
-
-[[package]]
-name = "node"
-version = "0.1.0"
-dependencies = [
- "ic-cdk 0.2.4",
- "ic-cdk-macros 0.2.4",
- "ic-types",
- "serde",
- "tree",
-]
 
 [[package]]
 name = "num-bigint"

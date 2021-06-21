@@ -1,5 +1,5 @@
 [package]
-name = "node"
+name = "big-map-node"
 version = "0.1.0"
 authors = ["Parsa Ghadimi <qti3eqti3e@gmail.com>"]
 edition = "2018"

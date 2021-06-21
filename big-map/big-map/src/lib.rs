@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use tree;
 
 const NODE_WASM: &'static [u8] =
-    include_bytes!("../../../target/wasm32-unknown-unknown/release/node-opt.wasm");
+    include_bytes!("../../../target/wasm32-unknown-unknown/release/big_map_node.wasm");
 
 struct WasmProvider;
 
