@@ -8,4 +8,28 @@ What Dab does is not much different from a classic phone book. With either, you 
 
 For storing the information, Big Map is used. Big Map is a very minimalistic insert/update only auto-scalable key-value storage for the I.C.
 
-Work in progress, this repository will be updated soon.
+## Methods
+
+| Method Name    | Parameters                     | Return Type |
+| :------------- | :----------                    | :--------   |
+| name           | ___________                    | String      |
+| add_canister   | key: String, value: Principal  | ()          |
+| get_canister   | key: String | Principal        | Principal   |
+
+## How to run
+
+To run this canister you need to have `dfx` and `node` installed.
+
+``` bash
+dfx start --background
+dfx deploy
+
+dfx canister call dab name
+-> returns the name: ("Dfinity Address Book")
+
+dfx canister call dab add_canister (dank, principal "principal") -> ()
+-> returns nothing: ()
+
+dfx canister call dab get_canister (dank)
+-> returns the principal ID associated with the key: ("principal")
+```
