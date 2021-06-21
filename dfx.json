@@ -1,9 +1,9 @@
 {
   "canisters": {
     "dab": {
-      "build": "cargo build --target wasm32-unknown-unknown --package dab --release",
+      "build": "node build.js",
       "candid": "src/dab/candid.did",
-      "wasm": "target/wasm32-unknown-unknown/release/dab.wasm",
+      "wasm": "target/wasm32-unknown-unknown/release/dab-opt.wasm",
       "type": "custom"
     }
   },

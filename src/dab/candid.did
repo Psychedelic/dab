@@ -1,5 +1,5 @@
 service : {
-    "name" : () -> (text);
+    "name" : () -> (text) query;
     "add_canister" : (key: text, value: principal) -> ();
-    "get_canister" : (key: text) -> (opt principal) query;
+    "get_canister" : (key: text) -> (opt principal);
 }
