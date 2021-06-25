@@ -16,3 +16,6 @@ dist/
 
 # Target
 target/
+
+# My personal todo file
+todo.txt
