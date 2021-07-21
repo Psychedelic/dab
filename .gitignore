@@ -14,8 +14,9 @@
 node_modules/
 dist/
 
-# Target
+# Rust
 target/
+Cargo.lock
 
 # My personal todo file
 todo.txt
