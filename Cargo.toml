@@ -1,8 +1,4 @@
 [workspace]
 members = [
     "src/dab",
-    "big-map/big-map",
-    "big-map/tree",
-    "big-map/node",
-    "big-map/e2e",
 ]

@@ -34,5 +34,4 @@ function buildWasm(pkg) {
     execSync(optCommand.join(' '));
 }
 
-buildWasm('big-map-node');
 buildWasm('dab');

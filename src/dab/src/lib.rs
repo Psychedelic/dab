@@ -1,11 +1,10 @@
 use ic_cdk::export::Principal;
 use ic_cdk_macros::*;
 use ic_cdk::*;
-use big_map;
 
 type Key = (Principal, String);
 
-struct Data(big_map::BigMap<Key, Principal>);
+/** struct Data(big_map::BigMap<Key, Principal>);
 
 impl Default for Data {
     fn default() -> Self {
@@ -32,10 +31,6 @@ async fn get_canister(key: String) -> Option<Principal> {
     return data.0.get(pointer).await;
 }
 
-
-// The remove_canister and remove_all functions can't be completed
-// because big map doesn't have a remove or unset function.
-
 #[update]
 async fn remove_canister(key: String) {
 
@@ -50,3 +45,5 @@ async fn remove_all(key: String) {
 async fn get_all(key: String) {
 
 }
+
+**/
