@@ -1,49 +1,71 @@
+use std::collections::HashMap;
 use ic_cdk::export::Principal;
 use ic_cdk_macros::*;
 use ic_cdk::*;
 
+/**
+Every item in the map looks like this:
+( ( Principal,  String       ), Principal  )
+( ( UserID,     CanisterName ), CanisterID )
+**/
+
 type Key = (Principal, String);
+pub struct AddressBook(HashMap<Key, Principal>);
 
-/** struct Data(big_map::BigMap<Key, Principal>);
-
-impl Default for Data {
+impl Default for AddressBook {
     fn default() -> Self {
-        Self(big_map::BigMap::new(5, 2 * 1024 * 1024))
+        Self(HashMap::new())
     }
+}
+
+impl AddressBook {
+    pub fn add_address(&mut self, account: Principal, item: <Key, Principal>) {}
+    pub fn remove_address(&mut self, account: Principal, canister_name: String) {}
+    pub fn get_address(&mut self, account: Principal, canister_name: String) {}
+    pub fn remove_all(&mut self, account: Principal) {};
+    pub fn get_all(&mut self, account: Principal) {};
 }
 
 #[query]
 fn name() -> String {
-    String::from("Dfinity Address Book")
+    String::from("Decentralised Address Book")
 }
 
 #[update]
-async fn add_canister(key: String, value: Principal) {
-    let pointer: Key = (caller(), key);
-    let data = storage::get_mut::<Data>();
-    data.0.insert(pointer, value).await;
+fn add_address(canister_name: String, canister_id: Principal) {
+    let pointer: Key = (caller(), canister_name);
+    let item = (pointer, canister_id);
+
+    let AddressBook = storage::get_mut::<AddressBook>();
+    AddressBook.add_address(caller(), item);
 }
 
 #[update]
-async fn get_canister(key: String) -> Option<Principal> {
-    let pointer: Key = (caller(), key);
-    let data = storage::get::<Data>();
-    return data.0.get(pointer).await;
+fn remove_address(canister_name: String) {
+    let AddressBook = storage::get_mut::<AddressBook>();
+    AddressBook.add_address(caller(), canister_name);
 }
 
 #[update]
-async fn remove_canister(key: String) {
-
+fn get_address(canister_name: String) {
+    let AddressBook = storage::get_mut::<AddressBook>();
+    AddressBook.add_address(caller(), canister_name);
 }
 
 #[update]
-async fn remove_all(key: String) {
-
+fn remove_all() {
+    let AddressBook = storage::get_mut::<AddressBook>();
+    AddressBook.add_address(caller());
 }
 
 #[update]
-async fn get_all(key: String) {
-
+fn get_all() {
+    let AddressBook = storage::get_mut::<AddressBook>();
+    AddressBook.add_address(caller());
 }
 
+/** TODO (@Nima-Ra):
+        1. Write unfinished methods.
+        2. Fix the candid file.
+        3. Update README.md
 **/
