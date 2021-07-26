@@ -66,6 +66,6 @@ fn get_all() {
 
 /** TODO (@Nima-Ra):
         1. Write unfinished methods.
-        2. Fix the candid file.
+        2. Fix the candid file. [DONE]
         3. Update README.md
 **/
