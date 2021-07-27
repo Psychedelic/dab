@@ -1,14 +1,21 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use ic_cdk::export::Principal;
+use ic_cdk::export::candid::{CandidType, Principal};
 use ic_cdk_macros::*;
 use ic_cdk::*;
+use serde::*;
 
 /**
 Every item in the map looks like this:
 ( ( Principal,  String       ), Principal  )
 ( ( UserID,     CanisterName ), CanisterID )
 **/
+
+#[derive(CandidType, Deserialize)]
+pub struct GetAddressResult {
+    canister_name: String,
+    canister_id: Option<Principal>,
+}
 
 type Key = (Principal, String);
 pub struct AddressBook(HashMap<Key, Principal>);
@@ -33,8 +40,13 @@ impl AddressBook {
     }
 
     pub fn remove_address(&mut self, account: Principal, canister_name: String) {}
-
-    pub fn get_address(&mut self, account: Principal, canister_name: String) {
+    
+    pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
+        let pointer: Key = (account, canister_name.clone());
+        return { GetAddressResult {
+            canister_name: canister_name,
+            canister_id: self.0.get(&pointer).cloned()
+        } }
     }
 
     pub fn remove_all(&mut self, account: Principal) {}

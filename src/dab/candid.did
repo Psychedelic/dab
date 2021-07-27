@@ -1,9 +1,14 @@
+type GetAddressResult = record {
+    canister_name    : text;
+    canister_id      : opt principal;
+};
+
 service : {
     "name" : () -> (text) query;
 
     "add_address"    : (canister_name: text, canister_id: principal) -> ();
     "remove_address" : (canister_name: text) -> ();
-    "get_address"    : (canister_name: text) -> (opt principal);
+    "get_address"    : (canister_name: text) -> (GetAddressResult);
 
     "get_all"    : () -> ();
     "remove_all" : () -> ();
