@@ -3,24 +3,17 @@ const { execSync } = require('child_process');
 function buildWasm(pkg) {
     const underscoredName = pkg.replace(/-/g, '_');
 
-    let buildCommand = [
+    const buildCommand = [
         'cargo',
         'build',
         '--target',
         'wasm32-unknown-unknown',
+        '--release',
         '--package',
         pkg,
     ];
 
-    if (process.env.NODE_ENV === 'production') {
-        buildCommand = [
-            ...buildCommand,
-            '--release',
-        ]
-    }
-
     console.log(`Building ${underscoredName}.wasm`);
-
     execSync(buildCommand.join(' '));
 
     const optCommand = [
