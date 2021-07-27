@@ -55,7 +55,7 @@ impl AddressBook {
 
 #[query]
 fn name() -> String {
-    String::from("Decentralised Address Book")
+    String::from("DAB")
 }
 
 #[update]
