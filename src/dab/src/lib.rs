@@ -1,9 +1,8 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
 use ic_cdk::export::candid::{CandidType, Principal};
+use std::collections::BTreeMap;
+use serde::{Deserialize};
 use ic_cdk_macros::*;
 use ic_cdk::*;
-use serde::*;
 
 /**
 Every item in the map looks like this:
@@ -11,12 +10,18 @@ Every item in the map looks like this:
 ( ( UserID,     CanisterName ), CanisterID )
 **/
 
+#[derive(Deserialize, CandidType, Clone)]
+pub struct GetAddressResult {
+    canister_name: String,
+    canister_id: Option<Principal>,
+}
+
 type Key = (Principal, String);
-pub struct AddressBook(HashMap<Key, Principal>);
+pub struct AddressBook(BTreeMap<Key, Principal>);
 
 impl Default for AddressBook {
     fn default() -> Self {
-        Self(HashMap::new())
+        Self(BTreeMap::new())
     }
 }
 
@@ -34,13 +39,19 @@ impl AddressBook {
         self.0.remove(&pointer);
     }
     
-    pub fn get_address(&mut self, account: Principal, canister_name: String) -> Option<Principal> {
-        let pointer: Key = (account, canister_name);
-        return self.0.get(&pointer).cloned();
+    pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
+        let pointer: Key = (account, canister_name.clone());
+        let canister_id: Option<Principal> = self.0.get(&pointer).cloned();
+        GetAddressResult { canister_name, canister_id }
     }
 
-    pub fn remove_all(&mut self, account: Principal) {}
-    pub fn get_all(&mut self, account: Principal) {}
+    pub fn remove_all(&mut self, account: Principal) {
+        // binary_search
+    }
+
+    pub fn get_all(&mut self, account: Principal) {
+        // binary_search
+    }
 }
 
 #[query]
@@ -61,9 +72,9 @@ fn remove_address(canister_name: String) {
 }
 
 #[update]
-fn get_address(canister_name: String) {
+fn get_address(canister_name: String) -> GetAddressResult {
     let address_book = storage::get_mut::<AddressBook>();
-    address_book.get_address(caller(), canister_name);
+    address_book.get_address(caller(), canister_name)
 }
 
 #[update]
