@@ -42,7 +42,7 @@ impl AddressBook {
     pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
         let pointer: Key = (account, canister_name.clone());
         let canister_id: Option<Principal> = self.0.get(&pointer).cloned();
-        GetAddressResult { canister_name, canister_id }
+        GetAddressResult { canister_name: canister_name, canister_id: canister_id }
     }
 
     pub fn remove_all(&mut self, account: Principal) {
