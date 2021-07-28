@@ -3,6 +3,8 @@ type GetAddressResult = record {
     canister_id      : opt principal;
 };
 
+type key = record { principal; text }
+
 service : {
     "name" : () -> (text) query;
 
@@ -10,6 +12,6 @@ service : {
     "remove_address" : (canister_name: text) -> ();
     "get_address"    : (canister_name: text) -> (GetAddressResult);
 
-    "get_all"    : () -> ();
+    "get_all"    : () -> (vec key);
     "remove_all" : () -> ();
 }

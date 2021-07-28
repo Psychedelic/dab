@@ -10,14 +10,12 @@ Every item in the map looks like this:
 ( ( UserID,     CanisterName ), CanisterID )
 **/
 
-#[derive(Deserialize, CandidType, Clone)]
-pub struct GetAddressResult {
-    canister_name: String,
-    canister_id: Option<Principal>,
-}
-
 type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Principal>);
+
+fn binary_search(map: BTreeMap<Key, Principal>, target: Principal, low: u64, high: u64) {
+    // TODO
+}
 
 impl Default for AddressBook {
     fn default() -> Self {
@@ -49,8 +47,9 @@ impl AddressBook {
         // binary_search
     }
 
-    pub fn get_all(&mut self, account: Principal) {
-        // binary_search
+    pub fn get_all(&mut self, account: Principal) -> Vec<(Principal, String)> {
+        let keys: Vec<_> = self.0.keys().cloned().collect();
+        return keys
     }
 }
 
@@ -71,6 +70,12 @@ fn remove_address(canister_name: String) {
     address_book.remove_address(caller(), canister_name);
 }
 
+#[derive(Deserialize, CandidType, Clone)]
+pub struct GetAddressResult {
+    canister_name: String,
+    canister_id: Option<Principal>,
+}
+
 #[update]
 fn get_address(canister_name: String) -> GetAddressResult {
     let address_book = storage::get_mut::<AddressBook>();
@@ -84,7 +89,7 @@ fn remove_all() {
 }
 
 #[update]
-fn get_all() {
+fn get_all() -> Vec<(Principal, String)> {
     let address_book = storage::get_mut::<AddressBook>();
-    address_book.get_all(caller());
+    address_book.get_all(caller())
 }
