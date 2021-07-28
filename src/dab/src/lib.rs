@@ -29,17 +29,16 @@ impl Default for AddressBook {
 impl AddressBook {
     pub fn add_address(&mut self, account: Principal, canister_name: String, canister_id: Principal) {
         let pointer: Key = (account, canister_name);
-        match self.0.entry(pointer) {
-            Entry::Occupied(mut e) => {
-                e.insert(canister_id);
-            }
-            Entry::Vacant(e) => {
-                e.insert(canister_id);
-            }
-        }
+        self.0.insert(
+            pointer,
+            canister_id
+        );
     }
 
-    pub fn remove_address(&mut self, account: Principal, canister_name: String) {}
+    pub fn remove_address(&mut self, account: Principal, canister_name: String) {
+        let pointer: Key = (account, canister_name);
+        self.0.remove(&pointer);
+    }
     
     pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
         let pointer: Key = (account, canister_name.clone());
@@ -50,7 +49,11 @@ impl AddressBook {
     }
 
     pub fn remove_all(&mut self, account: Principal) {}
-    pub fn get_all(&mut self, account: Principal) {}
+    pub fn get_all(&mut self, account: Principal) {
+        // for key in self.0.keys() {
+        //    println!("{}", key);
+        // }
+    }
 }
 
 #[query]
