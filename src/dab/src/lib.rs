@@ -11,12 +11,6 @@ Every item in the map looks like this:
 ( ( UserID,     CanisterName ), CanisterID )
 **/
 
-#[derive(CandidType, Deserialize)]
-pub struct GetAddressResult {
-    canister_name: String,
-    canister_id: Option<Principal>,
-}
-
 type Key = (Principal, String);
 pub struct AddressBook(HashMap<Key, Principal>);
 
@@ -40,20 +34,13 @@ impl AddressBook {
         self.0.remove(&pointer);
     }
     
-    pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
-        let pointer: Key = (account, canister_name.clone());
-        return { GetAddressResult {
-            canister_name: canister_name,
-            canister_id: self.0.get(&pointer).cloned()
-        } }
+    pub fn get_address(&mut self, account: Principal, canister_name: String) -> Option<Principal> {
+        let pointer: Key = (account, canister_name);
+        return self.0.get(&pointer).cloned();
     }
 
     pub fn remove_all(&mut self, account: Principal) {}
-    pub fn get_all(&mut self, account: Principal) {
-        // for key in self.0.keys() {
-        //    println!("{}", key);
-        // }
-    }
+    pub fn get_all(&mut self, account: Principal) {}
 }
 
 #[query]
