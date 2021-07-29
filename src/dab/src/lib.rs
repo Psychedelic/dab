@@ -13,8 +13,35 @@ Every item in the map looks like this:
 type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Principal>);
 
-fn binary_search(map: BTreeMap<Key, Principal>, target: Principal, low: u64, high: u64) {
-    // TODO
+fn binary_search(map: Vec<(Principal, String)>, target: Principal, low: usize, high: usize) -> (Key, Key) {
+    //ic_cdk::api::print(map.to_string());
+    let highest_principal = map[high].0;
+    let lowest_principal = map[low].0;
+    let middle = low + high / 2;
+    let middle_principal = map[middle].0;
+
+    if highest_principal == target {
+        if lowest_principal == target {
+            return (map[low], map[high]);
+        }
+        return binary_search(map, target, low + 1, high);
+    } else if lowest_principal == target {
+        return binary_search(map, target, low, high - 1);
+    } else {
+        if middle_principal  == target {
+            loop {
+                if map[middle - 1].0 != target && map[middle + 1].0 != target {
+                    return (map[middle], map[middle]);
+                } else if map[middle - 1].0 != target {
+                    return binary_search(map, target, middle, high - 1);
+                }
+            }
+        } else if middle_principal > target {
+            return binary_search(map, target, low + 1, middle - 1);
+        } else {
+            return binary_search(map, target, middle + 1, high - 1);
+        }
+    }
 }
 
 impl Default for AddressBook {
@@ -47,9 +74,16 @@ impl AddressBook {
         // binary_search
     }
 
-    pub fn get_all(&mut self, account: Principal) -> Vec<(Principal, String)> {
+    pub fn get_all(&mut self, account: Principal) -> Vec<_> {
         let keys: Vec<_> = self.0.keys().cloned().collect();
-        return keys
+        
+        // "2" should be changed to the length of the keys vector.
+        let range = binary_search(keys, account, 0, 2);
+
+        // ic_cdk::api::print(range.0.to_string());
+        // ic_cdk::api::print(range.1.to_string());
+
+        self.0.range(range.0..range.1).collect()
     }
 }
 
@@ -89,7 +123,7 @@ fn remove_all() {
 }
 
 #[update]
-fn get_all() -> Vec<(Principal, String)> {
+fn get_all() -> Vec<(Principal, String), Principal> {
     let address_book = storage::get_mut::<AddressBook>();
     address_book.get_all(caller())
 }
