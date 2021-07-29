@@ -1,5 +1,3 @@
-
-
 use ic_cdk::export::candid::{CandidType, Principal};
 use std::collections::BTreeMap;
 use serde::{Deserialize};
@@ -16,7 +14,6 @@ type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Principal>);
 
 fn binary_search(map: Vec<(Principal, String)>, target: Principal, low: usize, high: usize) -> (Key, Key) {
-    //ic_cdk::api::print(map.to_string());
     let highest_principal = map[high].0;
     let lowest_principal = map[low].0;
     let middle = low + high / 2;
@@ -72,20 +69,10 @@ impl AddressBook {
         GetAddressResult { canister_name: canister_name, canister_id: canister_id }
     }
 
-    pub fn remove_all(&mut self, account: Principal) {
-        // binary_search
-    }
-
     pub fn get_all(&mut self, account: Principal) -> Vec<(Key, Principal)> {
         let keys: Vec<_> = self.0.keys().cloned().collect();
-        
-        // "2" should be changed to the length of the keys vector.
+        // "2" should be changed to the length of the keys vector
         let range = binary_search(keys, account, 0, 2);
-
-        // ic_cdk::api::print(range.0.to_string());
-        // ic_cdk::api::print(range.1.to_string());
-
-        self.0.range(range.0..range.1).cloned().collect()
     }
 }
 
@@ -116,12 +103,6 @@ pub struct GetAddressResult {
 fn get_address(canister_name: String) -> GetAddressResult {
     let address_book = storage::get_mut::<AddressBook>();
     address_book.get_address(caller(), canister_name)
-}
-
-#[update]
-fn remove_all() {
-    let address_book = storage::get_mut::<AddressBook>();
-    address_book.remove_all(caller());
 }
 
 #[update]
