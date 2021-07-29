@@ -13,42 +13,6 @@ Every item in the map looks like this:
 type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Principal>);
 
-fn binary_search(
-    map: Vec<(Principal, String)>,
-    target: Principal,
-    low: usize,
-    high: usize,
-) -> (Key, Key) {
-    //ic_cdk::api::print(map.to_string());
-    let highest_principal = map[high].0;
-    let lowest_principal = map[low].0;
-    let middle = low + high / 2;
-    let middle_principal = map[middle].0;
-
-    if highest_principal == target {
-        if lowest_principal == target {
-            return (map[low], map[high]);
-        }
-        return binary_search(map, target, low + 1, high);
-    } else if lowest_principal == target {
-        return binary_search(map, target, low, high - 1);
-    } else {
-        if middle_principal == target {
-            loop {
-                if map[middle - 1].0 != target && map[middle + 1].0 != target {
-                    return (map[middle], map[middle]);
-                } else if map[middle - 1].0 != target {
-                    return binary_search(map, target, middle, high - 1);
-                }
-            }
-        } else if middle_principal > target {
-            return binary_search(map, target, low + 1, middle - 1);
-        } else {
-            return binary_search(map, target, middle + 1, high - 1);
-        }
-    }
-}
-
 impl Default for AddressBook {
     fn default() -> Self {
         Self(BTreeMap::new())
@@ -71,29 +35,21 @@ impl AddressBook {
         self.0.remove(&pointer);
     }
 
-    pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
+    pub fn get_address(&self, account: Principal, canister_name: String) -> GetAddressResult {
         let pointer: Key = (account, canister_name.clone());
         let canister_id: Option<Principal> = self.0.get(&pointer).cloned();
         GetAddressResult {
-            canister_name: canister_name,
-            canister_id: canister_id,
+            canister_name,
+            canister_id,
         }
     }
 
     pub fn remove_all(&mut self, account: Principal) {
-        // binary_search
+        unimplemented!()
     }
 
-    pub fn get_all(&mut self, account: Principal) -> Vec<(Key, Principal)> {
-        let keys: Vec<_> = self.0.keys().cloned().collect();
-
-        // "2" should be changed to the length of the keys vector.
-        let range = binary_search(keys, account, 0, 2);
-
-        // ic_cdk::api::print(range.0.to_string());
-        // ic_cdk::api::print(range.1.to_string());
-
-        self.0.range(range.0..range.1).cloned().collect()
+    pub fn get_all(&self, account: Principal) -> Vec<(Key, Principal)> {
+        unimplemented!()
     }
 }
 
