@@ -1,12 +1,22 @@
 # DAB
 
+> An open internet service for user profile information
+
 ## Overview
 
-DAB is a decentralized application on the Internet Computer. DAB helps you organize your principal IDs and set names for them. Other features of DAB will be soon released. You can find out more about the roadmap in the next section.
+DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application on the Internet Computer.
+
+DAB will allow user's to set and edit publicly available profile information (e.g. 'display name', 'emoji', 'avatar url') against their IC principal id. Dapp developers will be able to access this information on behalf of their users and integrate for improved UX.
+
+> DAB is currently a reference implementation looking for community feedback
+
+DAB is in its early stages, `fleek` is seeking to add profile capabilities to (plug)[https://github.com/psychedelic/plug], but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
 
 ## Roadmap
 
-We are currently planning on open-sourcing this repository with minimal features. Other features will be added in the next releases. You can see what is going to be on the next releases in this [document](https://docs.google.com/document/d/1wmFIXUHPGRJuB8_l70a9lMR9Tl0FjCZ4WGqZqq9Zv3w/edit?usp=sharing).
+* [x] open source proposed api
+* [ ] deploy v0.1.0 test canister to mainnet
+* [ ] plug integration
 
 ## How to run
 
