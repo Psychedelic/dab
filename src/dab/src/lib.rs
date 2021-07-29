@@ -1,8 +1,9 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use std::collections::BTreeMap;
-use serde::{Deserialize};
-use ic_cdk_macros::*;
 use ic_cdk::*;
+use ic_cdk_macros::*;
+use serde::Deserialize;
+use std::collections::BTreeMap;
+use std::ops::Bound::Included;
 
 /**
 Every item in the map looks like this:
@@ -13,36 +14,6 @@ Every item in the map looks like this:
 type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Principal>);
 
-fn binary_search(map: Vec<(Principal, String)>, target: Principal, low: usize, high: usize) -> (Key, Key) {
-    let highest_principal = map[high].0;
-    let lowest_principal = map[low].0;
-    let middle = low + high / 2;
-    let middle_principal = map[middle].0;
-
-    if highest_principal == target {
-        if lowest_principal == target {
-            return (map[low], map[high]);
-        }
-        return binary_search(map, target, low + 1, high);
-    } else if lowest_principal == target {
-        return binary_search(map, target, low, high - 1);
-    } else {
-        if middle_principal  == target {
-            loop {
-                if map[middle - 1].0 != target && map[middle + 1].0 != target {
-                    return (map[middle], map[middle]);
-                } else if map[middle - 1].0 != target {
-                    return binary_search(map, target, middle, high - 1);
-                }
-            }
-        } else if middle_principal > target {
-            return binary_search(map, target, low + 1, middle - 1);
-        } else {
-            return binary_search(map, target, middle + 1, high - 1);
-        }
-    }
-}
-
 impl Default for AddressBook {
     fn default() -> Self {
         Self(BTreeMap::new())
@@ -50,29 +21,36 @@ impl Default for AddressBook {
 }
 
 impl AddressBook {
-    pub fn add_address(&mut self, account: Principal, canister_name: String, canister_id: Principal) {
+    pub fn add_address(
+        &mut self,
+        account: Principal,
+        canister_name: String,
+        canister_id: Principal,
+    ) {
         let pointer: Key = (account, canister_name);
-        self.0.insert(
-            pointer,
-            canister_id
-        );
+        self.0.insert(pointer, canister_id);
     }
 
     pub fn remove_address(&mut self, account: Principal, canister_name: String) {
         let pointer: Key = (account, canister_name);
         self.0.remove(&pointer);
     }
-    
-    pub fn get_address(&mut self, account: Principal, canister_name: String) -> GetAddressResult {
+
+    pub fn get_address(&self, account: Principal, canister_name: String) -> GetAddressResult {
         let pointer: Key = (account, canister_name.clone());
         let canister_id: Option<Principal> = self.0.get(&pointer).cloned();
-        GetAddressResult { canister_name: canister_name, canister_id: canister_id }
+        GetAddressResult {
+            canister_name,
+            canister_id,
+        }
     }
-
-    pub fn get_all(&mut self, account: Principal) -> Vec<(Key, Principal)> {
-        let keys: Vec<_> = self.0.keys().cloned().collect();
-        // "2" should be changed to the length of the keys vector
-        let range = binary_search(keys, account, 0, 2);
+  
+    pub fn get_all(&self, account: Principal) -> Vec<(&Key, &Principal)> {
+        let start: Key = (account.clone(), String::new());
+        let end: Key = (account.clone(), unsafe {
+            String::from(std::char::from_u32_unchecked(u32::MAX))
+        });
+        self.0.range((Included(start), Included(end))).collect()
     }
 }
 
@@ -106,7 +84,7 @@ fn get_address(canister_name: String) -> GetAddressResult {
 }
 
 #[update]
-fn get_all() -> Vec<(Key, Principal)> {
+fn get_all() -> Vec<(&'static Key, &'static Principal)> {
     let address_book = storage::get_mut::<AddressBook>();
     address_book.get_all(caller())
 }
