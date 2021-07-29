@@ -3,6 +3,7 @@ use ic_cdk::*;
 use ic_cdk_macros::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
+use std::ops::Bound::Included;
 
 /**
 Every item in the map looks like this:
@@ -45,11 +46,29 @@ impl AddressBook {
     }
 
     pub fn remove_all(&mut self, account: Principal) {
-        unimplemented!()
+        // Unfortunately there is not a better native rust method to do this atm, see:
+        // https://users.rust-lang.org/t/removing-range-of-elements-from-btreemap/51582/14
+
+        let start: Key = (account.clone(), String::new());
+        let end: Key = (account.clone(), unsafe {
+            String::from(std::char::from_u32_unchecked(u32::MAX))
+        });
+
+        // Remove the data in the search range, and insert the remaining elements again.
+        let mut rem = self.0.split_off(&start).split_off(&end);
+        self.0.append(&mut rem);
+
+        // We don't know what users are doing, so the final key might still be in the map.
+        // (in theory it can be part of the second split_off)
+        self.0.remove(&end);
     }
 
-    pub fn get_all(&self, account: Principal) -> Vec<(Key, Principal)> {
-        unimplemented!()
+    pub fn get_all(&self, account: Principal) -> Vec<(&Key, &Principal)> {
+        let start: Key = (account.clone(), String::new());
+        let end: Key = (account.clone(), unsafe {
+            String::from(std::char::from_u32_unchecked(u32::MAX))
+        });
+        self.0.range((Included(start), Included(end))).collect()
     }
 }
 
@@ -89,7 +108,7 @@ fn remove_all() {
 }
 
 #[update]
-fn get_all() -> Vec<(Key, Principal)> {
+fn get_all() -> Vec<(&'static Key, &'static Principal)> {
     let address_book = storage::get_mut::<AddressBook>();
     address_book.get_all(caller())
 }
