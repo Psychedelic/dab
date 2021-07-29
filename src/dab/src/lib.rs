@@ -1,3 +1,5 @@
+
+
 use ic_cdk::export::candid::{CandidType, Principal};
 use std::collections::BTreeMap;
 use serde::{Deserialize};
@@ -74,7 +76,7 @@ impl AddressBook {
         // binary_search
     }
 
-    pub fn get_all(&mut self, account: Principal) -> Vec<_> {
+    pub fn get_all(&mut self, account: Principal) -> Vec<(Key, Principal)> {
         let keys: Vec<_> = self.0.keys().cloned().collect();
         
         // "2" should be changed to the length of the keys vector.
@@ -83,7 +85,7 @@ impl AddressBook {
         // ic_cdk::api::print(range.0.to_string());
         // ic_cdk::api::print(range.1.to_string());
 
-        self.0.range(range.0..range.1).collect()
+        self.0.range(range.0..range.1).cloned().collect()
     }
 }
 
@@ -123,7 +125,7 @@ fn remove_all() {
 }
 
 #[update]
-fn get_all() -> Vec<(Principal, String), Principal> {
+fn get_all() -> Vec<(Key, Principal)> {
     let address_book = storage::get_mut::<AddressBook>();
     address_book.get_all(caller())
 }
