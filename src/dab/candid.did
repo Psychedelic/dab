@@ -13,5 +13,4 @@ service : {
     "get_address"    : (canister_name: text) -> (GetAddressResult);
 
     "get_all"    : () -> (vec address_list);
-    "remove_all" : () -> ();
 }
