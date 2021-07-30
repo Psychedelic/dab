@@ -1,10 +1,13 @@
 # DAB
 
-> An IC open internet service for user profile information
+[![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
+[![Discord](https://img.shields.io/badge/Discord-Channel-blue)](https://discord.gg/yVEcEzmrgm)
 
 ## Overview
 
-DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application on the Internet Computer.
+> An IC open internet service for user profile information
+
+DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application on the [Internet Computer](https://dfinity.org).
 
 DAB will allow user's to set and edit publicly available profile information (e.g. 'display name', 'emoji', 'avatar url') against their IC principal id. Dapp developers will be able to access this information on behalf of their users and integrate for improved UX.
 
