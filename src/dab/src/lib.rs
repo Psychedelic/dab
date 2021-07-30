@@ -71,7 +71,7 @@ fn remove_address(canister_name: String) {
     address_book.remove_address(caller(), canister_name);
 }
 
-#[derive(Deserialize, CandidType, Clone)]
+#[derive(Deserialize, CandidType)]
 pub struct GetAddressResult {
     canister_name: String,
     canister_id: Option<Principal>,
@@ -83,8 +83,18 @@ fn get_address(canister_name: String) -> GetAddressResult {
     address_book.get_address(caller(), canister_name)
 }
 
+#[derive(CandidType)]
+pub struct GetAllResult {
+    total_addresses: u64,
+    list: Vec<(&'static Key, &'static Principal)>
+}
+
 #[update]
-fn get_all() -> Vec<(&'static Key, &'static Principal)> {
+fn get_all() -> GetAllResult {
     let address_book = storage::get_mut::<AddressBook>();
-    address_book.get_all(caller())
+    let canisters_list = address_book.get_all(caller());
+    GetAllResult {
+        total_addresses: canisters_list.len() as u64,
+        list: canisters_list
+    }
 }

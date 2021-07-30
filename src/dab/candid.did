@@ -3,14 +3,19 @@ type GetAddressResult = record {
     canister_id      : opt principal;
 };
 
-type address_list = record { {principal; text}; principal }
+type GetAllResult = record { 
+    record {
+        principal;
+        text
+    };
+    principal
+}
 
 service : {
-    "name" : () -> (text) query;
+    "name"           :  () -> (text) query;
 
-    "add_address"    : (canister_name: text, canister_id: principal) -> ();
-    "remove_address" : (canister_name: text) -> ();
-    "get_address"    : (canister_name: text) -> (GetAddressResult);
-
-    "get_all"    : () -> (vec address_list);
+    "add_address"    :  (canister_name: text, canister_id: principal) -> ();
+    "get_address"    :  (canister_name: text) -> (GetAddressResult);
+    "remove_address" :  (canister_name: text) -> ();
+    "get_all"        :  () -> (record {total_addresses: nat64; list: vec GetAllResult});
 }
