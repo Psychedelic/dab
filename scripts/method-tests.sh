@@ -47,7 +47,7 @@ dfx identity use jack
 
 # Step 6. Asking DAB for another user's private address book.
 echo
-echo "${action} Checking if our new identity (Jack) can access our other user's private data."
+echo "${action} Checking if our new identity (Jack) can access other user's private data."
 echo
 dfx canister call dab get_address "(\"DAB\")"
 

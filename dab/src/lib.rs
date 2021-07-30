@@ -26,14 +26,16 @@ impl AddressBook {
         account: Principal,
         canister_name: String,
         canister_id: Principal,
-    ) {
+    ) -> bool {
         let pointer: Key = (account, canister_name);
-        self.0.insert(pointer, canister_id);
+        self.0.insert(pointer.clone(), canister_id);
+        self.0.contains_key(&pointer)
     }
 
-    pub fn remove_address(&mut self, account: Principal, canister_name: String) {
+    pub fn remove_address(&mut self, account: Principal, canister_name: String) -> bool {
         let pointer: Key = (account, canister_name);
         self.0.remove(&pointer);
+        !self.0.contains_key(&pointer)
     }
 
     pub fn get_address(&self, account: Principal, canister_name: String) -> GetAddressResult {
@@ -69,15 +71,15 @@ fn name() -> String {
 }
 
 #[update]
-fn add_address(canister_name: String, canister_id: Principal) {
+fn add_address(canister_name: String, canister_id: Principal) -> bool {
     let address_book = storage::get_mut::<AddressBook>();
-    address_book.add_address(caller(), canister_name, canister_id);
+    address_book.add_address(caller(), canister_name, canister_id)
 }
 
 #[update]
-fn remove_address(canister_name: String) {
+fn remove_address(canister_name: String) -> bool {
     let address_book = storage::get_mut::<AddressBook>();
-    address_book.remove_address(caller(), canister_name);
+    address_book.remove_address(caller(), canister_name)
 }
 
 #[derive(Deserialize, CandidType)]
