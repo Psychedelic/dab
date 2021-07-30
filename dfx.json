@@ -2,7 +2,7 @@
   "canisters": {
     "dab": {
       "build": "node build.js",
-      "candid": "src/dab/candid.did",
+      "candid": "dab/candid.did",
       "wasm": "target/wasm32-unknown-unknown/release/dab-opt.wasm",
       "type": "custom"
     }
