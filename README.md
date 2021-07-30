@@ -1,6 +1,6 @@
 # DAB
 
-> An open internet service for user profile information
+> An IC open internet service for user profile information
 
 ## Overview
 
@@ -12,6 +12,11 @@ DAB will allow user's to set and edit publicly available profile information (e.
 
 DAB is in its early stages, Fleek is seeking to add profile capabilities to [plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
 
+### Goals
+
+* A dapp developer should be able to use DAB with Plug to bootstrap the profile details section of their app. A user logging into a DAB enabled app will see their already configured profile details (e.g. display name).
+* A secondary goal is to support the profile and address book functions to move between dapps + devices.
+
 ### Roadmap
 
 * [x] open source proposed API
@@ -21,6 +26,8 @@ DAB is in its early stages, Fleek is seeking to add profile capabilities to [plu
 ## Development
 
 ### How to run
+
+The DAB reference implementation is in `rust`.
 
 To run this canister you need to have `dfx` and `node` installed.
 
