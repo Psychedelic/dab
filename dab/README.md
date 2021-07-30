@@ -8,12 +8,12 @@ shell script located [here](https://github.com/Psychedelic/dab/blob/main/scripts
 
 The private address book has four methods:
 
-| Method Name      | Description                                                                                                           |
-| -----------      | -----------                                                                                                           |
-| add_address      | This method adds a new address to users address book. Returns `true` if successful.                                   |
-| get_address      | This method returns the principal ID associated with the canister name from the address book                          |
-| remove_address   | This method removes the address associated with the canister name from the address book. Returns `true` if successful.|
-| get_all          | This method returns all of the addresses from the address book with the total count of them.                          |
+| Method Name      | Description                                                                                                |
+| -----------      | -----------                                                                                                |
+| add_address      | Adds a new address to users address book. Returns `true` if successful.                                    |
+| get_address      | Returns the principal ID associated with the canister name from the address book.                          |
+| get_all          | Returns all of the addresses from the address book with the total count of them.                           |
+| remove_address   | Removes the address associated with the canister name from the address book. Returns `true` if successful. |
 
 ### How to use them?
 
