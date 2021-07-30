@@ -1,4 +1,5 @@
 type GetAddressResult = record {
+    address_exists           : bool;
     canister_name    : text;
     canister_id      : opt principal;
 };

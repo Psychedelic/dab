@@ -38,13 +38,22 @@ impl AddressBook {
 
     pub fn get_address(&self, account: Principal, canister_name: String) -> GetAddressResult {
         let pointer: Key = (account, canister_name.clone());
+        if !self.0.contains_key(&pointer) {
+            return GetAddressResult {
+                address_exists: false,
+                canister_name: canister_name,
+                canister_id: None,
+            };
+        }
+
         let canister_id: Option<Principal> = self.0.get(&pointer).cloned();
         GetAddressResult {
-            canister_name,
-            canister_id,
+            address_exists: true,
+            canister_name: canister_name,
+            canister_id: canister_id,
         }
     }
-  
+
     pub fn get_all(&self, account: Principal) -> Vec<(&Key, &Principal)> {
         let start: Key = (account.clone(), String::new());
         let end: Key = (account.clone(), unsafe {
@@ -73,6 +82,7 @@ fn remove_address(canister_name: String) {
 
 #[derive(Deserialize, CandidType)]
 pub struct GetAddressResult {
+    address_exists: bool,
     canister_name: String,
     canister_id: Option<Principal>,
 }
@@ -86,7 +96,7 @@ fn get_address(canister_name: String) -> GetAddressResult {
 #[derive(CandidType)]
 pub struct GetAllResult {
     total_addresses: u64,
-    list: Vec<(&'static Key, &'static Principal)>
+    list: Vec<(&'static Key, &'static Principal)>,
 }
 
 #[update]
@@ -95,6 +105,6 @@ fn get_all() -> GetAllResult {
     let canisters_list = address_book.get_all(caller());
     GetAllResult {
         total_addresses: canisters_list.len() as u64,
-        list: canisters_list
+        list: canisters_list,
     }
 }
