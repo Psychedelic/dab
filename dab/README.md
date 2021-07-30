@@ -85,3 +85,15 @@ $ dfx canister call dab get_address "(\"XTC\")"
   },
 )
 ```
+
+## Profile Information Methods
+
+The profile information methods are not yet implemented and this is just an introduction to the methods that will be added soon.
+
+| Method Name        | Description                                                                                          |
+| -----------        | -----------                                                                                          |
+| get_public_profile | This method returns the public information of the profile associated with the principal ID provided. |
+| set_display_name   | This method updates the display name of the caller.                                                  |
+| set_description    | This method updates the biography of the caller.                                                     |
+| set_emoji          | This method updates the emoji associated with the caller.                                            |
+| set_avatar         | This method updates the link to the avatar of the caller.                                            |
