@@ -8,10 +8,12 @@ shell script located [here](https://github.com/Psychedelic/dab/blob/main/scripts
 
 The private address book has four methods:
 
-- add_address(canister_name: String, canister_id: Principal): This method adds a new address to users address book. Returns `true` if successful.
-- get_address(canister_name: String): This method returns the principal ID associated with the canister name from the address book.
-- remove_address(canister_name: String): This method removes the address associated with the canister name from the address book. Returns `true` if successful.
-- get_all(): This method returns all of the addresses from the address book with the total count of them.
+| Method Name      | Description                                                                                                |
+| -----------      | -----------                                                                                                |
+| add_address      | Adds a new address to users address book. Returns `true` if successful.                                    |
+| get_address      | Returns the principal ID associated with the canister name from the address book.                          |
+| get_all          | Returns all of the addresses from the address book with the total count of them.                           |
+| remove_address   | Removes the address associated with the canister name from the address book. Returns `true` if successful. |
 
 ### How to use them?
 
@@ -85,3 +87,15 @@ $ dfx canister call dab get_address "(\"XTC\")"
   },
 )
 ```
+
+## Profile Information Methods
+
+The profile information methods are not yet implemented and this is just an introduction to the methods that will be added soon.
+
+| Method Name        | Description                                                                                          |
+| -----------        | -----------                                                                                          |
+| get_public_profile | This method returns the public information of the profile associated with the principal ID provided. |
+| set_display_name   | This method updates the display name of the caller.                                                  |
+| set_description    | This method updates the biography of the caller.                                                     |
+| set_emoji          | This method updates the emoji associated with the caller.                                            |
+| set_avatar         | This method updates the link to the avatar of the caller.                                            |
