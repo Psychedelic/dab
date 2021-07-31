@@ -2,8 +2,14 @@
   "canisters": {
     "dab": {
       "build": "node build.js",
-      "candid": "dab/candid.did",
+      "candid": "candid/dab.did",
       "wasm": "target/wasm32-unknown-unknown/release/dab-opt.wasm",
+      "type": "custom"
+    },
+    "profile": {
+      "build": "cargo build --target wasm32-unknown-unknown --release --package profile",
+      "candid": "candid/profile.did",
+      "wasm": "target/wasm32-unknown-unknown/release/profile.wasm",
       "type": "custom"
     }
   },
