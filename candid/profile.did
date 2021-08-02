@@ -8,10 +8,13 @@ type ProfileMetadata = record {
 };
 
 service : {
-    "name"           :  () -> (text) query;
+    "name"               :  () -> (text) query;
 
-    "get_public_profile" : (opt principal) -> (opt ProfileMetadata);
     "set_display_name"   : (text) -> ();
     "set_description"    : (text) -> ();
     "set_emoji"          : (text)  -> ();
+    "set_avatar"         : (text)  -> ();
+    "set_banner"         : (text)  -> ();
+    "set_profile"        : (ProfileMetadata)  -> ();
+    "get_profile"        : (opt principal) -> (opt ProfileMetadata);
 }
