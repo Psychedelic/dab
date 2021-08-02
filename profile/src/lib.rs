@@ -3,7 +3,6 @@ use ic_cdk::*;
 use ic_cdk_macros::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
-use std::ops::Bound::Included;
 
 /**
 Every item in the map looks like this:
@@ -11,7 +10,7 @@ Every item in the map looks like this:
 ( UserID, UserProfileMetadata )
 **/
 
-#[derive(CandidType, Clone)]
+#[derive(Deserialize, CandidType, Clone)]
 pub struct ProfileMetadata {
     display_name: Option<String>,
     biography: Option<String>,
@@ -35,8 +34,24 @@ impl ProfileDB {
     }
 
     pub fn set_display_name(&mut self, account: Principal, name: String) {
-        assert_eq!(self.0.contains_key(&account), true);
-        ic_cdk::api::print(String::from("Works."));
+        match self.0.get_mut(&account) {
+            Some(x) => {
+                x.display_name = Some(name);
+            }
+            None => {
+                    self.0.insert(
+                        account,
+                        ProfileMetadata {
+                            display_name: Some(name),
+                            biography: None,
+                            emoji: None,
+                            avatar: None,
+                            banner: None,
+                            version: 0,
+                        },
+                    );
+                }
+        }
     }
 
     pub fn set_biography(&mut self, account: Principal, biography: String) {}
