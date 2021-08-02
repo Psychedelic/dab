@@ -9,6 +9,9 @@ use unic::emoji::char::is_emoji;
 use unic::emoji::*;
 use validator::validate_url;
 
+const MAX_DESCRIPTION_LIMIT  : usize = 1201;
+const MAX_DISPLAY_NAME_LIMIT : usize = 25;
+
 #[derive(Deserialize, CandidType, Clone)]
 pub struct ProfileMetadata {
     display_name: Option<String>,
@@ -160,7 +163,7 @@ fn get_profile(account: Option<Principal>) -> Option<ProfileMetadata> {
 
 #[update]
 fn set_display_name(name: String) {
-    if &name.len() < &25 && &name.len() > &2 {
+    if &name.len() < &MAX_DISPLAY_NAME_LIMIT && &name.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
         profile_db.set_display_name(caller(), name);
     }
@@ -168,7 +171,7 @@ fn set_display_name(name: String) {
 
 #[update]
 fn set_description(description: String) {
-    if &description.len() < &1200 {
+    if &description.len() < &MAX_DESCRIPTION_LIMIT {
         let profile_db = storage::get_mut::<ProfileDB>();
         profile_db.set_description(caller(), description);
     }

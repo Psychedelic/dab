@@ -72,8 +72,11 @@ fn name() -> String {
 
 #[update]
 fn add_address(canister_name: String, canister_id: Principal) -> bool {
-    let address_book = storage::get_mut::<AddressBook>();
-    address_book.add_address(caller(), canister_name, canister_id)
+    if canister_name.len() < 120 {
+        let address_book = storage::get_mut::<AddressBook>();
+        return address_book.add_address(caller(), canister_name, canister_id);
+    }
+    false
 }
 
 #[update]
