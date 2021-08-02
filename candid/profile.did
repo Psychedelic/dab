@@ -10,8 +10,8 @@ type ProfileMetadata = record {
 service : {
     "name"           :  () -> (text) query;
 
-    "get_public_profile" : (account: opt princpal) -> (ProfileMetadata);
-    "set_display_name"   : (name: text) -> ();
-    "set_description"    : (description: text) -> ();
-    "set_emoji"          : (emoji: text)  -> ();
+    "get_public_profile" : (opt principal) -> (opt ProfileMetadata);
+    "set_display_name"   : (text) -> ();
+    "set_description"    : (text) -> ();
+    "set_emoji"          : (text)  -> ();
 }
