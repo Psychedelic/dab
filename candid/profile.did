@@ -1,5 +1,17 @@
+type ProfileMetadata = record {
+    display_name: opt text;
+    description: opt text;
+    emoji: opt text;
+    avatar: opt text;
+    banner: opt text;
+    version: nat32;
+};
+
 service : {
     "name"           :  () -> (text) query;
 
-    "set_display_name"    :  (name: text) -> ();
+    "get_public_profile" : (account: opt princpal) -> (ProfileMetadata);
+    "set_display_name"   : (name: text) -> ();
+    "set_description"    : (description: text) -> ();
+    "set_emoji"          : (emoji: text)  -> ();
 }
