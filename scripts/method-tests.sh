@@ -54,6 +54,29 @@ dfx identity use default
 dfx canister call address remove_address "(\"XTC\")"
 dfx canister call address get_all
 
+tput setab 1
+printf "\nTESTING THE PROFILE CANISTER"
+tput sgr0
+
+# Step 1. Setting up our profile.
+printf "\n\n%s Setting up our display name\n" "${action}"
+dfx canister call profile set_display_name "(\"Peter Parker\")"
+
+printf "\n%s Setting up our description\n" "${action}"
+dfx canister call profile set_description "(\"Your friendly neighbourhood Spider-Man\")"
+
+printf "\n%s Setting up our emoji\n" "${action}"
+dfx canister call profile set_emoji "(\"🕷\")"
+
+printf "\n%s Setting up our avatar\n" "${action}"
+dfx canister call profile set_avatar "(\"https://upload.wikimedia.org/wikipedia/en/2/21/Web_of_Spider-Man_Vol_1_129-1.png\")"
+
+printf "\n%s Setting up our banner\n" "${action}"
+dfx canister call profile set_banner "(\"https://www.nme.com/wp-content/uploads/2020/09/Spider-Man-Suit.jpg\")"
+
+printf "\n%s Getting our profile\n" "${action}"
+dfx canister call profile get_profile "(\"null\")"
+
 # Step n. Stopping the DFX replica
 printf "\n%s Stopping DFX.\n" "${action}"
 dfx stop
