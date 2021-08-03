@@ -13,7 +13,7 @@ DAB will allow user's to set and edit publicly available profile information (e.
 
 > DAB is currently a **reference implementation** looking for community feedback
 
-DAB is in its early stages, Fleek is seeking to add profile capabilities to [plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
+DAB is in its early stages, Fleek is seeking to add profile capabilities to [Plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
 
 ### Goals
 
