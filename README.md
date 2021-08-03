@@ -1,3 +1,4 @@
+![](https://storageapi.fleek.co/fleek-team-bucket/Dank/dabcover.png)
 # DAB
 
 [![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
