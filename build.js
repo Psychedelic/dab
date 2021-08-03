@@ -27,4 +27,4 @@ function buildWasm(pkg) {
     execSync(optCommand.join(' '));
 }
 
-buildWasm('dab');
+buildWasm('address');

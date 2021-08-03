@@ -1,5 +1,5 @@
 [package]
-name = "dab"
+name = "address"
 version = "0.1.0"
 authors = ["Nima Rasooli <nimarasooli1@gmail.com>"]
 edition = "2018"

@@ -1,9 +1,9 @@
 {
   "canisters": {
-    "dab": {
+    "address": {
       "build": "node build.js",
-      "candid": "candid/dab.did",
-      "wasm": "target/wasm32-unknown-unknown/release/dab-opt.wasm",
+      "candid": "candid/address.did",
+      "wasm": "target/wasm32-unknown-unknown/release/address-opt.wasm",
       "type": "custom"
     },
     "profile": {

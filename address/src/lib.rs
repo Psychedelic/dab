@@ -1,7 +1,6 @@
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_cdk::*;
 use ic_cdk_macros::*;
-use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
 
@@ -10,6 +9,12 @@ Every item in the map looks like this:
 ( ( Principal,  String       ), Principal  )
 ( ( UserID,     CanisterName ), CanisterID )
 **/
+
+#[derive(CandidType)]
+pub struct CanisterAddress {
+    canister_name: String,
+    canister_id: Principal,
+}
 
 type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Principal>);
@@ -38,22 +43,21 @@ impl AddressBook {
         !self.0.contains_key(&pointer)
     }
 
-    pub fn get_address(&self, account: Principal, canister_name: String) -> GetAddressResult {
+    pub fn get_address(
+        &self,
+        account: Principal,
+        canister_name: String,
+    ) -> Option<CanisterAddress> {
         let pointer: Key = (account, canister_name.clone());
-        if !self.0.contains_key(&pointer) {
-            return GetAddressResult {
-                address_exists: false,
+        if self.0.contains_key(&pointer) {
+            let canister_id: Principal = self.0.get(&pointer).unwrap().clone();
+            // return Some((canister_name, canister_id));
+            return Some(CanisterAddress {
                 canister_name: canister_name,
-                canister_id: None,
-            };
+                canister_id: canister_id
+            });
         }
-
-        let canister_id: Option<Principal> = self.0.get(&pointer).cloned();
-        GetAddressResult {
-            address_exists: true,
-            canister_name: canister_name,
-            canister_id: canister_id,
-        }
+        return None;
     }
 
     pub fn get_all(&self, account: Principal) -> Vec<(&Key, &Principal)> {
@@ -85,15 +89,8 @@ fn remove_address(canister_name: String) -> bool {
     address_book.remove_address(caller(), canister_name)
 }
 
-#[derive(Deserialize, CandidType)]
-pub struct GetAddressResult {
-    address_exists: bool,
-    canister_name: String,
-    canister_id: Option<Principal>,
-}
-
 #[update]
-fn get_address(canister_name: String) -> GetAddressResult {
+fn get_address(canister_name: String) -> Option<CanisterAddress> {
     let address_book = storage::get_mut::<AddressBook>();
     address_book.get_address(caller(), canister_name)
 }
