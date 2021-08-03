@@ -71,7 +71,7 @@ impl AddressBook {
 
 #[query]
 fn name() -> String {
-    String::from("DAB")
+    String::from("Address Book")
 }
 
 #[update]

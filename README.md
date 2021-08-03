@@ -37,8 +37,10 @@ To run this canister you need to have `dfx` and `node` installed.
 ``` bash
 $ dfx start --background
 $ dfx deploy
-$ dfx canister call dab name
-("DAB")
+$ dfx canister call address name
+("Address Book")
+$ dfx canister call profile name
+("Profile Canister")
 ```
 
 ### How to interact with DAB
