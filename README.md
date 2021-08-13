@@ -1,3 +1,4 @@
+![](https://storageapi.fleek.co/fleek-team-bucket/Dank/dabcover.png)
 # DAB
 
 [![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
@@ -13,7 +14,7 @@ DAB will allow user's to set and edit publicly available profile information (e.
 
 > DAB is currently a **reference implementation** looking for community feedback
 
-DAB is in its early stages, Fleek is seeking to add profile capabilities to [plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
+DAB is in its early stages, Fleek is seeking to add profile capabilities to [Plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
 
 ### Goals
 
@@ -45,7 +46,9 @@ $ dfx canister call profile name
 
 ### How to interact with DAB
 
-You can find a walkthrough of interactions with dab via `dfx` [here](https://github.com/Psychedelic/dab/blob/main/dab/README.md).
+Currently DAB has two canisters: the private address book canister and the profile metadata canister. You can learn more about each of these canisters and their methods from their documentations:
+- [The Private Address Book Documentation](https://github.com/Psychedelic/dab/tree/main/address)
+- [The Profile Metadata Documentation](https://github.com/Psychedelic/dab/tree/main/profile)
 
 ----
 
