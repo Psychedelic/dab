@@ -1,22 +1,20 @@
-use crate::ab::{AddressBook};
+use crate::profile::{ProfileDB, ProfileMetadata};
 
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_cdk::*;
 use ic_cdk_macros::*;
 
-type Key = (Principal, String);
-
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
-    address_book: Vec<(Key, Principal)>,
+    profile_db: Vec<(Principal, ProfileMetadata)>,
 }
 
 #[pre_upgrade]
 pub fn pre_upgrade() {
-    let address_book = storage::get_mut::<AddressBook>().archive();
+    let profile_db = storage::get_mut::<ProfileDB>().archive();
 
     let stable = StableStorage {
-        address_book,
+        profile_db,
     };
 
     match storage::stable_save((stable,)) {
@@ -33,6 +31,6 @@ pub fn pre_upgrade() {
 #[post_upgrade]
 pub fn post_upgrade() {
     if let Ok((stable,)) = storage::stable_restore::<(StableStorage,)>() {
-        storage::get_mut::<AddressBook>().load(stable.address_book);
+        storage::get_mut::<ProfileDB>().load(stable.profile_db);
     }
 }
