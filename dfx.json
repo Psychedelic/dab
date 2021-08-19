@@ -11,6 +11,12 @@
       "candid": "candid/profile.did",
       "wasm": "target/wasm32-unknown-unknown/release/profile.wasm",
       "type": "custom"
+    },
+    "registry": {
+      "build": "cargo build --target wasm32-unknown-unknown --release --package registry",
+      "candid": "candid/registry.did",
+      "wasm": "target/wasm32-unknown-unknown/release/registry.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.7.2",
