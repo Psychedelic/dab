@@ -1,4 +1,4 @@
-![](https://storageapi.fleek.co/fleek-team-bucket/Dank/dabcover.png)
+![](https://storageapi.fleek.co/fleek-team-bucket/dab/dab-github.png)
 # DAB
 
 [![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
@@ -6,11 +6,30 @@
 
 ## Overview
 
-> An IC open internet service for user profile information
+> An Internet Computer open internet service for data.
 
-DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application on the [Internet Computer](https://dfinity.org).
+DAB is an open internet service for interface-agnostic user profiles & data, human-readable Principal ID & Canister ID names & info, as well as canister, token & NFT registries & verification for quality assurance and reduced risk of scams in the ecosystem.
+
+DAB is currently in development, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations seen below. This V0, open sourced version is intended to showcase the concept to the community, and gather feedback.
+
+[Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
+
+### Roadmap
+
+* [x] V1- User profiles / User Data (e.g name, avatar, owned canisters)
+* [x] Address book registry (private contact list)
+* [ ] Canister metadata registry (in development)
+* [ ] Principal IDs, Canister ID metadata registry
+* [ ] Canister, Token, NFTs, Dapps registries
+
+---
+## V0 - Profiles & Address Books
+
+In its first iteration, DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application/open internet service on the [Internet Computer](https://dfinity.org).
 
 DAB will allow user's to set and edit publicly available profile information (e.g. 'display name', 'emoji', 'avatar url') against their IC principal id. Dapp developers will be able to access this information on behalf of their users and integrate for improved UX.
+
+ **One profile with all your user data, referenced by your Principal ID, that apps/UIs can automatically surface.** Users could log into any integrated IC app, and have their profile, contacts, owned canisters, and more automatically surfaced. No more app-specific data or profiles. It's universal, and blockchain wide.
 
 > DAB is currently a **reference implementation** looking for community feedback
 
