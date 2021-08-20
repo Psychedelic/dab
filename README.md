@@ -13,10 +13,10 @@ DAB is an open internet service for interface-agnostic user profiles & data, hum
 By creating an open data protocol for these, we can enable: ✨
 
 - Blockchain-wide user-profiles & data users can take anywhere (your avatar, contacts, canisters, etc.).
-- Auto-surfacing of verified tokens, NFTs, as well as user balances and owned assets in-apps.
+- Auto-surfacing of verified tokens, NFTs, Dapps as well as user balances and owned assets in-apps.
 - Add a naming & metadata layer (name, description, image, etc.) to Canister & Principal IDs.
 
-DAB is currently in development, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations seen below. This V0, open sourced version is intended to showcase the concept to the community, and gather feedback.
+DAB takes a role in pushing the composability of the Internet Computer forward, by replacing siloed (or app-specific) data with network-wide data, naming conventions, and metadata that the entire network can consume to have a cohesive and interconnected experience! **DAB is currently in development**, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations (V0) seen below.
 
 [Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
 
@@ -39,7 +39,7 @@ DAB will allow user's to set and edit publicly available profile information (e.
 
 > DAB is currently a **reference implementation** looking for community feedback
 
-DAB is in its early stages, Fleek is seeking to add profile capabilities to [Plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
+The first DAB implementations will come to [Plug](https://github.com/psychedelic/plug), with user profiles, that connected apps will be able to surface into their own experiences. It is still early, and we're looking for feedback on these new profile/data standards, so **all feedback is welcome!**
 
 ### Goals
 
