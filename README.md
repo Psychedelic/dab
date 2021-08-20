@@ -10,6 +10,12 @@
 
 DAB is an open internet service for interface-agnostic user profiles & data, human-readable Principal ID & Canister ID names & info, as well as canister, token & NFT registries & verification for quality assurance and reduced risk of scams in the ecosystem.
 
+By creating an open data protocol for these, we can enable: ✨
+
+- Blockchain-wide user-profiles & data users can take anywhere (your avatar, contacts, canisters, etc.).
+- Auto-surfacing of verified tokens, NFTs, as well as user balances and owned assets in-apps.
+- Add a naming & metadata layer (name, description, image, etc.) to Canister & Principal IDs.
+
 DAB is currently in development, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations seen below. This V0, open sourced version is intended to showcase the concept to the community, and gather feedback.
 
 [Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
