@@ -20,7 +20,7 @@ DAB takes a role in pushing the composability of the Internet Computer forward, 
 
 [Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
 
-### Roadmap
+### Roadmap (Tentative)
 
 * [x] V1- User profiles / User Data (e.g name, avatar, owned canisters)
 * [x] Address book registry (private contact list)
