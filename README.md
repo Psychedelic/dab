@@ -16,9 +16,9 @@ By creating an open data protocol for these, we can enable: ✨
 - Auto-surfacing of verified tokens, NFTs, Dapps as well as user balances and owned assets in-apps.
 - Add a naming & metadata layer (name, description, image, etc.) to Canister & Principal IDs.
 
-DAB takes a role in pushing the composability of the Internet Computer forward, by replacing siloed (or app-specific) data with network-wide data, naming conventions, metadata, and quality assurance that the entire network can consume to have a cohesive, interconnected, and safer experience! **DAB is currently in development**, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations (V0) seen below.
+DAB takes a role in pushing the Internet Computer's **composability** forward  by replacing siloed (or app-specific) data with network-wide data, naming conventions, and user/asset/ID metadata that entire network can consume; and improve the discoverability, reputation, and trust in IC tokens following best practices from networks like Ethereum (e.g. with [Tokenlists](https://tokenlists.org/!)), but keeping the lists & data in decentralized canisters and as an open internet service.
 
-[Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
+**DAB is currently in development**, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations (V0) seen below. [Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
 
 ### Roadmap (Tentative)
 
