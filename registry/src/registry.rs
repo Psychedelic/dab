@@ -10,11 +10,10 @@ const MAX_DISPLAY_NAME_LIMIT : usize = 25;
 
 #[derive(Deserialize, CandidType, Clone)]
 pub struct CanisterMetadata {
-    principalID: Option<Principal>,
+    principal_id: Option<Principal>,
     description: Option<String>,
-    keywords: Option<Vec>,
     url: Option<String>,
-    IDL: Option<String>,
+    idl: Option<String>,
     version: u32,
 }
 
@@ -42,14 +41,36 @@ impl CanisterDB {
         self.0.get(canister).cloned()
     }
 
-    pub fn add_canister(&mut self, account: Principal, metadata: CanisterMetadata) {
-        
+    pub fn add_canister(&mut self, account: Principal, canister: String, metadata: CanisterMetadata) {
+        assert_eq!(metadata.version, 0);
+        // Todo: account should be verified. No one other than canister's controllers should be able to update the information.
+        self.0.insert(canister, metadata);
     }
 
-    pub fn set_description(&mut self, account: Principal, canister: String, description: String) {
-        match self.0.get_mut(&canister) {
+    pub fn set_description(&mut self, account: Principal, canister: &String, description: String) {
+        match self.0.get_mut(canister) {
             Some(x) => {
                 x.description = Some(description);
+                x.version += 1;
+            }
+            None => return,
+        }
+    }
+
+    pub fn set_url(&mut self, account: Principal, canister: &String, url: String) {
+        match self.0.get_mut(canister) {
+            Some(x) => {
+                x.url = Some(url);
+                x.version += 1;
+            }
+            None => return,
+        }
+    }
+
+    pub fn set_idl(&mut self, account: Principal, canister: &String, idl: String) {
+        match self.0.get_mut(canister) {
+            Some(x) => {
+                x.idl = Some(idl);
                 x.version += 1;
             }
             None => return,
@@ -59,28 +80,39 @@ impl CanisterDB {
 
 #[query]
 fn name() -> String {
-    String::from("Profile Canister")
+    String::from("Registry Canister")
 }
 
 #[update]
-fn get_info(account: Option<Principal>) -> Option<CanisterMetadata> {
+fn get_info(canister: String) -> Option<CanisterMetadata> {
     let canister_db = storage::get_mut::<CanisterDB>();
-    canister_db.get_profile(&account.unwrap_or_else(|| caller()))
+    canister_db.get_info(&canister)
 }
 
 #[update]
-fn set_description(description: String) {
+fn add_canister(canister: String, metadata: CanisterMetadata) {
+    let canister_db = storage::get_mut::<CanisterDB>();
+    canister_db.add_canister(caller(), canister, metadata);
+}
+
+#[update]
+fn set_url(canister: String, url: String) {
+    if validate_url(&url) {
+        let canister_db = storage::get_mut::<CanisterDB>();
+        canister_db.set_url(caller(), &canister, url);
+    }
+}
+
+#[update]
+fn set_description(canister: String, description: String) {
     if &description.len() < &MAX_DESCRIPTION_LIMIT {
         let canister_db = storage::get_mut::<CanisterDB>();
-        canister_db.set_description(caller(), description);
+        canister_db.set_description(caller(), &canister, description);
     }
 }
 
 #[update]
-fn add_canister(name: String, metadata: CanisterMetadata) {
-    if &metadata.description.len() < &MAX_DESCRIPTION_LIMIT {
-        let canister_db = storage::get_mut::<CanisterDB>();
-        canister_db.add_canister(caller(), name, metadata);
-    }
+fn set_idl(canister: String, idl: String) {
+    let canister_db = storage::get_mut::<CanisterDB>();
+    canister_db.set_idl(caller(), &canister, idl);
 }
-
