@@ -1,4 +1,4 @@
-![](https://storageapi.fleek.co/fleek-team-bucket/Dank/dabcover.png)
+![](https://storageapi.fleek.co/fleek-team-bucket/dab/dab-github.png)
 # DAB
 
 [![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
@@ -6,15 +6,39 @@
 
 ## Overview
 
-> An IC open internet service for user profile information
+> An Internet Computer open internet service for data.
 
-DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application on the [Internet Computer](https://dfinity.org).
+DAB is an open internet service for interface-agnostic user profiles & data, human-readable Principal ID & Canister ID names & info, as well as canister, token & NFT registries & verification for quality assurance and reduced risk of scams in the ecosystem.
+
+By creating an open data protocol for these, we can enable: ✨
+
+- Blockchain-wide user-profiles & data users can take anywhere (your avatar, contacts, etc.)
+- Auto-surfacing of verified tokens, NFTs, Dapps as well as user balances and owned assets in-apps.
+- Add a naming & metadata layer (name, description, image, etc.) to Canister & Principal IDs.
+
+DAB takes a role in pushing the Internet Computer's **composability** forward  by replacing siloed (or app-specific) data with network-wide data, naming conventions, and user/asset/ID metadata that entire network can consume; and improve the discoverability, reputation, and trust in IC tokens following best practices from networks like Ethereum (e.g. with [Tokenlists](https://tokenlists.org/!)), but keeping the lists & data in decentralized canisters and as an open internet service.
+
+**DAB is currently in development**, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations (V0) seen below. [Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
+
+### Roadmap (Tentative)
+
+* [x] V1- User profiles / User Data (e.g name, avatar, etc.)
+* [x] Address book registry (private contact list)
+* [ ] Principal IDs, Canister ID metadata registries (in development)
+* [ ] Canister, Token, NFTs, Dapps registries
+
+---
+## V0 - Profiles & Address Books
+
+In its first iteration, DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application/open internet service on the [Internet Computer](https://dfinity.org).
 
 DAB will allow user's to set and edit publicly available profile information (e.g. 'display name', 'emoji', 'avatar url') against their IC principal id. Dapp developers will be able to access this information on behalf of their users and integrate for improved UX.
 
+ **One profile with all your user data, referenced by your Principal ID, that apps/UIs can automatically surface.** Users could log into any integrated IC app, and have their profile, contacts, etcetera, automatically surfaced. No more app-specific data or profiles. It's universal, and blockchain wide.
+
 > DAB is currently a **reference implementation** looking for community feedback
 
-DAB is in its early stages, Fleek is seeking to add profile capabilities to [Plug](https://github.com/psychedelic/plug), but believes the community more generally would find shared profiles useful in dapp development, and so are seeking early community feedback.
+The first DAB implementations will come to [Plug](https://github.com/psychedelic/plug), with user profiles, that connected apps will be able to surface into their own experiences. It is still early, and we're looking for feedback on these new profile/data standards, so **all feedback is welcome!**
 
 ### Goals
 
