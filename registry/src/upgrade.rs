@@ -1,6 +1,6 @@
 use crate::registry::{CanisterDB, CanisterMetadata};
 
-use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use ic_cdk::export::candid::{CandidType, Deserialize};
 use ic_cdk::*;
 use ic_cdk_macros::*;
 

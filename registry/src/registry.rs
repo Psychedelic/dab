@@ -10,11 +10,15 @@ const MAX_DISPLAY_NAME_LIMIT: usize = 25;
 
 #[derive(Deserialize, CandidType, Clone)]
 pub struct CanisterMetadata {
-    principal_id: Option<Principal>,
+    principal_id: Principal,
     description: Option<String>,
     url: Option<String>,
     idl: Option<String>,
     version: u32,
+}
+
+fn is_controller(canister_id: &Principal, account: &Principal) -> bool {
+    return true;
 }
 
 pub struct CanisterDB(BTreeMap<String, CanisterMetadata>);
@@ -33,7 +37,6 @@ impl CanisterDB {
 
     pub fn load(&mut self, archive: Vec<(String, CanisterMetadata)>) {
         self.0 = archive.into_iter().collect();
-        // self.0.reserve(25_000 - self.0.len());
     }
 
     pub fn get_info(&mut self, canister: &String) -> Option<CanisterMetadata> {
@@ -47,6 +50,7 @@ impl CanisterDB {
         metadata: CanisterMetadata,
     ) {
         assert_eq!(metadata.version, 0);
+        assert!(is_controller(&metadata.principal_id, &account));
         // Todo: account should be verified. No one other than canister's controllers should be able to update the information.
         self.0.insert(canister, metadata);
     }
@@ -54,6 +58,7 @@ impl CanisterDB {
     pub fn set_description(&mut self, account: Principal, canister: &String, description: String) {
         match self.0.get_mut(canister) {
             Some(x) => {
+                assert!(is_controller(&x.principal_id, &account));
                 x.description = Some(description);
                 x.version += 1;
             }
@@ -64,6 +69,7 @@ impl CanisterDB {
     pub fn set_url(&mut self, account: Principal, canister: &String, url: String) {
         match self.0.get_mut(canister) {
             Some(x) => {
+                assert!(is_controller(&x.principal_id, &account));
                 x.url = Some(url);
                 x.version += 1;
             }
@@ -74,6 +80,7 @@ impl CanisterDB {
     pub fn set_idl(&mut self, account: Principal, canister: &String, idl: String) {
         match self.0.get_mut(canister) {
             Some(x) => {
+                assert!(is_controller(&x.principal_id, &account));
                 x.idl = Some(idl);
                 x.version += 1;
             }
