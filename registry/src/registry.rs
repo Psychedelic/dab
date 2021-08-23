@@ -14,6 +14,7 @@ pub struct CanisterMetadata {
     description: Option<String>,
     url: Option<String>,
     idl: Option<String>,
+    logo_url: Option<String>,
     version: u32,
 }
 
@@ -77,6 +78,17 @@ impl CanisterDB {
         }
     }
 
+    pub fn set_logo(&mut self, account: Principal, canister: &String, logo_url: String) {
+        match self.0.get_mut(canister) {
+            Some(x) => {
+                assert!(is_controller(&x.principal_id, &account));
+                x.logo_url = Some(logo_url);
+                x.version += 1;
+            }
+            None => return,
+        }
+    }
+
     pub fn set_idl(&mut self, account: Principal, canister: &String, idl: String) {
         match self.0.get_mut(canister) {
             Some(x) => {
@@ -126,4 +138,12 @@ fn set_description(canister: String, description: String) {
 fn set_idl(canister: String, idl: String) {
     let canister_db = storage::get_mut::<CanisterDB>();
     canister_db.set_idl(caller(), &canister, idl);
+}
+
+#[update]
+fn set_logo(canister: String, logo_url: String) {
+    if validate_url(&logo_url) {
+        let canister_db = storage::get_mut::<CanisterDB>();
+        canister_db.set_logo(caller(), &canister, logo_url);
+    }
 }

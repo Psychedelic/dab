@@ -21,7 +21,7 @@ tput sgr0
 
 # Step 1. Adding a new canister
 printf "\n%s Adding a new canister to the registry\n" "${action}"
-dfx canister call registry add_canister "(\"XTC\", record {principal_id= principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"; description= \"The Cycles Token (XTC) is Dank's first product.\"; url= \"https://dank.ooo\"; idl= null; version= 0})"
+dfx canister call registry add_canister "(\"XTC\", record {principal_id= principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"; description= \"The Cycles Token (XTC) is Dank's first product.\"; url= \"https://dank.ooo\"; idl= null; logo_url= \"https://github.com/Psychedelic/dank\";version= 0})"
 
 printf "\n%s Asking for XTC's info\n" "${action}"
 dfx canister call registry get_info "(\"XTC\")"

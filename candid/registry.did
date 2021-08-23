@@ -1,8 +1,9 @@
 type CanisterMetadata = record {
-    principal_id: opt principal;
+    principal_id: principal;
     description: opt text;
     url: opt text;
     idl: opt text;
+    logo_url: opt text;
     version: nat32;
 };
 
@@ -14,4 +15,5 @@ service : {
     "set_url"            : (text, text)  -> ();
     "set_description"    : (text, text)  -> ();
     "set_idl"            : (text, text)  -> ();
+    "set_logo"           : (text, text)  -> ()
 }
