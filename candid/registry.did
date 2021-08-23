@@ -1,0 +1,17 @@
+type CanisterMetadata = record {
+    principal_id: opt principal;
+    description: opt text;
+    url: opt text;
+    idl: opt text;
+    version: nat32;
+};
+
+service : {
+    "name"               :  () -> (text) query;
+
+    "get_info"           : (text) -> (opt CanisterMetadata);
+    "add_canister"       : (text, CanisterMetadata) -> ();
+    "set_url"            : (text, text)  -> ();
+    "set_description"    : (text, text)  -> ();
+    "set_idl"            : (text, text)  -> ();
+}

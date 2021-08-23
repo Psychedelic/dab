@@ -5,8 +5,8 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 use validator::validate_url;
 
-const MAX_DESCRIPTION_LIMIT  : usize = 1201;
-const MAX_DISPLAY_NAME_LIMIT : usize = 25;
+const MAX_DESCRIPTION_LIMIT: usize = 1201;
+const MAX_DISPLAY_NAME_LIMIT: usize = 25;
 
 #[derive(Deserialize, CandidType, Clone)]
 pub struct CanisterMetadata {
@@ -28,10 +28,9 @@ impl Default for CanisterDB {
 impl CanisterDB {
     pub fn archive(&mut self) -> Vec<(String, CanisterMetadata)> {
         let map = std::mem::replace(&mut self.0, BTreeMap::new());
-        map.into_iter()
-            .collect()
+        map.into_iter().collect()
     }
-    
+
     pub fn load(&mut self, archive: Vec<(String, CanisterMetadata)>) {
         self.0 = archive.into_iter().collect();
         // self.0.reserve(25_000 - self.0.len());
@@ -41,7 +40,12 @@ impl CanisterDB {
         self.0.get(canister).cloned()
     }
 
-    pub fn add_canister(&mut self, account: Principal, canister: String, metadata: CanisterMetadata) {
+    pub fn add_canister(
+        &mut self,
+        account: Principal,
+        canister: String,
+        metadata: CanisterMetadata,
+    ) {
         assert_eq!(metadata.version, 0);
         // Todo: account should be verified. No one other than canister's controllers should be able to update the information.
         self.0.insert(canister, metadata);

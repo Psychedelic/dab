@@ -13,9 +13,7 @@ struct StableStorage {
 pub fn pre_upgrade() {
     let canister_db = storage::get_mut::<CanisterDB>().archive();
 
-    let stable = StableStorage {
-        canister_db,
-    };
+    let stable = StableStorage { canister_db };
 
     match storage::stable_save((stable,)) {
         Ok(_) => (),
