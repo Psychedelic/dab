@@ -12,7 +12,7 @@ use validator::validate_url;
 const MAX_DESCRIPTION_LIMIT  : usize = 1201;
 const MAX_DISPLAY_NAME_LIMIT : usize = 25;
 
-#[derive(Deserialize, CandidType, Clone)]
+#[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct ProfileMetadata {
     display_name: Option<String>,
     description: Option<String>,
@@ -216,4 +216,41 @@ fn set_banner(url: String) {
 fn set_profile(profile_data: ProfileMetadata) {
     let profile_db = storage::get_mut::<ProfileDB>();
     profile_db.set_profile(caller(), profile_data);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ProfileDB, ProfileMetadata};
+    use ic_cdk::export::candid::Principal;
+
+    fn barry() -> Principal {
+        Principal::from_text("fterm-bydaq-aaaaa-aaaaa-c").unwrap()
+    }
+
+    #[test]
+    fn metadata() {
+        let mut profile_db = ProfileDB::default();
+
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 4 };
+
+        assert_eq!(profile_db.set_display_name(barry(), String::from("Barry Allen")), ());
+        barry_metadata.display_name = Some(String::from("Barry Allen"));
+
+        assert_eq!(profile_db.set_avatar(barry(), String::from("Avatar Link")), ());
+        barry_metadata.avatar = Some(String::from("Avatar Link"));
+
+        assert_eq!(profile_db.set_banner(barry(), String::from("Banner Link")), ());
+        barry_metadata.banner = Some(String::from("Banner Link"));
+
+        assert_eq!(profile_db.set_emoji(barry(), String::from("⚡️")), ());
+        barry_metadata.emoji = Some(String::from("⚡️"));
+
+        assert_eq!(profile_db.set_description(barry(), String::from("Fastest man alive!")), ());
+        barry_metadata.description = Some(String::from("Fastest man alive!"));
+
+
+        let profile_metadata = profile_db.get_profile(&barry());
+
+        assert_eq!(profile_metadata.unwrap(), barry_metadata);
+    }
 }
