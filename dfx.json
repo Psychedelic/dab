@@ -1,15 +1,21 @@
 {
   "canisters": {
     "address": {
-      "build": "node build.js",
+      "build": "node build.js address",
       "candid": "candid/address.did",
       "wasm": "target/wasm32-unknown-unknown/release/address-opt.wasm",
       "type": "custom"
     },
     "profile": {
-      "build": "cargo build --target wasm32-unknown-unknown --release --package profile",
+      "build": "node build.js profile",
       "candid": "candid/profile.did",
       "wasm": "target/wasm32-unknown-unknown/release/profile.wasm",
+      "type": "custom"
+    },
+    "registry": {
+      "build": "node build.js registry",
+      "candid": "candid/registry.did",
+      "wasm": "target/wasm32-unknown-unknown/release/registry.wasm",
       "type": "custom"
     }
   },
