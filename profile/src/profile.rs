@@ -227,6 +227,10 @@ mod tests {
         Principal::from_text("fterm-bydaq-aaaaa-aaaaa-c").unwrap()
     }
 
+    fn alec() -> Principal {
+        Principal::from_text("hozae-racaq-aaaaa-aaaaa-c").unwrap()
+    }
+
     #[test]
     fn metadata() {
         let mut profile_db = ProfileDB::default();
@@ -252,5 +256,16 @@ mod tests {
         let profile_metadata = profile_db.get_profile(&barry());
 
         assert_eq!(profile_metadata.unwrap(), barry_metadata);
+
+        // Testing what happens if the profile doesn't exist
+        assert_eq!(profile_db.get_profile(&alec()), None);
+
+        // Partial test
+        let mut alec_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+
+        assert_eq!(profile_db.set_display_name(alec(), String::from("Alec Holland")), ());
+        alec_metadata.display_name = Some(String::from("Alec Holland"));
+
+        assert_eq!(profile_db.get_profile(&alec()).unwrap(), alec_metadata);
     }
 }
