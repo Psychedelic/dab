@@ -232,40 +232,83 @@ mod tests {
     }
 
     #[test]
-    fn metadata() {
+    fn display_name() {
         let mut profile_db = ProfileDB::default();
-
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 4 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_display_name(barry(), String::from("Barry Allen")), ());
         barry_metadata.display_name = Some(String::from("Barry Allen"));
 
-        assert_eq!(profile_db.set_avatar(barry(), String::from("Avatar Link")), ());
-        barry_metadata.avatar = Some(String::from("Avatar Link"));
-
-        assert_eq!(profile_db.set_banner(barry(), String::from("Banner Link")), ());
-        barry_metadata.banner = Some(String::from("Banner Link"));
-
-        assert_eq!(profile_db.set_emoji(barry(), String::from("⚡️")), ());
-        barry_metadata.emoji = Some(String::from("⚡️"));
-
-        assert_eq!(profile_db.set_description(barry(), String::from("Fastest man alive!")), ());
-        barry_metadata.description = Some(String::from("Fastest man alive!"));
-
-
         let profile_metadata = profile_db.get_profile(&barry());
 
         assert_eq!(profile_metadata.unwrap(), barry_metadata);
+    }
 
-        // Testing what happens if the profile doesn't exist
+    #[test]
+    fn set_avatar() {
+        let mut profile_db = ProfileDB::default();
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+
+        assert_eq!(profile_db.set_avatar(barry(), String::from("Avatar Link")), ());
+        barry_metadata.avatar = Some(String::from("Avatar Link"));
+    }
+
+    #[test]
+    fn set_banner() {
+        let mut profile_db = ProfileDB::default();
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+
+        assert_eq!(profile_db.set_banner(barry(), String::from("Banner Link")), ());
+        barry_metadata.banner = Some(String::from("Banner Link"));
+    }
+
+    #[test]
+    fn get_profile() {
+        let mut profile_db = ProfileDB::default();
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+
+        assert_eq!(profile_db.set_avatar(barry(), String::from("Avatar Link")), ());
+        barry_metadata.avatar = Some(String::from("Avatar Link"));
+
+        let profile_metadata = profile_db.get_profile(&barry());
+        assert_eq!(profile_metadata.unwrap(), barry_metadata);
+
+    }
+
+    #[test]
+    fn set_emoji() {
+        let mut profile_db = ProfileDB::default();
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+
+        assert_eq!(profile_db.set_emoji(barry(), String::from("⚡️")), ());
+        barry_metadata.emoji = Some(String::from("⚡️"));
+    }
+
+    #[test]
+    fn set_description() {
+        let mut profile_db = ProfileDB::default();
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+
+        assert_eq!(profile_db.set_description(barry(), String::from("Fastest man alive!")), ());
+        barry_metadata.description = Some(String::from("Fastest man alive!"));
+    }
+
+    #[test]
+    fn null_case() {
+        let mut profile_db = ProfileDB::default();
+
+        // Testing to see what happens if the profile doesn't exist
         assert_eq!(profile_db.get_profile(&alec()), None);
+    }
 
-        // Partial test
+    #[test]
+    fn partial_case() {
+        let mut profile_db = ProfileDB::default();
         let mut alec_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_display_name(alec(), String::from("Alec Holland")), ());
         alec_metadata.display_name = Some(String::from("Alec Holland"));
-
+    
         assert_eq!(profile_db.get_profile(&alec()).unwrap(), alec_metadata);
     }
 }
