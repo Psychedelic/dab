@@ -1,0 +1,52 @@
+{
+  "name": "automated_tests",
+  "version": "0.0.1",
+  "keywords": [
+    "package",
+    "typescript"
+  ],
+  "sideEffects": false,
+  "private": false,
+  "repository": "https://github.com/psychedelic/dab",
+  "scripts": {
+    "test:unit": "jest --config jest.config.js --coverage",
+    "test": "jest",
+    "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext js,ts --cache --fix"
+  },
+  "author": {
+    "name": "Nima Rasooli",
+    "email": "Nima@fleek.co"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/jest": "^26.0.23",
+    "@types/node-fetch": "^2.5.10",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "esbuild": "^0.11.16",
+    "esbuild-loader": "^2.12.0",
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.4",
+    "ts-loader": "^9.1.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@dfinity/agent": "latest",
+    "@dfinity/candid": "latest",
+    "@dfinity/identity": "latest",
+    "@dfinity/principal": "latest",
+    "bn.js": "^5.2.0",
+    "node-fetch": "^2.6.1"
+  },
+  "engines": {
+    "node": ">=12.18.2",
+    "npm": ">=6.14.0"
+  }
+}
