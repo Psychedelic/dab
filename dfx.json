@@ -9,13 +9,13 @@
     "profile": {
       "build": "node build.js profile",
       "candid": "candid/profile.did",
-      "wasm": "target/wasm32-unknown-unknown/release/profile.wasm",
+      "wasm": "target/wasm32-unknown-unknown/release/profile-opt.wasm",
       "type": "custom"
     },
     "registry": {
       "build": "node build.js registry",
       "candid": "candid/registry.did",
-      "wasm": "target/wasm32-unknown-unknown/release/registry.wasm",
+      "wasm": "target/wasm32-unknown-unknown/release/registry-opt.wasm",
       "type": "custom"
     }
   },
