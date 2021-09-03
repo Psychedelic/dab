@@ -1,5 +1,5 @@
 import createActor, { getProfileCanisterId } from './utils/canisters/profile';
-import { principal } from './utils/agent';
+import { principal, fakePrincipal } from './utils/agent';
 
 describe('Profile', () => {
   let profileActor: ReturnType<typeof createActor>;
@@ -83,6 +83,13 @@ describe('Profile', () => {
           expect(getProfile).toEqual(metadata);
         });
       });
+    });
+  });
+
+  describe('Special Cases', () => {
+    it('The return should be set to null in case the profile does not exist', async () => {
+      const getProfile = await profileActor.get_profile([fakePrincipal]);
+      expect(getProfile).toEqual(null);
     });
   });
 });
