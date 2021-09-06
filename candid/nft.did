@@ -8,4 +8,6 @@ service : {
     "name" : () -> (text) query;
 
     "add" : (nft_canister) -> (text);
+    "get_all" : () -> (vec nft_canister);
+    "remove" : (text) -> (text);
 }
