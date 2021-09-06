@@ -28,6 +28,10 @@ impl Registry {
         self.0.insert(name, canister_info);
         String::from("Operation was successful.")
     }
+
+    pub fn get_all(&self) -> Vec<&NftCanister> {
+        self.0.values().collect()
+    }
 }
 
 #[query]
@@ -51,6 +55,7 @@ fn add(canister_info: NftCanister) -> String {
 }
 
 #[update]
-fn get_all() {
-
+fn get_all() -> Vec<&'static NftCanister> {
+    let db = storage::get::<Registry>();
+    db.get_all()
 }
