@@ -1,8 +1,7 @@
 import { Actor } from '@dfinity/agent';
+import profileIDL from '../idls/profile.did';
 
 import agent from '../agent';
-// @ts-ignore
-import profileIDL from '../idls/profile.did';
 
 const createActor = (canisterId: string) => {
   const actor = Actor.createActor(profileIDL, {
