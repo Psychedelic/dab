@@ -1,3 +1,11 @@
+type nft_canister = record {
+    principal_id: principal;
+    name: text;
+    standard: text;
+};
+
 service : {
     "name" : () -> (text) query;
+
+    "add" : (nft_canister) -> (text);
 }
