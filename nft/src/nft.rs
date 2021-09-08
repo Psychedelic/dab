@@ -24,7 +24,7 @@ fn is_controller(account: &Principal) -> bool {
     account == &get_context().get::<Controller>().0
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct NftCanister {
     principal_id: Principal,
     name: String,
@@ -155,17 +155,106 @@ mod tests {
         init();
 
         let canister_info = NftCanister {
-            name: String::from("test_canister"),
+            name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
-            standard: String::from("Dank")
+            standard: String::from("Dank"),
         };
 
         let mut addition = add(canister_info.clone());
         assert_eq!(addition, String::from("Operation was successful."));
-        remove(String::from("test_canister"));
+        remove(String::from("xtc"));
 
         ctx.update_caller(mock_principals::bob());
         addition = add(canister_info);
-        assert_eq!(addition, String::from("You are not authorized to make changes."));
+        assert_eq!(
+            addition,
+            String::from("You are not authorized to make changes.")
+        );
+    }
+
+    #[test]
+    fn test_add() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
+
+        let canister_info = NftCanister {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            standard: String::from("Dank"),
+        };
+
+        assert_eq!(
+            add(canister_info),
+            String::from("Operation was successful.")
+        );
+    }
+
+    #[test]
+    fn test_remove() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
+
+        let canister_info = NftCanister {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            standard: String::from("Dank"),
+        };
+
+        assert_eq!(
+            add(canister_info),
+            String::from("Operation was successful.")
+        );
+
+        assert_eq!(
+            remove(String::from("xtc")),
+            String::from("Operation was successful.")
+        );
+    }
+
+    #[test]
+    fn test_get_canister() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
+
+        let canister_info = NftCanister {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            standard: String::from("Dank"),
+        };
+
+        assert_eq!(
+            add(canister_info.clone()),
+            String::from("Operation was successful.")
+        );
+
+        assert_eq!(get_canister(String::from("xtc")).unwrap(), &canister_info);
+        assert!(get_canister(String::from("dab")).is_none());
+    }
+
+    #[test]
+    fn test_get_all() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
+
+        let canister_info = NftCanister {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            standard: String::from("Dank"),
+        };
+
+        assert_eq!(
+            add(canister_info.clone()),
+            String::from("Operation was successful.")
+        );
+
+        assert_eq!(get_all(), vec![&canister_info]);
     }
 }
