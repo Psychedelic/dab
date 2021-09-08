@@ -7,7 +7,10 @@ type nft_canister = record {
 service : {
     "name" : () -> (text) query;
 
-    "add" : (nft_canister) -> (text);
-    "get_all" : () -> (vec nft_canister);
+    "add"    : (nft_canister) -> (text);
     "remove" : (text) -> (text);
+    "edit"   : (text, opt principal, opt text) -> (text);
+    
+    "get_canister" : (text) -> (opt nft_canister);
+    "get_all"      : () -> (vec nft_canister);
 }
