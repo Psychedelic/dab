@@ -1,9 +1,9 @@
-use std::collections::HashMap;
 use ic_cdk::export::candid::types::ic_types::principal;
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_cdk::*;
 use ic_cdk_macros::*;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 fn is_controller() -> bool {
     true
@@ -13,16 +13,11 @@ fn is_controller() -> bool {
 pub struct NftCanister {
     principal_id: Principal,
     name: String,
-    standard: String
+    standard: String,
 }
 
+#[derive(Default)]
 pub struct Registry(HashMap<String, NftCanister>);
-
-impl Default for Registry {
-    fn default() -> Self {
-        Self(HashMap::new())
-    }
-}
 
 impl Registry {
     pub fn add(&mut self, name: String, canister_info: NftCanister) -> String {
@@ -39,7 +34,12 @@ impl Registry {
         String::from("No such entry exists in the registry.")
     }
 
-    pub fn edit(&mut self, name: &String, principal_id: Option<Principal>, standard: Option<String>) -> String {
+    pub fn edit(
+        &mut self,
+        name: &String,
+        principal_id: Option<Principal>,
+        standard: Option<String>,
+    ) -> String {
         match self.0.get_mut(name) {
             None => String::from("The canister you want to change does not exist in the registry."),
             Some(canister) => {
@@ -48,8 +48,8 @@ impl Registry {
                 } else {
                     canister.standard = standard.unwrap();
                 }
-                return String::from("Operation was successful.")
-            },
+                return String::from("Operation was successful.");
+            }
         }
     }
 
@@ -60,7 +60,6 @@ impl Registry {
     pub fn get_all(&self) -> Vec<&NftCanister> {
         self.0.values().collect()
     }
-
 }
 
 #[query]
@@ -98,9 +97,11 @@ fn edit(name: String, principal_id: Option<Principal>, standard: Option<String>)
     if !is_controller() {
         return String::from("You are not authorized to make changes.");
     }
-    
+
     if principal_id.is_none() && standard.is_none() {
-        return String::from("You should pass at least one of the principal_id or standard parameters.")
+        return String::from(
+            "You should pass at least one of the principal_id or standard parameters.",
+        );
     } else {
         let db = storage::get_mut::<Registry>();
         return db.edit(&name, principal_id, standard);
