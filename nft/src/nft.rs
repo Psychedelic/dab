@@ -1,7 +1,5 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_cdk::*;
 use ic_cdk_macros::*;
-use ic_kit::macros::*;
 use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -143,8 +141,7 @@ fn get_all() -> Vec<&'static NftCanister> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ic_kit::*;
-
+    
     #[test]
     fn test_controller() {
         // alice is the controller
