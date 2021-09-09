@@ -10,10 +10,11 @@
 # dfx temporary files
 .dfx/
 
-# frontend code
+# frontend / js code
 node_modules/
 dist/
 **/package-lock.json
+**/.eslintcache
 
 # Rust
 target/
