@@ -17,6 +17,12 @@
       "candid": "candid/registry.did",
       "wasm": "target/wasm32-unknown-unknown/release/registry-opt.wasm",
       "type": "custom"
+    },
+    "nft": {
+      "build": "node build.js nft",
+      "candid": "candid/nft.did",
+      "wasm": "target/wasm32-unknown-unknown/release/nft-opt.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.7.2",

@@ -2,5 +2,6 @@
 members = [
     "address",
     "profile",
-    "registry"
+    "registry",
+    "nft"
 ]
