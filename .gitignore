@@ -15,6 +15,7 @@ node_modules/
 dist/
 **/package-lock.json
 **/.eslintcache
+**/coverage
 
 # Rust
 target/

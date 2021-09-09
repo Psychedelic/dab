@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^26.0.24",
     "@types/node-fetch": "^2.5.10",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
@@ -43,7 +43,8 @@
     "@dfinity/identity": "latest",
     "@dfinity/principal": "latest",
     "bn.js": "^5.2.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "system-commands": "^1.1.7"
   },
   "engines": {
     "node": ">=12.18.2",

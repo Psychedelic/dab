@@ -23,4 +23,5 @@ export default ({ IDL }) => {
     set_profile: IDL.Func([ProfileMetadata], [], []),
   });
 };
-export const init = ({ IDL }) => [];
+// eslint-disable-next-line arrow-body-style
+export const init = ({ IDL }) => { return []; };
