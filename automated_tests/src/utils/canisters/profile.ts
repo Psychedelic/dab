@@ -1,5 +1,4 @@
 import { Actor } from '@dfinity/agent';
-// import system = require('system-commands');
 import agent from '../agent';
 import { ProfileIDL, ProfileIDLFactory } from '../idls';
 
