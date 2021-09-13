@@ -1,6 +1,6 @@
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_cdk_macros::*;
-use ic_kit::*;
+use ic_kit::{candid::Result, get_context};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -33,18 +33,18 @@ pub struct NftCanister {
 pub struct Registry(HashMap<String, NftCanister>);
 
 impl Registry {
-    pub fn add(&mut self, name: String, canister_info: NftCanister) -> String {
+    pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<(), OperationError> {
         self.0.insert(name, canister_info);
-        String::from("Operation was successful.")
+        Ok(())
     }
 
-    pub fn remove(&mut self, name: &String) -> String {
+    pub fn remove(&mut self, name: &String) -> Result<(), OperationError> {
         if self.0.contains_key(name) {
             self.0.remove(name);
-            return String::from("Operation was successful.");
+            return Ok(());
         }
 
-        String::from("No such entry exists in the registry.")
+        Err(OperationError::NonExistentCanister)
     }
 
     pub fn edit(
@@ -80,31 +80,45 @@ fn name() -> String {
     String::from("NFT Registry Canister")
 }
 
+#[derive(CandidType)]
+pub enum OperationError {
+    NotAuthorized,
+    ParamatersNotPassed,
+    NonExistentCanister,
+    CharacterLimitation
+}
+
 #[update]
-fn add(canister_info: NftCanister) -> String {
+fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
-        return String::from("You are not authorized to make changes.");
+        return Err(OperationError::NotAuthorized);
     }
 
     let name = canister_info.name.clone();
     if name.len() <= 120 {
         let db = ic.get_mut::<Registry>();
-        return db.add(name, canister_info);
+        match db.add(name, canister_info) {
+            Ok(()) => Ok(()),
+            Err(e) => Err(e)
+        }
     }
 
-    String::from("The name of this canister has exceeded the limitation of 120 characters.")
+    Err(OperationError::CharacterLimitation)
 }
 
 #[update]
-fn remove(name: String) -> String {
+fn remove(name: String) -> Result<(), OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
-        return String::from("You are not authorized to make changes.");
+        return Err(OperationError::NotAuthorized);
     }
 
     let db = ic.get_mut::<Registry>();
-    db.remove(&name)
+    match db.remove(&name) {
+        Ok(()) => Ok(()),
+        Err(e) => Err(e)
+    }
 }
 
 #[update]
