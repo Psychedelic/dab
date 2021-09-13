@@ -9,12 +9,12 @@ type operation_error = variant {
     ParamatersNotPassed;
     NonExistentCanister;
     CharacterLimitation;
-}
+};
 
 type operation_response = variant {
-    Ok : ();
+    Ok  : bool;
     Err : operation_error;
-}
+};
 
 service : {
     "name" : () -> (text) query;

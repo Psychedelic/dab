@@ -33,15 +33,15 @@ pub struct NftCanister {
 pub struct Registry(HashMap<String, NftCanister>);
 
 impl Registry {
-    pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<(), OperationError> {
+    pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
         self.0.insert(name, canister_info);
-        Ok(())
+        Ok(true)
     }
 
-    pub fn remove(&mut self, name: &String) -> Result<(), OperationError> {
+    pub fn remove(&mut self, name: &String) -> Result<OperationSuccessful, OperationError> {
         if self.0.contains_key(name) {
             self.0.remove(name);
-            return Ok(());
+            return Ok(true);
         }
 
         Err(OperationError::NonExistentCanister)
@@ -52,7 +52,7 @@ impl Registry {
         name: &String,
         principal_id: Option<Principal>,
         standard: Option<String>,
-    ) -> Result<(), OperationError> {
+    ) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(name) {
             None => return Err(OperationError::NonExistentCanister),
             Some(canister) => {
@@ -61,7 +61,7 @@ impl Registry {
                 } else {
                     canister.standard = standard.unwrap();
                 }
-                return Ok(());
+                return Ok(true);
             }
         }
     }
@@ -88,8 +88,10 @@ pub enum OperationError {
     CharacterLimitation,
 }
 
+pub type OperationSuccessful = bool;
+
 #[update]
-fn add(canister_info: NftCanister) -> Result<(), OperationError> {
+fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
         return Err(OperationError::NotAuthorized);
@@ -98,17 +100,14 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     let name = canister_info.name.clone();
     if name.len() <= 120 {
         let db = ic.get_mut::<Registry>();
-        match db.add(name, canister_info) {
-            Ok(()) => return Ok(()),
-            Err(e) => return Err(e),
-        }
+        return db.add(name, canister_info);
     }
 
     Err(OperationError::CharacterLimitation)
 }
 
 #[update]
-fn remove(name: String) -> Result<(), OperationError> {
+fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
         return Err(OperationError::NotAuthorized);
@@ -123,7 +122,7 @@ fn edit(
     name: String,
     principal_id: Option<Principal>,
     standard: Option<String>,
-) -> Result<(), OperationError> {
+) -> Result<OperationSuccessful, OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
         return Err(OperationError::NotAuthorized);
