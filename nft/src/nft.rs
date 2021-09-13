@@ -1,6 +1,6 @@
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_cdk_macros::*;
-use ic_kit::{candid::Result, get_context};
+use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -52,16 +52,16 @@ impl Registry {
         name: &String,
         principal_id: Option<Principal>,
         standard: Option<String>,
-    ) -> String {
+    ) -> Result<(), OperationError> {
         match self.0.get_mut(name) {
-            None => String::from("The canister you want to change does not exist in the registry."),
+            None => return Err(OperationError::NonExistentCanister),
             Some(canister) => {
                 if principal_id.is_some() {
                     canister.principal_id = principal_id.unwrap();
                 } else {
                     canister.standard = standard.unwrap();
                 }
-                return String::from("Operation was successful.");
+                return Ok(());
             }
         }
     }
@@ -99,8 +99,8 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     if name.len() <= 120 {
         let db = ic.get_mut::<Registry>();
         match db.add(name, canister_info) {
-            Ok(()) => Ok(()),
-            Err(e) => Err(e)
+            Ok(()) => return Ok(()),
+            Err(e) => return Err(e)
         }
     }
 
@@ -115,23 +115,18 @@ fn remove(name: String) -> Result<(), OperationError> {
     }
 
     let db = ic.get_mut::<Registry>();
-    match db.remove(&name) {
-        Ok(()) => Ok(()),
-        Err(e) => Err(e)
-    }
+    db.remove(&name)
 }
 
 #[update]
-fn edit(name: String, principal_id: Option<Principal>, standard: Option<String>) -> String {
+fn edit(name: String, principal_id: Option<Principal>, standard: Option<String>) -> Result<(), OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
-        return String::from("You are not authorized to make changes.");
+        return Err(OperationError::NotAuthorized);
     }
 
     if principal_id.is_none() && standard.is_none() {
-        return String::from(
-            "You should pass at least one of the principal_id or standard parameters.",
-        );
+        return Err(OperationError::ParamatersNotPassed);
     } else {
         let db = ic.get_mut::<Registry>();
         return db.edit(&name, principal_id, standard);
