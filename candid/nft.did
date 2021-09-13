@@ -4,6 +4,18 @@ type nft_canister = record {
     standard: text;
 };
 
+type operation_error = variant {
+    NotAuthorized;
+    ParamatersNotPassed;
+    NonExistentCanister;
+    CharacterLimitation;
+}
+
+type operation_response = variant {
+    Ok : ();
+    Err : operation_error;
+}
+
 service : {
     "name" : () -> (text) query;
 
