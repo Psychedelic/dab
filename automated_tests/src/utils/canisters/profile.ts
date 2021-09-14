@@ -12,4 +12,4 @@ const createActor = (canisterId: string) => {
 
 export default createActor;
 
-export const getProfileCanisterId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+export const getProfileCanisterId = 'REPLACE-THIS-WITH-PRINCIPAL-ID';
