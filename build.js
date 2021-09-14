@@ -1,6 +1,5 @@
 const { execSync } = require('child_process');
 var package = process.argv[2];
-console.log(package);
 
 function buildWasm(pkg) {
     const underscoredName = pkg.replace(/-/g, '_');
