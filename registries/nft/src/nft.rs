@@ -1,25 +1,23 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_cdk_macros::*;
 use ic_kit::*;
+use ic_kit::ic::*;
+use ic_kit::macros::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-struct Controller(Principal);
+pub struct Controller(pub Principal);
+
 impl Default for Controller {
-    fn default() -> Self {
-        panic!("Cannot set a default controller!")
-    }
+    fn default() -> Self { panic!() }
 }
 
 #[init]
 fn init() {
-    let ic = get_context();
-    let controller = ic.caller();
-    ic.store(Controller(controller));
+    ic::store(Controller(ic::caller()));
 }
 
 fn is_controller(account: &Principal) -> bool {
-    account == &get_context().get::<Controller>().0
+    account == &ic::get::<Controller>().0
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
@@ -33,6 +31,15 @@ pub struct NftCanister {
 pub struct Registry(HashMap<String, NftCanister>);
 
 impl Registry {
+    pub fn archive(&mut self) -> Vec<(String, NftCanister)> {
+        let map = std::mem::replace(&mut self.0, HashMap::new());
+        map.into_iter()
+            .collect()
+    }
+    pub fn load(&mut self, archive: Vec<(String, NftCanister)>) {
+        self.0 = archive.into_iter().collect();
+    }
+
     pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
         self.0.insert(name, canister_info);
         Ok(true)
@@ -92,14 +99,13 @@ pub type OperationSuccessful = bool;
 
 #[update]
 fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
-    let ic = get_context();
-    if !is_controller(&ic.caller()) {
+    if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     let name = canister_info.name.clone();
     if name.len() <= 120 {
-        let db = ic.get_mut::<Registry>();
+        let db = ic::get_mut::<Registry>();
         return db.add(name, canister_info);
     }
 
@@ -108,12 +114,11 @@ fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError
 
 #[update]
 fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
-    let ic = get_context();
-    if !is_controller(&ic.caller()) {
+    if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
-    let db = ic.get_mut::<Registry>();
+    let db = ic::get_mut::<Registry>();
     db.remove(&name)
 }
 
@@ -123,30 +128,27 @@ fn edit(
     principal_id: Option<Principal>,
     standard: Option<String>,
 ) -> Result<OperationSuccessful, OperationError> {
-    let ic = get_context();
-    if !is_controller(&ic.caller()) {
+    if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     if principal_id.is_none() && standard.is_none() {
         return Err(OperationError::ParamatersNotPassed);
     } else {
-        let db = ic.get_mut::<Registry>();
+        let db = ic::get_mut::<Registry>();
         return db.edit(&name, principal_id, standard);
     }
 }
 
 #[update]
 fn get_canister(name: String) -> Option<&'static NftCanister> {
-    let ic = get_context();
-    let db = ic.get_mut::<Registry>();
+    let db = ic::get_mut::<Registry>();
     db.get_canister(&name)
 }
 
 #[update]
 fn get_all() -> Vec<&'static NftCanister> {
-    let ic = get_context();
-    let db = ic.get_mut::<Registry>();
+    let db = ic::get_mut::<Registry>();
     db.get_all()
 }
 
