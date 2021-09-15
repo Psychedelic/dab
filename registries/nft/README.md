@@ -1,10 +1,25 @@
-# NFT Registry Canister
+# 🎨 NFT Registry Canister
 
-The NFT registry canister provides information about different NFT canisters on the Internet Computer. Their names, standards they support and principal IDs are part of the information.
+![](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh-nft.png)
 
-## Interaction guide
+The NFT registry canister provides a list of different NFT collections on the Internet Computer. Their names, standards they support and Principal IDs are part of the information.
 
-This canister currently has four methods:
+## Current NFT List & New Submissions 📜
+
+The current list of NFT collections that are live and queryable in the NFT List canister can be found in this directory. Want to make a new submissions to the list? Use the form below:
+
+- [View the current NFT Collection List📜](registries\nft\Cargo.toml)
+- [Submit a new NFT to the list 📫](https://dab-ooo.typeform.com/nft-list)
+
+---
+
+## 🧰 Interaction guide
+
+As a developer that is looking to integrate DAB into an app/UI, your main point of interaction should be to use the [DAB-js library](https://github.com/psychedelic/dab-js), that also provides a standard wrapper to faciliate the integration to NFTs that use different standards. You can [read our documentation](https://docs.dab.ooo) to get detailed examples on how to do so.
+
+This interaction guide is **not end-user oriented**, and focuses on reviewing all the exposed methods of this canister, usable in DFX, which the DAB team initially will use to maintain the canister and add new registries.
+
+**This canister currently has four methods:**
 
 - name: returns the name of the NFT registry canister for health check purposes
 - add: adds a new canister to the registry

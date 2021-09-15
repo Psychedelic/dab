@@ -1,78 +1,56 @@
-![](https://storageapi.fleek.co/fleek-team-bucket/dab/dab-github.png)
+![](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh%20(1).png)
 # DAB
 
 [![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
 [![Discord](https://img.shields.io/badge/Discord-Channel-blue)](https://discord.gg/yVEcEzmrgm)
 
-## Overview
+## 👀 Overview
 
 > An Internet Computer open internet service for data.
 
-DAB is an open internet service for interface-agnostic user profiles & data, human-readable Principal ID & Canister ID names & info, as well as canister, token & NFT registries & verification for quality assurance and reduced risk of scams in the ecosystem.
+All the data an IC app needs to make seamless experiences, accessible directly on the IC. [DAB](https://dab.ooo/) is an open internet service for NFT, Token, Canister, and Dapp registries.
 
-By creating an open data protocol for these, we can enable: ✨
+### 🛣️ DAB's Roadmap (Tentative)
 
-- Blockchain-wide user-profiles & data users can take anywhere (your avatar, contacts, etc.)
-- Auto-surfacing of verified tokens, NFTs, Dapps as well as user balances and owned assets in-apps.
-- Add a naming & metadata layer (name, description, image, etc.) to Canister & Principal IDs.
-
-DAB takes a role in pushing the Internet Computer's **composability** forward  by replacing siloed (or app-specific) data with network-wide data, naming conventions, and user/asset/ID metadata that entire network can consume; and improve the discoverability, reputation, and trust in IC tokens following best practices from networks like Ethereum (e.g. with [Tokenlists](https://tokenlists.org/!)), but keeping the lists & data in decentralized canisters and as an open internet service.
-
-**DAB is currently in development**, and coming soon. The features above represent our vision for DAB, and we are starting with the implementations (V0) seen below. [Visit DAB's website](https://dab.ooo/) to stay up to date with its release, and make early submissions to our Token, NFTs, and Dapp lists/registries.
-
-### Roadmap (Tentative)
-
-* [x] V1- User profiles / User Data (e.g name, avatar, etc.)
-* [x] Address book registry (private contact list)
-* [ ] Principal IDs, Canister ID metadata registries (in development)
-* [ ] Canister, Token, NFTs, Dapps registries
+* [x] NFT List
+* [ ] Token List
+* [ ] Canister List (partially developed)
+* [ ] Dapp List
 
 ---
-## V0 - Profiles & Address Books
 
-In its first iteration, DAB is an IC open internet service to support dapp's that want to integrate user's self-sovereign profile data. DAB is a decentralized application/open internet service on the [Internet Computer](https://dfinity.org).
+## 🎨 V0.1.0 - The NFT List
 
-DAB will allow user's to set and edit publicly available profile information (e.g. 'display name', 'emoji', 'avatar url') against their IC principal id. Dapp developers will be able to access this information on behalf of their users and integrate for improved UX.
+![](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh-nft.png)
 
- **One profile with all your user data, referenced by your Principal ID, that apps/UIs can automatically surface.** Users could log into any integrated IC app, and have their profile, contacts, etcetera, automatically surfaced. No more app-specific data or profiles. It's universal, and blockchain wide.
+In its first iteration, we have released DAB's first registry, **the NFT list** DAB provides a list of NFTs that apps & developers can **consume to surface new NFTs as they are listed in DAB, instead of manually adding them one by one**.
 
-> DAB is currently a **reference implementation** looking for community feedback
+DAB's NFT list is **standard agnostic** and through the DAB-js library, developers can easily integrate and make calls to any NFT collection on the list regardless of their NFT standard interface (EXT, Departure Labs, etc.), **because in its library DAB wraps all standards into a common javascript interface**.
 
-The first DAB implementations will come to [Plug](https://github.com/psychedelic/plug), with user profiles, that connected apps will be able to surface into their own experiences. It is still early, and we're looking for feedback on these new profile/data standards, so **all feedback is welcome!**
+- [**View the NFT List Canister Source Code**](registries\nft\README.md)
 
-### Goals
+### 🖌️ Current NFT List & Making New Submissions
+You can see the current listed NFT collections in the link below. **Want to submit a new NFT collection to the list? Use the form below.**
 
-* A dapp developer should be able to use DAB with Plug to bootstrap the profile details section of their app. A user logging into a DAB enabled app will see their already configured profile details (e.g. display name).
-* A secondary goal is to support the profile and address book functions to move between dapps + devices.
+- [**View the current NFT Collection List📜**](registries\nft\Cargo.toml)
+- [**Submit a new NFT to the list 📫**](https://dab-ooo.typeform.com/nft-list)
 
-### Roadmap
+For V0.1.0, the review process for submissions is manual and done by the DAB core team; in the future we will automate the process, and migrate to a community-governed and trustless system.
 
-* [x] open source proposed API
-* [ ] deploy v0.1.0 test canister to mainnet
-* [ ] plug integration
+### 🧰 Start Integrating DAB's NFT List into your App
+To interact with DAB's services you need to use the DAB-js library. Read our documentation or visit the DAB-js repository to get started.
 
-## Development
+- [**Read our documentation**](https://docs.dab.ooo)
+- [**DAB-js library - Repository**](https://github.com/psychedelic/dab-js)
 
-### How to run
+----
+## ⛱️ Sandbox
 
-The DAB reference implementation is in `rust`.
+In the Sandbox directory, you can find in-development projects, such as the canister directory, and other data registries that the DAB team is exploring. Developers are welcome to review and provide feedback.
 
-To run this canister you need to have `dfx` and `node` installed.
-
-``` bash
-$ dfx start --background
-$ dfx deploy
-$ dfx canister call address name
-("Address Book")
-$ dfx canister call profile name
-("Profile Canister")
-```
-
-### How to interact with DAB
-
-Currently DAB has two canisters: the private address book canister and the profile metadata canister. You can learn more about each of these canisters and their methods from their documentations:
-- [The Private Address Book Documentation](https://github.com/Psychedelic/dab/tree/main/address)
-- [The Profile Metadata Documentation](https://github.com/Psychedelic/dab/tree/main/profile)
+- [Address book](sandbox\address\README.md)
+- [Profile metadata](sandbox\profile\README.md)
+- [Canister registry](sandbox\registry\README.md)
 
 ----
 
