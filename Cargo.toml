@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "address",
-    "profile",
-    "registry",
-    "nft"
+    "sandbox/address",
+    "sandbox/profile",
+    "sandbox/registry",
+    "registries/nft"
 ]

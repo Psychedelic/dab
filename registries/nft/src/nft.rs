@@ -33,18 +33,18 @@ pub struct NftCanister {
 pub struct Registry(HashMap<String, NftCanister>);
 
 impl Registry {
-    pub fn add(&mut self, name: String, canister_info: NftCanister) -> String {
+    pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
         self.0.insert(name, canister_info);
-        String::from("Operation was successful.")
+        Ok(true)
     }
 
-    pub fn remove(&mut self, name: &String) -> String {
+    pub fn remove(&mut self, name: &String) -> Result<OperationSuccessful, OperationError> {
         if self.0.contains_key(name) {
             self.0.remove(name);
-            return String::from("Operation was successful.");
+            return Ok(true);
         }
 
-        String::from("No such entry exists in the registry.")
+        Err(OperationError::NonExistentCanister)
     }
 
     pub fn edit(
@@ -52,16 +52,16 @@ impl Registry {
         name: &String,
         principal_id: Option<Principal>,
         standard: Option<String>,
-    ) -> String {
+    ) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(name) {
-            None => String::from("The canister you want to change does not exist in the registry."),
+            None => return Err(OperationError::NonExistentCanister),
             Some(canister) => {
                 if principal_id.is_some() {
                     canister.principal_id = principal_id.unwrap();
                 } else {
                     canister.standard = standard.unwrap();
                 }
-                return String::from("Operation was successful.");
+                return Ok(true);
             }
         }
     }
@@ -80,11 +80,21 @@ fn name() -> String {
     String::from("NFT Registry Canister")
 }
 
+#[derive(CandidType)]
+pub enum OperationError {
+    NotAuthorized,
+    ParamatersNotPassed,
+    NonExistentCanister,
+    CharacterLimitation,
+}
+
+pub type OperationSuccessful = bool;
+
 #[update]
-fn add(canister_info: NftCanister) -> String {
+fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
-        return String::from("You are not authorized to make changes.");
+        return Err(OperationError::NotAuthorized);
     }
 
     let name = canister_info.name.clone();
@@ -93,14 +103,14 @@ fn add(canister_info: NftCanister) -> String {
         return db.add(name, canister_info);
     }
 
-    String::from("The name of this canister has exceeded the limitation of 120 characters.")
+    Err(OperationError::CharacterLimitation)
 }
 
 #[update]
-fn remove(name: String) -> String {
+fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
-        return String::from("You are not authorized to make changes.");
+        return Err(OperationError::NotAuthorized);
     }
 
     let db = ic.get_mut::<Registry>();
@@ -108,16 +118,18 @@ fn remove(name: String) -> String {
 }
 
 #[update]
-fn edit(name: String, principal_id: Option<Principal>, standard: Option<String>) -> String {
+fn edit(
+    name: String,
+    principal_id: Option<Principal>,
+    standard: Option<String>,
+) -> Result<OperationSuccessful, OperationError> {
     let ic = get_context();
     if !is_controller(&ic.caller()) {
-        return String::from("You are not authorized to make changes.");
+        return Err(OperationError::NotAuthorized);
     }
 
     if principal_id.is_none() && standard.is_none() {
-        return String::from(
-            "You should pass at least one of the principal_id or standard parameters.",
-        );
+        return Err(OperationError::ParamatersNotPassed);
     } else {
         let db = ic.get_mut::<Registry>();
         return db.edit(&name, principal_id, standard);
@@ -141,7 +153,7 @@ fn get_all() -> Vec<&'static NftCanister> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_controller() {
         // alice is the controller
@@ -158,15 +170,14 @@ mod tests {
         };
 
         let mut addition = add(canister_info.clone());
-        assert_eq!(addition, String::from("Operation was successful."));
-        remove(String::from("xtc"));
+        assert!(addition.is_ok());
 
+        let remove_operation = remove(String::from("xtc"));
+        assert!(remove_operation.is_ok());
+        
         ctx.update_caller(mock_principals::bob());
         addition = add(canister_info);
-        assert_eq!(
-            addition,
-            String::from("You are not authorized to make changes.")
-        );
+        assert!(addition.is_err());
     }
 
     #[test]
@@ -182,10 +193,7 @@ mod tests {
             standard: String::from("Dank"),
         };
 
-        assert_eq!(
-            add(canister_info),
-            String::from("Operation was successful.")
-        );
+        assert!(add(canister_info).is_ok());
     }
 
     #[test]
@@ -201,15 +209,9 @@ mod tests {
             standard: String::from("Dank"),
         };
 
-        assert_eq!(
-            add(canister_info),
-            String::from("Operation was successful.")
-        );
+        assert!(add(canister_info).is_ok());
 
-        assert_eq!(
-            remove(String::from("xtc")),
-            String::from("Operation was successful.")
-        );
+        assert!(remove(String::from("xtc")).is_ok());
     }
 
     #[test]
@@ -225,10 +227,7 @@ mod tests {
             standard: String::from("Dank"),
         };
 
-        assert_eq!(
-            add(canister_info.clone()),
-            String::from("Operation was successful.")
-        );
+        assert!(add(canister_info.clone()).is_ok());
 
         assert_eq!(get_canister(String::from("xtc")).unwrap(), &canister_info);
         assert!(get_canister(String::from("dab")).is_none());
@@ -247,11 +246,7 @@ mod tests {
             standard: String::from("Dank"),
         };
 
-        assert_eq!(
-            add(canister_info.clone()),
-            String::from("Operation was successful.")
-        );
-
+        assert!(add(canister_info.clone()).is_ok());
         assert_eq!(get_all(), vec![&canister_info]);
     }
 }

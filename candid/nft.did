@@ -4,12 +4,20 @@ type nft_canister = record {
     standard: text;
 };
 
+type operation_response = variant {
+    Ok;
+    NotAuthorized;
+    ParamatersNotPassed;
+    NonExistentCanister;
+    CharacterLimitation;
+};
+
 service : {
     "name" : () -> (text) query;
 
-    "add"    : (nft_canister) -> (text);
-    "remove" : (text) -> (text);
-    "edit"   : (text, opt principal, opt text) -> (text);
+    "add"    : (nft_canister) -> (operation_response);
+    "remove" : (text) -> (operation_response);
+    "edit"   : (text, opt principal, opt text) -> (operation_response);
     
     "get_canister" : (text) -> (opt nft_canister);
     "get_all"      : () -> (vec nft_canister);
