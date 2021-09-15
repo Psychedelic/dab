@@ -5,20 +5,10 @@ use ic_kit::macros::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-pub struct Controller(Principal);
+pub struct Controller(pub Principal);
 
 impl Default for Controller {
     fn default() -> Self { panic!() }
-}
-
-impl Controller {
-    pub fn archive(&mut self) -> Principal {
-        self.0
-    }
-    
-    pub fn load(&mut self, id: Principal) {
-        self.0 = id;
-    }
 }
 
 #[init]
@@ -46,10 +36,8 @@ impl Registry {
         map.into_iter()
             .collect()
     }
-    
     pub fn load(&mut self, archive: Vec<(String, NftCanister)>) {
         self.0 = archive.into_iter().collect();
-        // self.0.reserve(25_000 - self.0.len());
     }
 
     pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {

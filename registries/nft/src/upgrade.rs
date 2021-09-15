@@ -13,7 +13,7 @@ struct StableStorage {
 #[pre_upgrade]
 pub fn pre_upgrade() {
     let db = ic::get_mut::<Registry>().archive();
-    let controller = ic::get_mut::<Controller>().archive();
+    let controller = ic::get_mut::<Controller>().0;
 
     let stable = StableStorage {
         db,
@@ -35,6 +35,6 @@ pub fn pre_upgrade() {
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
         ic::get_mut::<Registry>().load(stable.db);
-        ic::get_mut::<Controller>().load(stable.controller);
+        ic::store(Controller(stable.controller));
     }
 }
