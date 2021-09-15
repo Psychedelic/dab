@@ -8,9 +8,9 @@
 
 > An Internet Computer open internet service for data.
 
-All the data an IC app needs to make seamless experiences, accessible directly on the IC. [DAB](https://dab.ooo/) is an open internet service for NFT, Token, Canister, and Dapp registries.
+All the data an IC app needs to make a seamless experience, accessible directly on the IC. [DAB](https://dab.ooo/) is an open internet service for NFT, Token, Canister, and Dapp registries.
 
-### 🛣️ DAB's Roadmap (Tentative)
+### 🛣️ DAB's Roadmap (Order is not set)
 
 * [x] NFT List
 * [ ] Token List
