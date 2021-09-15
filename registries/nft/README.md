@@ -1,6 +1,6 @@
 # 🎨 NFT Registry Canister
 
-![](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh-nft.png)
+![Top Photo](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh-nft.png)
 
 The NFT registry canister provides a list of different NFT collections on the Internet Computer. Their names, standards they support and Principal IDs are part of the information.
 
@@ -8,7 +8,7 @@ The NFT registry canister provides a list of different NFT collections on the In
 
 The current list of NFT collections that are live and queryable in the NFT List canister can be found in this directory. Want to make a new submissions to the list? Use the form below:
 
-- [View the current NFT Collection List📜](registries\nft\Cargo.toml)
+- [View the current NFT Collection List📜](list.json)
 - [Submit a new NFT to the list 📫](https://dab-ooo.typeform.com/nft-list)
 
 ---
