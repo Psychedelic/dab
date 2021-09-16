@@ -140,13 +140,13 @@ fn edit(
     }
 }
 
-#[update]
+#[query]
 fn get_canister(name: String) -> Option<&'static NftCanister> {
     let db = ic::get_mut::<Registry>();
     db.get_canister(&name)
 }
 
-#[update]
+#[query]
 fn get_all() -> Vec<&'static NftCanister> {
     let db = ic::get_mut::<Registry>();
     db.get_all()

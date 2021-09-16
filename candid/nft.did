@@ -23,6 +23,6 @@ service : {
     "remove" : (text) -> (operation_response);
     "edit"   : (text, opt principal, opt text) -> (operation_response);
     
-    "get_canister" : (text) -> (opt nft_canister);
-    "get_all"      : () -> (vec nft_canister);
+    "get_canister" : (text) -> (opt nft_canister) query;
+    "get_all"      : () -> (vec nft_canister) query;
 }
