@@ -25,6 +25,8 @@ pub struct NftCanister {
     principal_id: Principal,
     name: String,
     standard: String,
+    description: String,
+    icon: String,
 }
 
 #[derive(Default)]
@@ -59,15 +61,28 @@ impl Registry {
         name: &String,
         principal_id: Option<Principal>,
         standard: Option<String>,
+        icon: Option<String>,
+        description: Option<String>
     ) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(name) {
             None => return Err(OperationError::NonExistentCanister),
             Some(canister) => {
                 if principal_id.is_some() {
                     canister.principal_id = principal_id.unwrap();
-                } else {
+                }
+
+                if standard.is_some() {
                     canister.standard = standard.unwrap();
                 }
+
+                if icon.is_some() {
+                    canister.icon = icon.unwrap();
+                }
+
+                if description.is_some() {
+                    canister.description = description.unwrap();
+                }
+
                 return Ok(true);
             }
         }
@@ -104,7 +119,7 @@ fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError
     }
 
     let name = canister_info.name.clone();
-    if name.len() <= 120 {
+    if name.len() <= 120 && &canister_info.description.len() <= &1200 {
         let db = ic::get_mut::<Registry>();
         return db.add(name, canister_info);
     }
@@ -127,16 +142,18 @@ fn edit(
     name: String,
     principal_id: Option<Principal>,
     standard: Option<String>,
+    icon: Option<String>,
+    description: Option<String>
 ) -> Result<OperationSuccessful, OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
-    if principal_id.is_none() && standard.is_none() {
+    if principal_id.is_none() && standard.is_none() && icon.is_none() && description.is_none() {
         return Err(OperationError::ParamatersNotPassed);
     } else {
         let db = ic::get_mut::<Registry>();
-        return db.edit(&name, principal_id, standard);
+        return db.edit(&name, principal_id, standard, icon, description);
     }
 }
 
