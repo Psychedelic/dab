@@ -31,7 +31,7 @@ pub struct NftCanister {
     standard: String,
     description: String,
     icon: String,
-    timestamp: SystemTime,
+    timestamp: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
@@ -66,7 +66,7 @@ impl Registry {
             standard: canister_info.standard,
             description: canister_info.description,
             icon: canister_info.icon,
-            timestamp: SystemTime::now(),
+            timestamp: ic::time(),
         };
 
         self.0.insert(name, nft_canister);
@@ -181,7 +181,9 @@ fn edit(
         && description.is_none()
     {
         return Err(OperationError::ParamatersNotPassed);
-    } else if !validate_url(&icon) || &name.len() <= &120 || &description.len() <= &1200 {
+    } else if !validate_url(&icon.clone().unwrap()) {
+        return Err(OperationError::BadParameters);
+    } else if &description.clone().unwrap().len() > &1200 {
         return Err(OperationError::BadParameters);
     } else {
         let db = ic::get_mut::<Registry>();

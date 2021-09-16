@@ -13,7 +13,7 @@ type input_nft_canister = record {
     standard: text;
     icon: text;
     description: text;
-}
+};
 
 type operation_error = variant {
     NotAuthorized;
