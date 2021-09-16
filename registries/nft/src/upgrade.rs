@@ -1,13 +1,13 @@
-use crate::nft::{Registry, NftCanister, Controller};
+use crate::nft::{Controller, NftCanister, Registry};
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
-use ic_kit::*;
 use ic_kit::ic::*;
 use ic_kit::macros::*;
+use ic_kit::*;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
     db: Vec<(String, NftCanister)>,
-    controller: Principal
+    controller: Principal,
 }
 
 #[pre_upgrade]
@@ -15,10 +15,7 @@ pub fn pre_upgrade() {
     let db = ic::get_mut::<Registry>().archive();
     let controller = ic::get_mut::<Controller>().0;
 
-    let stable = StableStorage {
-        db,
-        controller
-    };
+    let stable = StableStorage { db, controller };
 
     match ic::stable_store((stable,)) {
         Ok(_) => (),
