@@ -1,14 +1,17 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_kit::*;
 use ic_kit::ic::*;
 use ic_kit::macros::*;
+use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
+use validator::validate_url;
 
 pub struct Controller(pub Principal);
 
 impl Default for Controller {
-    fn default() -> Self { panic!() }
+    fn default() -> Self {
+        panic!()
+    }
 }
 
 #[init]
@@ -25,6 +28,18 @@ pub struct NftCanister {
     principal_id: Principal,
     name: String,
     standard: String,
+    description: String,
+    icon: String,
+    timestamp: u64,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct InputNftCanister {
+    principal_id: Principal,
+    name: String,
+    standard: String,
+    description: String,
+    icon: String,
 }
 
 #[derive(Default)]
@@ -33,15 +48,27 @@ pub struct Registry(HashMap<String, NftCanister>);
 impl Registry {
     pub fn archive(&mut self) -> Vec<(String, NftCanister)> {
         let map = std::mem::replace(&mut self.0, HashMap::new());
-        map.into_iter()
-            .collect()
+        map.into_iter().collect()
     }
     pub fn load(&mut self, archive: Vec<(String, NftCanister)>) {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
-        self.0.insert(name, canister_info);
+    pub fn add(
+        &mut self,
+        name: String,
+        canister_info: InputNftCanister,
+    ) -> Result<OperationSuccessful, OperationError> {
+        let nft_canister = NftCanister {
+            principal_id: canister_info.principal_id,
+            name: canister_info.name,
+            standard: canister_info.standard,
+            description: canister_info.description,
+            icon: canister_info.icon,
+            timestamp: ic::time(),
+        };
+
+        self.0.insert(name, nft_canister);
         Ok(true)
     }
 
@@ -59,15 +86,28 @@ impl Registry {
         name: &String,
         principal_id: Option<Principal>,
         standard: Option<String>,
+        icon: Option<String>,
+        description: Option<String>,
     ) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(name) {
             None => return Err(OperationError::NonExistentCanister),
             Some(canister) => {
                 if principal_id.is_some() {
                     canister.principal_id = principal_id.unwrap();
-                } else {
+                }
+
+                if standard.is_some() {
                     canister.standard = standard.unwrap();
                 }
+
+                if icon.is_some() {
+                    canister.icon = icon.unwrap();
+                }
+
+                if description.is_some() {
+                    canister.description = description.unwrap();
+                }
+
                 return Ok(true);
             }
         }
@@ -92,24 +132,26 @@ pub enum OperationError {
     NotAuthorized,
     ParamatersNotPassed,
     NonExistentCanister,
-    CharacterLimitation,
+    BadParameters,
 }
 
 pub type OperationSuccessful = bool;
 
 #[update]
-fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
+fn add(canister_info: InputNftCanister) -> Result<OperationSuccessful, OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
+    } else if !validate_url(&canister_info.icon) {
+        return Err(OperationError::BadParameters);
     }
 
     let name = canister_info.name.clone();
-    if name.len() <= 120 {
+    if name.len() <= 120 && &canister_info.description.len() <= &1200 {
         let db = ic::get_mut::<Registry>();
         return db.add(name, canister_info);
     }
 
-    Err(OperationError::CharacterLimitation)
+    Err(OperationError::BadParameters)
 }
 
 #[update]
@@ -127,16 +169,24 @@ fn edit(
     name: String,
     principal_id: Option<Principal>,
     standard: Option<String>,
+    icon: Option<String>,
+    description: Option<String>,
 ) -> Result<OperationSuccessful, OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
-    }
-
-    if principal_id.is_none() && standard.is_none() {
+    } else if principal_id.is_none()
+        && standard.is_none()
+        && icon.is_none()
+        && description.is_none()
+    {
         return Err(OperationError::ParamatersNotPassed);
+    } else if !validate_url(&icon.clone().unwrap()) {
+        return Err(OperationError::BadParameters);
+    } else if &description.clone().unwrap().len() > &1200 {
+        return Err(OperationError::BadParameters);
     } else {
         let db = ic::get_mut::<Registry>();
-        return db.edit(&name, principal_id, standard);
+        return db.edit(&name, principal_id, standard, icon, description);
     }
 }
 
@@ -165,10 +215,12 @@ mod tests {
 
         init();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com"),
         };
 
         let mut addition = add(canister_info.clone());
@@ -176,7 +228,7 @@ mod tests {
 
         let remove_operation = remove(String::from("xtc"));
         assert!(remove_operation.is_ok());
-        
+
         ctx.update_caller(mock_principals::bob());
         addition = add(canister_info);
         assert!(addition.is_err());
@@ -189,10 +241,12 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com"),
         };
 
         assert!(add(canister_info).is_ok());
@@ -205,10 +259,12 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com"),
         };
 
         assert!(add(canister_info).is_ok());
@@ -223,15 +279,20 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com"),
         };
 
         assert!(add(canister_info.clone()).is_ok());
 
-        assert_eq!(get_canister(String::from("xtc")).unwrap(), &canister_info);
+        assert_eq!(
+            get_canister(String::from("xtc")).unwrap().name,
+            canister_info.name
+        );
         assert!(get_canister(String::from("dab")).is_none());
     }
 
@@ -242,13 +303,15 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com"),
         };
 
         assert!(add(canister_info.clone()).is_ok());
-        assert_eq!(get_all(), vec![&canister_info]);
+        assert_eq!(get_all()[0].name, canister_info.name);
     }
 }

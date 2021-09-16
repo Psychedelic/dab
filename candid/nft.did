@@ -2,26 +2,37 @@ type nft_canister = record {
     principal_id: principal;
     name: text;
     standard: text;
+    description: text;
+    icon: text;
+    timestamp: nat64
+};
+
+type input_nft_canister = record {
+    principal_id: principal;
+    name: text;
+    standard: text;
+    description: text;
+    icon: text;
 };
 
 type operation_error = variant {
     NotAuthorized;
     ParamatersNotPassed;
     NonExistentCanister;
-    CharacterLimitation;
+    BadParameters;
 };
 
 type operation_response = variant {
-    Ok : bool;
+    Ok  : bool;
     Err : operation_error;
 };
 
 service : {
     "name" : () -> (text) query;
 
-    "add"    : (nft_canister) -> (operation_response);
+    "add"    : (input_nft_canister) -> (operation_response);
     "remove" : (text) -> (operation_response);
-    "edit"   : (text, opt principal, opt text) -> (operation_response);
+    "edit"   : (text, opt principal, opt text, opt text, opt text) -> (operation_response);
     
     "get_canister" : (text) -> (opt nft_canister) query;
     "get_all"      : () -> (vec nft_canister) query;
