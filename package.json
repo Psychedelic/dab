@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "csv-parser": "^3.0.0",
+    "inquirer": "^8.1.5"
+  }
+}
