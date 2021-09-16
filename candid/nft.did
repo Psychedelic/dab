@@ -2,8 +2,8 @@ type nft_canister = record {
     principal_id: principal;
     name: text;
     standard: text;
-    icon: text;
     description: text;
+    icon: text;
     timestamp: nat64
 };
 
@@ -11,19 +11,19 @@ type input_nft_canister = record {
     principal_id: principal;
     name: text;
     standard: text;
-    icon: text;
     description: text;
+    icon: text;
 };
 
 type operation_error = variant {
     NotAuthorized;
     ParamatersNotPassed;
     NonExistentCanister;
-    CharacterLimitation;
+    BadParameters;
 };
 
 type operation_response = variant {
-    Ok : bool;
+    Ok  : bool;
     Err : operation_error;
 };
 

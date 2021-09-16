@@ -4,7 +4,6 @@ use ic_kit::macros::*;
 use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::time::SystemTime;
 use validator::validate_url;
 
 pub struct Controller(pub Principal);
