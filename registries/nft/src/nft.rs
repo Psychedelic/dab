@@ -4,6 +4,7 @@ use ic_kit::ic::*;
 use ic_kit::macros::*;
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::time::SystemTime;
 
 pub struct Controller(pub Principal);
 
@@ -27,7 +28,18 @@ pub struct NftCanister {
     standard: String,
     description: String,
     icon: String,
+    timestamp: SystemTime
 }
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct InputNftCanister {
+    principal_id: Principal,
+    name: String,
+    standard: String,
+    description: String,
+    icon: String
+}
+
 
 #[derive(Default)]
 pub struct Registry(HashMap<String, NftCanister>);
@@ -42,8 +54,17 @@ impl Registry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, name: String, canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
-        self.0.insert(name, canister_info);
+    pub fn add(&mut self, name: String, canister_info: InputNftCanister) -> Result<OperationSuccessful, OperationError> {
+        let nft_canister = NftCanister {
+            principal_id: canister_info.principal_id,
+            name: canister_info.name,
+            standard: canister_info.standard,
+            description: canister_info.description,
+            icon: canister_info.icon,
+            timestamp: SystemTime::now()
+        };
+
+        self.0.insert(name, nft_canister);
         Ok(true)
     }
 
@@ -113,7 +134,7 @@ pub enum OperationError {
 pub type OperationSuccessful = bool;
 
 #[update]
-fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
+fn add(canister_info: InputNftCanister) -> Result<OperationSuccessful, OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
