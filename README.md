@@ -1,4 +1,5 @@
 ![](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh%20(1).png)
+
 # DAB
 
 [![Fleek](https://img.shields.io/badge/Made%20by-Fleek-blue)](https://fleek.co/)
@@ -27,32 +28,35 @@ In its first iteration, we have released DAB's first registry, **the NFT list** 
 
 DAB's NFT list is **standard agnostic** and through the DAB-js library, developers can easily integrate and make calls to any NFT collection on the list regardless of their NFT standard interface (EXT, Departure Labs, etc.), **because in its library DAB wraps all standards into a common javascript interface**.
 
-- [**View the NFT List Canister Source Code**](registries\nft\README.md)
+* [**View the NFT List Canister Source Code**](registries/nft/)
 
 ### 🖌️ Current NFT List & Making New Submissions
+
 You can see the current listed NFT collections in the link below. **Want to submit a new NFT collection to the list? Use the form below.**
 
-- [**View the current NFT Collection List📜**](registries\nft\Cargo.toml)
-- [**Submit a new NFT to the list 📫**](https://dab-ooo.typeform.com/nft-list)
+* [**View the current NFT Collection List📜**](registries/nft/list.json)
+* [**Submit a new NFT to the list 📫**](https://dab-ooo.typeform.com/nft-list)
 
 For V0.1.0, the review process for submissions is manual and done by the DAB core team; in the future we will automate the process, and migrate to a community-governed and trustless system.
 
 ### 🧰 Start Integrating DAB's NFT List into your App
+
 To interact with DAB's services you need to use the DAB-js library. Read our documentation or visit the DAB-js repository to get started.
 
-- [**Read our documentation**](https://docs.dab.ooo)
-- [**DAB-js library - Repository**](https://github.com/psychedelic/dab-js)
+* [**Read our documentation**](https://docs.dab.ooo)
+* [**DAB-js library - Repository**](https://github.com/psychedelic/dab-js)
 
-----
+---
+
 ## ⛱️ Sandbox
 
 In the Sandbox directory, you can find in-development projects, such as the canister directory, and other data registries that the DAB team is exploring. Developers are welcome to review and provide feedback.
 
-- [Address book](sandbox\address\README.md)
-- [Profile metadata](sandbox\profile\README.md)
-- [Canister registry](sandbox\registry\README.md)
+* [Address book](sandbox/address/README.md)
+* [Profile metadata](sandbox/profile/README.md)
+* [Canister registry](sandbox/registry/README.md)
 
-----
+---
 
 ## License
 
