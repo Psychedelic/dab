@@ -203,10 +203,12 @@ mod tests {
 
         init();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com")
         };
 
         let mut addition = add(canister_info.clone());
@@ -227,10 +229,12 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com")
         };
 
         assert!(add(canister_info).is_ok());
@@ -243,10 +247,12 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com")
         };
 
         assert!(add(canister_info).is_ok());
@@ -261,15 +267,17 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com")
         };
 
         assert!(add(canister_info.clone()).is_ok());
 
-        assert_eq!(get_canister(String::from("xtc")).unwrap(), &canister_info);
+        assert_eq!(get_canister(String::from("xtc")).unwrap().name, canister_info.name);
         assert!(get_canister(String::from("dab")).is_none());
     }
 
@@ -280,13 +288,15 @@ mod tests {
             .with_data(Controller(mock_principals::alice()))
             .inject();
 
-        let canister_info = NftCanister {
+        let canister_info = InputNftCanister {
             name: String::from("xtc"),
             principal_id: mock_principals::xtc(),
             standard: String::from("Dank"),
+            description: String::from("XTC is your cycles wallet."),
+            icon: String::from("https://google.com")
         };
 
         assert!(add(canister_info.clone()).is_ok());
-        assert_eq!(get_all(), vec![&canister_info]);
+        assert_eq!(get_all()[0].name, canister_info.name);
     }
 }
