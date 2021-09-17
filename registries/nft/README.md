@@ -17,6 +17,8 @@ The current list of NFT collections that are live and queryable in the NFT List 
 
 As a developer that is looking to integrate DAB into an app/UI, your main point of interaction should be to use the [DAB-js library](https://github.com/psychedelic/dab-js), that also provides a standard wrapper to faciliate the integration to NFTs that use different standards. You can [read our documentation](https://docs.dab.ooo) to get detailed examples on how to do so.
 
+**The principal ID of the registry on the mainnet: `aipdg-waaaa-aaaah-aaq5q-cai`**
+
 **This canister currently has three public methods:**
 
 - name: returns the name of the NFT registry canister for health check purposes
@@ -28,14 +30,14 @@ There are also other methods such as `add`, `edit` and `remove` but these method
 Let's call the name method and do a health-check:
 
 ```sh
-$ dfx canister call replace_principal_id name
+$ dfx canister --network=ic call aipdg-waaaa-aaaah-aaq5q-cai name
 ("NFT Registry Canister")
 ```
 
 Now we can use the `get_canister` method to get the metadata of a canister in the registry (in this case ICPunks):
 
 ```sh
-$ dfx canister call replace_principal_id get_canister "(\"ICPunks\")"
+$ dfx canister --network=ic call aipdg-waaaa-aaaah-aaq5q-cai get_canister "(\"ICPunks\")"
 (
   opt record {
     name = "ICPunks";
@@ -48,7 +50,7 @@ $ dfx canister call replace_principal_id get_canister "(\"ICPunks\")"
 Notice that we passed the name of the canister as an argument. That is necessary for the registry to find the canister. If you don't have an special canister in your mind, you can use the `get_all` method to get every canister's information:
 
 ```sh
-$ dfx canister call replace_principal_id get_all
+$ dfx canister --network=ic call aipdg-waaaa-aaaah-aaq5q-cai get_all
 (
   vec {
     record {
