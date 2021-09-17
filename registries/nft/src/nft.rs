@@ -23,6 +23,15 @@ fn is_controller(account: &Principal) -> bool {
     account == &ic::get::<Controller>().0
 }
 
+#[update]
+fn set_controller(new_controller: Principal) -> Result<OperationSuccessful, OperationError>{
+    if is_controller(&ic::caller()) {
+        ic::store(Controller(new_controller));   
+        return Ok(true);
+    }
+    Err(OperationError::NotAuthorized)
+}
+
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct NftCanister {
     principal_id: Principal,

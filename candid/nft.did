@@ -36,4 +36,5 @@ service : {
     
     "get_canister" : (text) -> (opt nft_canister) query;
     "get_all"      : () -> (vec nft_canister) query;
+    "set_controller" : (principal) -> (operation_response);
 }
