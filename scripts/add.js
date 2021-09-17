@@ -61,6 +61,7 @@ stream
                             `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; standard= \\"${standard}\\"; description= \\"${description}\\"; icon= \\"${icon}\\"})"`,
                         ];
                         execSync(command.join(' '));
+                        console.log(`Add: ${name}`);
                     }
                 }
             });
