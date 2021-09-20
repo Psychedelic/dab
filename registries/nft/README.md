@@ -40,11 +40,15 @@ Now we can use the `get_canister` method to get the metadata of a canister in th
 $ dfx canister --network=ic call aipdg-waaaa-aaaah-aaq5q-cai get_canister "(\"ICPunks\")"
 (
   opt record {
+    icon = "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/1";
     name = "ICPunks";
-    id = principal "qcg3w-tyaaa-aaaah-qakea-cai";
+    description = "10,000 randomly generated, unique collectible clowns with proof of ownership stored on the Internet Computer blockchain. Created as a reference to a meme comparing the Internet Computer token (ICP) with the Insane Clown Posse - an American hip hop duo founded in 1989.";
+    timestamp = 1_631_892_639_206_823_987 : nat64;
+    principal_id = principal "qcg3w-tyaaa-aaaah-qakea-cai";
     standard = "ICPunks";
   },
 )
+
 ```
 
 Notice that we passed the name of the canister as an argument. That is necessary for the registry to find the canister. If you don't have an special canister in your mind, you can use the `get_all` method to get every canister's information:
@@ -54,53 +58,30 @@ $ dfx canister --network=ic call aipdg-waaaa-aaaah-aaq5q-cai get_all
 (
   vec {
     record {
-      name = "ICPunks";
-      principal_id = principal "qcg3w-tyaaa-aaaah-qakea-cai";
-      standard = "ICPunks";
-    };
-    record {
-      name = "ICP News";
-      principal_id = principal "uzhxd-ziaaa-aaaah-qanaq-cai";
-      standard = "EXT";
-    };
-    record {
-      name = "ICPuzzle";
-      principal_id = principal "owuqd-dyaaa-aaaah-qapxq-cai";
-      standard = "EXT";
-    };
-    record {
-      name = "Starverse";
-      principal_id = principal "nbg4r-saaaa-aaaah-qap7a-cai";
-      standard = "EXT";
-    };
-    record {
-      name = "Cronic Wearables";
-      principal_id = principal "tde7l-3qaaa-aaaah-qansa-cai";
-      standard = "EXT";
-    };
-    record {
-      name = "Cronic Critters";
-      principal_id = principal "e3izy-jiaaa-aaaah-qacbq-cai";
-      standard = "EXT";
-    };
-    record {
+      icon = "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/1";
       name = "Wrapped ICPunks";
+      description = "ICPunks wrapped under the EXT standard. 10,000 randomly generated, unique collectible clowns with proof of ownership stored on the Internet Computer blockchain. Created as a reference to a meme comparing the Internet Computer token (ICP) with the Insane Clown Posse.";
+      timestamp = 1_631_892_608_834_917_796 : nat64;
       principal_id = principal "bxdf4-baaaa-aaaah-qaruq-cai";
       standard = "EXT";
     };
     record {
-      name = "IC Drip";
-      principal_id = principal "3db6u-aiaaa-aaaah-qbjbq-cai";
-      standard = "EXT";
-    };
-    record {
+      icon = "https://73xld-saaaa-aaaah-qbjya-cai.raw.ic0.app/?tokenid=tpx6i-sykor-uwiaa-aaaaa-b4ako-aaqca-aaaaz-a";
       name = "Wing";
+      description = "An NFT photographic series created by the photographer @olisav ";
+      timestamp = 1_631_892_635_257_688_785 : nat64;
       principal_id = principal "73xld-saaaa-aaaah-qbjya-cai";
       standard = "EXT";
-    };
-    record {
-      name = "ICMojis";
-      principal_id = principal "gevsk-tqaaa-aaaah-qaoca-cai";
+    }; 
+    .
+    .
+    .
+    record { 
+      icon = "https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=hancg-5ykor-uwiaa-aaaaa-b4aaq-maqca-aabuk-a";
+      name = "Cronic Critters";
+      description = "Cronics is a Play-to-earn NFT game being developed by ToniqLabs for the Internet Computer. Cronics  incorporates breeding mechanics, wearable NFTs and a p2e minigame ecosystem and more.";
+      timestamp = 1_631_892_601_985_356_293 : nat64;
+      principal_id = principal "e3izy-jiaaa-aaaah-qacbq-cai";
       standard = "EXT";
     };
   },
