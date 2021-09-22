@@ -1,21 +1,21 @@
 use crate::registry::{CanisterDB, CanisterMetadata};
-
-use ic_cdk::export::candid::{CandidType, Deserialize};
-use ic_cdk::*;
-use ic_cdk_macros::*;
+use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use ic_kit::*;
+use ic_kit::ic::*;
+use ic_kit::macros::*;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
-    canister_db: Vec<(String, CanisterMetadata)>,
+    db: Vec<(Principal, CanisterMetadata)>
 }
 
 #[pre_upgrade]
 pub fn pre_upgrade() {
-    let canister_db = storage::get_mut::<CanisterDB>().archive();
+    let db = ic::get_mut::<CanisterDB>().archive();
 
-    let stable = StableStorage { canister_db };
+    let stable = StableStorage { db };
 
-    match storage::stable_save((stable,)) {
+    match ic::stable_store((stable,)) {
         Ok(_) => (),
         Err(candid_err) => {
             trap(&format!(
@@ -28,7 +28,7 @@ pub fn pre_upgrade() {
 
 #[post_upgrade]
 pub fn post_upgrade() {
-    if let Ok((stable,)) = storage::stable_restore::<(StableStorage,)>() {
-        storage::get_mut::<CanisterDB>().load(stable.canister_db);
+    if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
+        ic::get_mut::<CanisterDB>().load(stable.db);
     }
 }

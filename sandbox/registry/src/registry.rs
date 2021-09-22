@@ -1,6 +1,7 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_cdk::*;
-use ic_cdk_macros::*;
+use ic_kit::*;
+use ic_kit::ic::*;
+use ic_kit::macros::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use validator::validate_url;
@@ -22,13 +23,8 @@ fn is_controller(canister_id: &Principal, account: &Principal) -> bool {
     return true;
 }
 
+#[derive(Default)]
 pub struct CanisterDB(BTreeMap<String, CanisterMetadata>);
-
-impl Default for CanisterDB {
-    fn default() -> Self {
-        Self(BTreeMap::new())
-    }
-}
 
 impl CanisterDB {
     pub fn archive(&mut self) -> Vec<(String, CanisterMetadata)> {
@@ -108,20 +104,20 @@ fn name() -> String {
 
 #[update]
 fn get_info(canister: String) -> Option<CanisterMetadata> {
-    let canister_db = storage::get_mut::<CanisterDB>();
+    let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.get_info(&canister)
 }
 
 #[update]
 fn add_canister(canister: String, metadata: CanisterMetadata) {
-    let canister_db = storage::get_mut::<CanisterDB>();
+    let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.add_canister(caller(), canister, metadata);
 }
 
 #[update]
 fn set_url(canister: String, url: String) {
     if validate_url(&url) {
-        let canister_db = storage::get_mut::<CanisterDB>();
+        let canister_db = ic::get_mut::<CanisterDB>();
         canister_db.set_url(caller(), &canister, url);
     }
 }
@@ -129,21 +125,21 @@ fn set_url(canister: String, url: String) {
 #[update]
 fn set_description(canister: String, description: String) {
     if &description.len() < &MAX_DESCRIPTION_LIMIT {
-        let canister_db = storage::get_mut::<CanisterDB>();
+        let canister_db = ic::get_mut::<CanisterDB>();
         canister_db.set_description(caller(), &canister, description);
     }
 }
 
 #[update]
 fn set_idl(canister: String, idl: String) {
-    let canister_db = storage::get_mut::<CanisterDB>();
+    let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.set_idl(caller(), &canister, idl);
 }
 
 #[update]
 fn set_logo(canister: String, logo_url: String) {
     if validate_url(&logo_url) {
-        let canister_db = storage::get_mut::<CanisterDB>();
+        let canister_db = ic::get_mut::<CanisterDB>();
         canister_db.set_logo(caller(), &canister, logo_url);
     }
 }
