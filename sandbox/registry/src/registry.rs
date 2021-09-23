@@ -56,6 +56,11 @@ impl CanisterDB {
         self.0.remove(canister);
     }
 
+    pub fn get_all(&self) -> Vec<&CanisterMetadata> {
+        self.0.values().collect()
+    }
+}
+
     /* pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
         match self.0.get_mut(canister) {
             Some(x) => {
@@ -115,6 +120,12 @@ fn name() -> String {
 fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>> {
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.get_info(canisters)
+}
+
+#[query]
+fn get_all() -> Vec<&'static CanisterMetadata> {
+    let db = ic::get_mut::<CanisterDB>();
+    db.get_all()
 }
 
 #[update]
