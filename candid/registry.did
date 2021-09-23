@@ -10,5 +10,5 @@ service : {
     "name"               :  () -> (text) query;
 
     "get_info"           : (vec text) -> (vec opt CanisterMetadata) query;
-    "add_canister"       : (text, CanisterMetadata) -> ();
+    "add_canister"       : (principal, CanisterMetadata) -> ();
 }
