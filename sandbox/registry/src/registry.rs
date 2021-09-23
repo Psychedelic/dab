@@ -25,6 +25,15 @@ pub struct CanisterMetadata {
     version: u32,
 }
 
+
+#[derive(Deserialize, CandidType, Clone)]
+pub struct InputCanisterMetadata {
+    name: String,
+    description: String,
+    url: String,
+    logo_url: String,
+}
+
 #[derive(Default)]
 pub struct CanisterDB(HashMap<Principal, CanisterMetadata>);
 
@@ -48,8 +57,15 @@ impl CanisterDB {
         list
     }
 
-    pub fn add_canister(&mut self, canister: Principal, metadata: CanisterMetadata) {
-        self.0.insert(canister, metadata);
+    pub fn add_canister(&mut self, canister: Principal, metadata: InputCanisterMetadata) {
+        let canister_metadata = CanisterMetadata {
+            name: metadata.name,
+            description: metadata.description,
+            url: metadata.url,
+            logo_url: metadata.logo_url,
+            version: 0,
+        };
+        self.0.insert(canister, canister_metadata);
     }
 
     pub fn remove_canister(&mut self, canister: &Principal) {
@@ -128,19 +144,19 @@ fn get_all() -> Vec<&'static CanisterMetadata> {
 }
 
 #[update]
-fn add_canister(canister: Principal, metadata: CanisterMetadata) {
-    assert!(is_fleek(&ic::caller()));
-    assert_eq!(&metadata.version, &0);
+fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Option<String> {
+    assert!(is_fleek(&ic::caller()), "{}", String::from("Not Fleek"));
     if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || validate_url(&metadata.logo_url)
         || validate_url(&metadata.url)
     {
-        return;
+        return Some(String::from("Bad Parameters"));
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.add_canister(canister, metadata);
+    return Some(String::from("Operation Successful"));
 }
 
 #[update]

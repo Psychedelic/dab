@@ -1,4 +1,4 @@
-type CanisterMetadata = record {
+type canister_metadata = record {
     name: text;
     description: text;
     url: text;
@@ -6,11 +6,18 @@ type CanisterMetadata = record {
     version: nat32;
 };
 
+type input_canister_metadata = record {
+    name: text;
+    description: text;
+    url: text;
+    logo_url: text;
+};
+
 service : {
     "name"               :  () -> (text) query;
 
-    "get_info"           : (vec text) -> (vec opt CanisterMetadata) query;
-    "get_all"            : () -> (vec CanisterMetadata) query;
-    
-    "add_canister"       : (principal, CanisterMetadata) -> ();
+    "get_info"           : (vec text) -> (vec opt canister_metadata) query;
+    "get_all"            : () -> (vec canister_metadata) query;
+
+    "add_canister"       : (principal, input_canister_metadata) -> (opt text);
 }
