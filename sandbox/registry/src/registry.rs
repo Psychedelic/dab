@@ -1,5 +1,7 @@
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_kit::*;
+use ic_kit::candid::Result;
+use ic_kit::candid::types::ic_types::principal;
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use serde::Deserialize;
@@ -9,12 +11,19 @@ use validator::validate_url;
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 24;
 
+pub struct Fleek(pub Vec<Principal>);
+
+impl Default for Fleek {
+    fn default() -> Self {
+        panic!()
+    }
+}
+
 #[derive(Deserialize, CandidType, Clone)]
 pub struct CanisterMetadata {
     name: String,
     description: String,
     url: String,
-    idl: String,
     logo_url: String,
     version: u32,
 }
@@ -36,22 +45,29 @@ impl CanisterDB {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn get_info(&mut self, canister: &Principal) -> Option<CanisterMetadata> {
-        self.0.get(canister).cloned()
+    pub fn get_info(&mut self, canisters: Vec<Principal>) -> Vec<Option<&CanisterMetadata>> {
+        // self.0.get(canister).cloned()
+        let mut list: Vec<Option<&CanisterMetadata>> = vec![];
+        for canister in canisters {
+            let item = self.0.get(&canister);
+            list.push(item);
+        }
+        list
     }
 
     pub fn add_canister(
         &mut self,
-        account: Principal,
         canister: Principal,
         metadata: CanisterMetadata,
     ) {
-        assert!(is_controller(&canister, &account));
-        // Todo: account should be verified. No one other than canister's controllers should be able to update the information.
         self.0.insert(canister, metadata);
     }
 
-    pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
+    pub fn remove_canister(&mut self, canister: &Principal) {
+        self.0.remove(canister);
+    }
+
+    /* pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
         match self.0.get_mut(canister) {
             Some(x) => {
                 assert!(is_controller(canister, &account));
@@ -82,40 +98,77 @@ impl CanisterDB {
             }
             None => return,
         }
-    }
+    } **/
+}
 
-    pub fn set_idl(&mut self, account: Principal, canister: &Principal, idl: String) {
-        match self.0.get_mut(canister) {
-            Some(x) => {
-                assert!(is_controller(canister, &account));
-                x.idl = idl;
-                x.version += 1;
-            }
-            None => return,
-        }
+#[derive(CandidType)]
+pub enum OperationError {
+    NotAuthorized,
+    ParamatersNotPassed,
+    NonExistentCanister,
+    BadParameters,
+    CallFailed
+}
+
+#[init]
+fn init() {
+    ic::store(Fleek(vec![ic::caller()]));
+}
+
+fn is_fleek(account: &Principal) -> bool {
+    ic::get::<Fleek>().0.contains(account)
+}
+
+#[update]
+fn set_admin(new_admin: Principal) {
+    if is_fleek(&ic::caller()) {
+        ic::get_mut::<Fleek>().0.push(new_admin);   
     }
 }
 
 #[query]
 fn name() -> String {
-    String::from("Registry Canister")
+    String::from("Canister Registry")
 }
 
 #[update]
-fn get_info(canister: Principal) -> Option<CanisterMetadata> {
+fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>> {
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.get_info(&canister)
+    canister_db.get_info(canisters)
 }
 
 #[update]
 fn add_canister(canister: Principal, metadata: CanisterMetadata) {
+    assert!(is_fleek(&ic::caller()));
     assert_eq!(&metadata.version, &0);
     if &metadata.name.len() > &NAME_LIMIT || &metadata.description.len() > &DESCRIPTION_LIMIT {
         return;
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.add_canister(caller(), canister, metadata);
+    canister_db.add_canister(canister, metadata);
+}
+
+#[update]
+fn remove_canister(canister: Principal) {
+    assert!(is_fleek(&ic::caller()));
+    let canister_db = ic::get_mut::<CanisterDB>();
+    canister_db.remove_canister(&canister);
+}
+
+/* #[update]
+async fn update_canister(canister: Principal) -> Result<Option<String>, String>{
+    match ic::call(canister, registry, None).await {
+        Ok(x) => {
+
+        },
+        Err((code, msg)) => {
+            Err(format!(
+                "An error happened during the call: {}: {}",
+                code as u8, msg
+            ))
+        }
+    }
 }
 
 #[update]
@@ -135,15 +188,9 @@ fn set_description(canister: Principal, description: String) {
 }
 
 #[update]
-fn set_idl(canister: Principal, idl: String) {
-    let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.set_idl(caller(), &canister, idl);
-}
-
-#[update]
 fn set_logo(canister: Principal, logo_url: String) {
     if validate_url(&logo_url) {
         let canister_db = ic::get_mut::<CanisterDB>();
         canister_db.set_logo(caller(), &canister, logo_url);
     }
-}
+} **/
