@@ -59,7 +59,6 @@ impl CanisterDB {
     pub fn get_all(&self) -> Vec<&CanisterMetadata> {
         self.0.values().collect()
     }
-}
 
     /* pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
         match self.0.get_mut(canister) {
