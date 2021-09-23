@@ -1,9 +1,6 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_kit::*;
-use ic_kit::candid::Result;
-use ic_kit::candid::types::ic_types::principal;
-use ic_kit::ic::*;
 use ic_kit::macros::*;
+use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 use validator::validate_url;
@@ -26,10 +23,6 @@ pub struct CanisterMetadata {
     url: String,
     logo_url: String,
     version: u32,
-}
-
-fn is_controller(canister_id: &Principal, account: &Principal) -> bool {
-    return true;
 }
 
 #[derive(Default)]
@@ -55,11 +48,7 @@ impl CanisterDB {
         list
     }
 
-    pub fn add_canister(
-        &mut self,
-        canister: Principal,
-        metadata: CanisterMetadata,
-    ) {
+    pub fn add_canister(&mut self, canister: Principal, metadata: CanisterMetadata) {
         self.0.insert(canister, metadata);
     }
 
@@ -101,15 +90,6 @@ impl CanisterDB {
     } **/
 }
 
-#[derive(CandidType)]
-pub enum OperationError {
-    NotAuthorized,
-    ParamatersNotPassed,
-    NonExistentCanister,
-    BadParameters,
-    CallFailed
-}
-
 #[init]
 fn init() {
     ic::store(Fleek(vec![ic::caller()]));
@@ -122,7 +102,7 @@ fn is_fleek(account: &Principal) -> bool {
 #[update]
 fn set_admin(new_admin: Principal) {
     if is_fleek(&ic::caller()) {
-        ic::get_mut::<Fleek>().0.push(new_admin);   
+        ic::get_mut::<Fleek>().0.push(new_admin);
     }
 }
 
@@ -141,7 +121,11 @@ fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>>
 fn add_canister(canister: Principal, metadata: CanisterMetadata) {
     assert!(is_fleek(&ic::caller()));
     assert_eq!(&metadata.version, &0);
-    if &metadata.name.len() > &NAME_LIMIT || &metadata.description.len() > &DESCRIPTION_LIMIT {
+    if &metadata.name.len() > &NAME_LIMIT
+        || &metadata.description.len() > &DESCRIPTION_LIMIT
+        || validate_url(&metadata.logo_url)
+        || validate_url(&metadata.url)
+    {
         return;
     }
 
