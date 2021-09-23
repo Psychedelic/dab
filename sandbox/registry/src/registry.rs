@@ -148,8 +148,8 @@ fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Option<
     assert!(is_fleek(&ic::caller()), "{}", String::from("Not Fleek"));
     if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
-        || validate_url(&metadata.logo_url)
-        || validate_url(&metadata.url)
+        || !validate_url(&metadata.logo_url)
+        || !validate_url(&metadata.url)
     {
         return Some(String::from("Bad Parameters"));
     }
