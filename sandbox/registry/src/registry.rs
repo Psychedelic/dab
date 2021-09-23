@@ -111,7 +111,7 @@ fn name() -> String {
     String::from("Canister Registry")
 }
 
-#[update]
+#[query]
 fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>> {
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.get_info(canisters)
