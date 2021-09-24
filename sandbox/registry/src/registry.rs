@@ -25,7 +25,6 @@ pub struct CanisterMetadata {
     version: u32,
 }
 
-
 #[derive(Deserialize, CandidType, Clone)]
 pub struct InputCanisterMetadata {
     name: String,
@@ -70,10 +69,6 @@ impl CanisterDB {
 
     pub fn remove_canister(&mut self, canister: &Principal) {
         self.0.remove(canister);
-    }
-
-    pub fn get_all(&self) -> Vec<&CanisterMetadata> {
-        self.0.values().collect()
     }
 
     /* pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
@@ -137,12 +132,6 @@ fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>>
     canister_db.get_info(canisters)
 }
 
-#[query]
-fn get_all() -> Vec<&'static CanisterMetadata> {
-    let db = ic::get_mut::<CanisterDB>();
-    db.get_all()
-}
-
 #[update]
 fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Option<String> {
     assert!(is_fleek(&ic::caller()), "{}", String::from("Not Fleek"));
@@ -166,22 +155,30 @@ fn remove_canister(canister: Principal) {
     canister_db.remove_canister(&canister);
 }
 
-/* #[update]
-async fn update_canister(canister: Principal) -> Result<Option<String>, String>{
-    match ic::call(canister, registry, None).await {
-        Ok(x) => {
+#[update]
+async fn update_canister(canister: Principal) -> Result<String, String> {
+    let metadata: InputCanisterMetadata =
+        match ic::call(canister, String::from("dab_registry"), ((),)).await {
+            Ok((x,)) => x,
+            Err((_code, msg)) => {
+                return Err(msg);
+            }
+        };
 
-        },
-        Err((code, msg)) => {
-            Err(format!(
-                "An error happened during the call: {}: {}",
-                code as u8, msg
-            ))
-        }
+    if &metadata.name.len() > &NAME_LIMIT
+        || &metadata.description.len() > &DESCRIPTION_LIMIT
+        || !validate_url(&metadata.logo_url)
+        || !validate_url(&metadata.url)
+    {
+        return Err(String::from("Operation failed: Check the length of name and description values. Check the logo_url and url fields."));
     }
+
+    let canister_db = ic::get_mut::<CanisterDB>();
+    canister_db.add_canister(canister, metadata);
+    Ok(String::from("Operation was successful."))
 }
 
-#[update]
+/*#[update]
 fn set_url(canister: Principal, url: String) {
     if validate_url(&url) {
         let canister_db = ic::get_mut::<CanisterDB>();
