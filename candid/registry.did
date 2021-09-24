@@ -18,4 +18,5 @@ service : {
 
     "get_info"           : (vec principal) -> (vec opt canister_metadata) query;
     "add_canister"       : (principal, input_canister_metadata) -> (opt text);
+    "update_canister"    : (principal) -> (text);
 }
