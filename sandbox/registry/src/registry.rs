@@ -56,7 +56,7 @@ impl CanisterDB {
         list
     }
 
-    pub fn add_canister(&mut self, canister: Principal, metadata: InputCanisterMetadata) {
+    pub fn add_canister(&mut self, canister: Principal, metadata: InputCanisterMetadata) -> Result<(), Failure> {
         let canister_metadata = CanisterMetadata {
             name: metadata.name,
             description: metadata.description,
@@ -65,10 +65,18 @@ impl CanisterDB {
             version: 0,
         };
         self.0.insert(canister, canister_metadata);
+        if !self.0.contains_key(&canister) {
+            return Err(Failure::UnknownError);
+        }
+        Ok(())
     }
 
-    pub fn remove_canister(&mut self, canister: &Principal) {
+    pub fn remove_canister(&mut self, canister: &Principal) -> Result<(), Failure> {
+        if !self.0.contains_key(canister) {
+            return Err(Failure::NonExistentCanister);
+        }
         self.0.remove(canister);
+        Ok(())
     }
 
     /* pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
@@ -105,6 +113,15 @@ impl CanisterDB {
     } **/
 }
 
+#[derive(CandidType)]
+pub enum Failure {
+    NotAuthorized,
+    BadParameters,
+    NonExistentCanister,
+    InterCanisterCall(String),
+    UnknownError
+}
+
 #[init]
 fn init() {
     ic::store(Fleek(vec![ic::caller()]));
@@ -133,35 +150,37 @@ fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>>
 }
 
 #[update]
-fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Option<String> {
-    assert!(is_fleek(&ic::caller()), "{}", String::from("Not Fleek"));
-    if &metadata.name.len() > &NAME_LIMIT
+fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Result<(), Failure> {
+    if !is_fleek(&ic::caller()) {
+        return Err(Failure::NotAuthorized);
+    } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || !validate_url(&metadata.logo_url)
         || !validate_url(&metadata.url)
     {
-        return Some(String::from("Bad Parameters"));
+        return Err(Failure::BadParameters);
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.add_canister(canister, metadata);
-    return Some(String::from("Operation Successful"));
+    canister_db.add_canister(canister, metadata)
 }
 
 #[update]
-fn remove_canister(canister: Principal) {
-    assert!(is_fleek(&ic::caller()));
+fn remove_canister(canister: Principal) -> Result<(), Failure>{
+    if !is_fleek(&ic::caller()) {
+        return Err(Failure::NotAuthorized);
+    }
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.remove_canister(&canister);
+    canister_db.remove_canister(&canister)
 }
 
 #[update]
-async fn update_canister(canister: Principal) -> Result<String, String> {
+async fn update_canister(canister: Principal) -> Result<(), Failure> {
     let metadata: InputCanisterMetadata =
         match ic::call(canister, String::from("dab_registry"), ((),)).await {
             Ok((x,)) => x,
             Err((_code, msg)) => {
-                return Err(msg);
+                return Err(Failure::InterCanisterCall(msg));
             }
         };
 
@@ -170,12 +189,11 @@ async fn update_canister(canister: Principal) -> Result<String, String> {
         || !validate_url(&metadata.logo_url)
         || !validate_url(&metadata.url)
     {
-        return Err(String::from("Operation failed: Check the length of name and description values. Check the logo_url and url fields."));
+        return Err(Failure::BadParameters);
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.add_canister(canister, metadata);
-    Ok(String::from("Operation was successful."))
+    canister_db.add_canister(canister, metadata)
 }
 
 /*#[update]
