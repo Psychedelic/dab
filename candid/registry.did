@@ -13,10 +13,24 @@ type input_canister_metadata = record {
     logo_url: text;
 };
 
+type operation_error = variant {
+    NotAuthorized;
+    BadParameters;
+    NonExistentCanister;
+    InterCanisterCall: text;
+    UnknownError;
+};
+
+type operation_response = variant {
+    Ok  : opt text;
+    Err : operation_error;
+};
+
 service : {
-    "name"               :  () -> (text) query;
+    "name"               : () -> (text) query;
 
     "get_info"           : (vec principal) -> (vec opt canister_metadata) query;
-    "add_canister"       : (principal, input_canister_metadata) -> (opt text);
-    "update_canister"    : (principal) -> (text);
+    "add_canister"       : (principal, input_canister_metadata) -> (operation_response);
+    "remove_canister"    : (principal) -> (operation_response);
+    "update_canister"    : (principal) -> (operation_response);
 }
