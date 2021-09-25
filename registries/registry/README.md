@@ -5,60 +5,87 @@ shell script located [here](https://github.com/Psychedelic/dab/blob/main/scripts
 
 ## Registry Canister Methods
 
-The profile canister has seven methods. You can find the details of these methods in the [candid file](https://github.com/Psychedelic/dab/blob/main/candid/profile.did).
+The registry canister has three public methods. You can find the details of these methods in the [candid file](https://github.com/Psychedelic/dab/blob/main/candid/registry.did).
 
-| Method Name        | Description                                                                                          |
-| -----------        | -----------                                                                                          |
-| get_info           | This method returns the metadata associated with the given canister name                             |
-| add_canister       | This method adds a new canister with its metadata to the registry                                    |
-| set_url            | This method updates the front-end URL of the canister.                                               |
-| set_description    | This method updates the description associated with the canister.                                    |
-| set_idl            | This method updates the IDL of the canister.                                                         |
-| set_logo           | This method updates the link to the logo of the canister.                                            |
+| Method Name        | Description                                                                                           |
+| -----------        | -----------                                                                                           |
+| name               | This method return the name of the canister for health-check                                          |
+| get_info           | This method returns the metadata associated with the given canister principal IDs                     |
+| update_canister    | This method makes an inter-canister call to the principal ID passed and updates the canister metadata |
 
 ## How to use them?
 
-In this section we take a look at the methods that the registry canister offers and try to add a new canister to the registry. Let's start by learning the structure of the metadata.
+In this section we take a look at the methods that the registry canister offers and try to add our canister to the registry. Let's start by learning the structure of the metadata.
 
 Registry canister stores the following information about every canister that has been added to it:
-- Principal ID
+
+- Name
 - Description
 - Front-end URL
-- IDL
 - Logo URL
 - Version of the metadata
 
-The version of the metadata helps you identify new updates and changes to the metadata. Version increments by one every time the metadata receives an update. Let's add the XTC canister to the registry as an example to see how it works. Remember that you have to be a controller of the canister if you want to apply changes to its metadata in the registry.
+The version of the metadata helps developers identify new updates and changes to the metadata. Version increments by one, every time the metadata receives an update. Let's add the XTC canister to the registry as an example to see how it works. For that to happen we need to add a snippet of code to our canister. This snippet returns the metadata of the canister for the time being. The reason we ask you to add this code is that DFX currently doesn't let us find out who is the controller of each canister so it is necessary to verify with this method.
 
-First we add our canister to the registry using the `add_canister` method. This method two arguments: the name of the canister and its metadata:
+The method is named `dab_registry` and you can just copy and paste it in to your code:
 
-```sh
-dfx canister call registry add_canister "(\"XTC\", record {principal_id= principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"; description= \"The Cycles Token (XTC) is Dank's first product.\"; url= \"https://dank.ooo\"; idl= null; logo_url= \"https://github.com/Psychedelic/dank\"; version= 0})"
+```rust
+pub struct InputCanisterMetadata {
+    name: String,
+    description: String,
+    url: String,
+    logo_url: String,
+}
 
+fn dab_registry() -> InputCanisterMetadata {
+  return InputCanisterMetadata {
+    name: String::from("Canister Name"),
+    description: String::from("Canister Description"),
+    url: String::from("https://frontend_url.com"),
+    logo_url: String::from("https://logo_url.com"),
+    };
+}
 ```
 
-Notice that we left the version of the canister to be zero. That's the initial version and with every new update it increments by one. Let's try to change the description of the canister:
+Notice that we didn't include the version field. That's because the registry itself controls the version and you do not have to worry about that! Next step is adding this snippet to your candid and after that we will call the registry and the registry takes care of the rest:
 
-```sh
-dfx canister call registry set_description "(\"XTC\", \"The Cycles Token (XTC) is a cycles ledger canister that provides users with a “wrapped/tokenized” version of cycles (XTC) that can be held with just a Principal ID (no need for a Cycles Wallet), and that also includes all the same developer features and functions (calls) as the Cycles Wallet (built into the XTC token itself).\")"
+```candid
+type input_canister_metadata = record {
+    name: text;
+    description: text;
+    url: text;
+    logo_url: text;
+};
+
+service : {
+  "dab_registry" : () -> (input_canister_metadata); 
+}
 ```
 
-You might have noticed that the length of this new paragraph is much more than the previous description. Registry canister has a limit for the maximum length of descriptions and it is set to be 1200 characters.
-
-Now if we decide to ask the registry for the information associated with the "XTC" canister, we should use the `get_info` method:
+Let's add the canister to the registry using the `update_canister` method:
 
 ```sh
-$ dfx canister call registry get_info "(\"XTC\")"
+dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai update_canister "(principal \"YOUR_CANISTER_ID\")" 
+```
+
+Now that we have added this canister to the registry, we can ask for its metadata:
+
+```sh
+$ dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai get_info "(vec {principal \"YOUR_CANISTER_ID\"})"
 (
   opt record {
-    idl = opt "Not IDL, but the method works.";
-    url = opt "https://dank.ooo/";
-    description = opt "The Cycles Token (XTC) is a cycles ledger canister that provides users with a “wrapped/tokenized” version of cycles (XTC) that can be held with just a Principal ID (no need for a Cycles Wallet), and that also includes all the same developer features and functions (calls) as the Cycles Wallet (built into the XTC token itself).";
+    name = "Canister Name";
+    description = "Canister Description";
+    url = "https://frontend_url.com";
+    logo_url = "https://logo_url.com";
     version = 1;
-    logo_url = opt "https://github.com/Psychedelic/dank";
-    principal_id = principal "aanaa-xaaaa-aaaah-aaeiq-cai";
   },
 )
 ```
 
-It works! We added our canister and updated its information with only two steps. Really, it's that easy!
+It works! We have added our canister and updated its information. You can also ask for other canisters' metadata with passing their principal ID along:
+
+```sh
+dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai get_info "(vec {principal \"CANISTER_ID_ONE\"; principal \"CANISTER_ID_TWO\"})"
+```
+
