@@ -29,6 +29,7 @@ In its first iteration, we have released DAB's first registry, **the NFT list** 
 DAB's NFT list is **standard agnostic** and through the DAB-js library, developers can easily integrate and make calls to any NFT collection on the list regardless of their NFT standard interface (EXT, Departure Labs, etc.), **because in its library DAB wraps all standards into a common javascript interface**.
 
 * [**View the NFT List Canister Source Code**](registries/nft/)
+* [**View the Canister Registry Source Code**](registries/registry/)
 
 ### 🖌️ Current NFT List & Making New Submissions
 
@@ -54,7 +55,6 @@ In the Sandbox directory, you can find in-development projects, such as the cani
 
 * [Address book](sandbox/address/README.md)
 * [Profile metadata](sandbox/profile/README.md)
-* [Canister registry](sandbox/registry/README.md)
 
 ---
 

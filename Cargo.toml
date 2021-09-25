@@ -2,6 +2,6 @@
 members = [
     "sandbox/address",
     "sandbox/profile",
-    "sandbox/registry",
+    "registries/registry",
     "registries/nft"
 ]
