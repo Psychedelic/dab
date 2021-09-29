@@ -63,7 +63,7 @@ To interact with DAB's services you need to use the DAB-js library. Read our doc
 Apps that show Canister IDs in their UIs/apps can **integrate to the Canister List** to check if that Canister ID has associated metadata, and display it for their users to see in a more descriptive and human-readable way.
 
 - It helps make Canister ID human-readable and identifiable.
-- It helps give users informations to judge whether to trust or not a Canister.
+- It helps give users information to judge whether to trust a canister or not
 - It can help in the future to identify duplicates or impersonations.
 
 [**View the Canister Registry Source Code**](registries/canister_registry/)
