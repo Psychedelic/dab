@@ -180,7 +180,7 @@ fn remove_canister(canister: Principal) -> Result<(), Failure> {
     canister_db.remove_canister(&canister)
 }
 
-#[update]
+/* #[update]
 async fn update_canister(canister: Principal) -> Result<(), Failure> {
     let metadata: InputCanisterMetadata =
         match ic::call(canister, String::from("dab_registry"), ((),)).await {
@@ -200,7 +200,7 @@ async fn update_canister(canister: Principal) -> Result<(), Failure> {
 
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.add_canister(canister, metadata)
-}
+} */
 
 #[cfg(test)]
 mod tests {

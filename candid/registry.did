@@ -32,5 +32,4 @@ service : {
     "get_info"           : (vec principal) -> (vec opt canister_metadata) query;
     "add_canister"       : (principal, input_canister_metadata) -> (operation_response);
     "remove_canister"    : (principal) -> (operation_response);
-    "update_canister"    : (principal) -> (operation_response);
 }
