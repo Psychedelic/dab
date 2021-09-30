@@ -68,5 +68,26 @@
     "standard": "ICPunks",
     "description": "10,000 randomly generated, unique collectible clowns with proof of ownership stored on the Internet Computer blockchain. Created as a reference to a meme comparing the Internet Computer token (ICP) with the Insane Clown Posse - an American hip hop duo founded in 1989.",
     "icon": "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/1"
+  },
+  {
+    "name": "ICPBunny",
+    "id": "xkbqi-2qaaa-aaaah-qbpqq-cai",
+    "standard": "ICPunks",
+    "description": "A bunny-themed NFT collection that uses utility tokens to enable yieldable and breedable NFTs on the Internet Computer.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/ICPBunny.png"
+  },
+  {
+    "name": "ICelebrity",
+    "id": "kss7i-hqaaa-aaaah-qbvmq-cai",
+    "standard": "EXT",
+    "description": "An NFT collection of 100 unique minted celebrities (Hollywood, Football Players, Singers and more).",
+    "icon": "https://kss7i-hqaaa-aaaah-qbvmq-cai.raw.ic0.app/?tokenid=bubur-lykor-uwiaa-aaaaa-b4anl-eaqca-aaaae-a"
+  },
+  {
+    "name": "The Universo",
+    "id": "k4qsa-4aaaa-aaaah-qbvnq-cai",
+    "standard": "EXT",
+    "description": "An NFT collection by a3capas. The Universo is where the chosen escape their mundane lives to astral travel and fuse their souls with the most powerful creatures.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/dab/a3capas-logo.png"
   }
 ]
