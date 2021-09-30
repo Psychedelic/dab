@@ -41,3 +41,27 @@ Registry canister stores the following information about every canister that has
 - Version of the metadata
 
 The version of the metadata helps developers identify new updates and changes to the metadata. Version increments by one, every time the metadata receives an update.
+
+The registry canister's principal ID on the mainnet is `qxtlu-aiaaa-aaaah-aaupq-cai`. Let's check if we have the right canister:
+
+```sh
+$ dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai name
+("Canister Registry")
+```
+
+Now that we are sure of the canister's principal ID, let's ask the registry for XTC canister's metadata:
+
+```sh
+$ dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai get_info "(vec {principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"})"
+(
+  vec {
+    opt record {
+      url = "https://dank.ooo/xtc/";
+      name = "XTC";
+      description = "Cycles Token (XTC) is a token that allows users or developers to hold cycles with just a Principal ID, and send, trade, or develop canisters with them.";
+      version = 0 : nat32;
+      logo_url = "https://storageapi.fleek.co/fleek-team-bucket/canister-logos/XTC.svg";
+    };
+  },
+)
+```
