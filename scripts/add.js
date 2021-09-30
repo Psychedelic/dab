@@ -2,12 +2,25 @@
 
 const fs = require("fs"),
       csv = require("csv-parser"),
+      createCsvWriter = require('csv-writer').createObjectCsvWriter,
       program = require("inquirer"),
       { execSync } = require('child_process');
 
 var results = [],
     inputFile = process.argv[2],
     ui = new program.ui.BottomBar();
+
+const csvWriter = createCsvWriter({
+    path: 'out.csv',
+    header: [
+        {id: 'name', title: 'name'},
+        {id: 'id', title: 'principal_id'},
+        {id: 'description', title: 'description'},
+        {id: 'url', title: 'url'},
+        {id: 'logo', title: 'logo_url'},
+    ]
+});
+      
 
 function main() {
     program
@@ -17,8 +30,9 @@ function main() {
                 name: 'functionality',
                 message: 'What do you want to do?',
                 choices: [
-                    'Add / Update NFT canister',
-                    'Add / Update entries in the registry canister'
+                    'Export the csv file of canister registry',
+                    'Add / Update NFT registry',
+                    'Add / Update entries in the canister registry'
                 ]
             }
         ])
@@ -28,9 +42,32 @@ function main() {
 
             if (answer.functionality == 'Add / Update NFT canister') {
                 add_nft(stream);
+            } else if (answer.functionality == 'Export the csv file of canister registry') {
+                csv_canister_registry(stream);
             } else {
                 add_canister(stream);
             }
+        });
+}
+
+function csv_canister_registry(stream) {
+    stream
+        .on("data", (data) => {
+            if (data.Name != '' && data.Description != '' && data.URL != '' && data.Logo != '' && data.ID != '') {
+                let item = {
+                    name: data.Name,
+                    id: data.ID,
+                    description: data.Description,
+                    url: data.URL,
+                    logo: data.Logo,
+                };
+                results.push(item);
+            }
+        })
+        .on("end", () => {
+            csvWriter
+              .writeRecords(results)
+              .then( () => console.log('The CSV file was written successfully'));
         });
 }
 
@@ -99,7 +136,6 @@ function add_nft(stream) {
     });
 
 }
-
 
 function add_canister(stream) {
     stream
