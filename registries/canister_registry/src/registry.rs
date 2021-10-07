@@ -11,7 +11,7 @@ const NAME_LIMIT: usize = 24;
 pub struct Fleek(pub Vec<Principal>);
 
 #[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
-pub enum Category {
+pub enum CanisterCategory {
     Asset,
     Nft,
     Service,
@@ -31,7 +31,7 @@ pub struct CanisterMetadata {
     url: String,
     logo_url: String,
     version: u32,
-    category: Category,
+    category: CanisterCategory,
 }
 
 #[derive(Deserialize, CandidType, Clone)]
@@ -40,7 +40,7 @@ pub struct InputCanisterMetadata {
     description: String,
     url: String,
     logo_url: String,
-    category: Category,
+    category: CanisterCategory,
 }
 
 #[derive(Default)]
@@ -235,7 +235,7 @@ mod tests {
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
-            category: Category::Asset
+            category: CanisterCategory::Asset
         };
 
         let addition = add_canister(mock_principals::xtc(), canister_info.clone());
@@ -273,7 +273,7 @@ mod tests {
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
-            category: Category::Asset
+            category: CanisterCategory::Asset
         };
 
         let xtc_metadata = CanisterMetadata {
@@ -282,7 +282,7 @@ mod tests {
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
             version: 0,
-            category: Category::Asset
+            category: CanisterCategory::Asset
         };
 
         let addition = add_canister(mock_principals::xtc(), xtc_info.clone());
@@ -312,7 +312,7 @@ mod tests {
             description: String::from("DAB's NFT registry provides its users with information for every nft canister in the registry."),
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
-            category: Category::Asset
+            category: CanisterCategory::Asset
         };
 
         let nft_metadata = CanisterMetadata {
@@ -321,7 +321,7 @@ mod tests {
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
             version: 0,
-            category: Category::Asset
+            category: CanisterCategory::Asset
         };
 
         let addition = add_canister(nft_registry(), nft_info);
@@ -349,7 +349,7 @@ mod tests {
                 description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
                 url: String::from("https://frontend_url.com"),
                 logo_url: String::from("https://logo_url.com"),
-                category: Category::Asset
+                category: CanisterCategory::Asset
             };
 
         let addition = add_canister(mock_principals::xtc(), xtc_info.clone());
