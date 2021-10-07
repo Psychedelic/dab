@@ -312,7 +312,7 @@ mod tests {
             description: String::from("DAB's NFT registry provides its users with information for every nft canister in the registry."),
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
-            category: CanisterCategory::Asset
+            category: CanisterCategory::Service
         };
 
         let nft_metadata = CanisterMetadata {
@@ -321,7 +321,7 @@ mod tests {
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
             version: 0,
-            category: CanisterCategory::Asset
+            category: CanisterCategory::Service
         };
 
         let addition = add_canister(nft_registry(), nft_info);
