@@ -89,5 +89,63 @@
     "standard": "EXT",
     "description": "An NFT collection by a3capas. The Universo is where the chosen escape their mundane lives to astral travel and fuse their souls with the most powerful creatures.",
     "icon": "https://storageapi.fleek.co/fleek-team-bucket/dab/a3capas-logo.png"
+  },
+  {
+    "name": "Principia Mathematica",
+    "id": "lhq4n-3yaaa-aaaai-qaniq-cai",
+    "standard": "DepartureLabs",
+    "description": "An Ode to Mathematics, a silent tribute to the greatest minds of all time.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/principia.png"
+  },
+  {
+    "name": "Candy Library",
+    "id": "hdxhu-qqaaa-aaaai-aasnq-cai",
+    "standard": "DepartureLabs",
+    "description": "Candy Library NFTs - distribution licenses for a motoko software library, fund software!",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/dab/candy-lib.png"
+  },
+  {
+    "name": "Cake",
+    "id": "wxi2q-oiaaa-aaaaj-qab2q-cai",
+    "standard": "EXT",
+    "description": "Slices of cake celebrating the birthdays of IC builders. Proceeds fund open source development.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/cake-logo.png"
+  },
+  {
+    "name": "ICPuppies",
+    "id": "njgly-uaaaa-aaaah-qb6pa-cai",
+    "standard": "EXT",
+    "description": "10,000 unique randomly generated 8-bit puppy NFTs on the Internet Computer.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/ICPuppies.png"
+  },
+  {
+    "name": "Internet Astronauts",
+    "id": "sr4qi-vaaaa-aaaah-qcaaq-cai",
+    "standard": "EXT",
+    "description": "Internet Astronauts is a collection of 10,000 unique digital astronaut NFT collectibles only found on the Internet Computer.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/internetastro.jpeg"
+  },
+  {
+    "name": "ICMojis Items",
+    "id": "cihkf-qyaaa-aaaah-qb7jq-cai",
+    "standard": "EXT",
+    "description": "Collection of items that will be integrated into the ICmojis Origins game in the future.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/items.png"
+  },
+  {
+    "name": "Wrapped ICPBunny",
+    "id": "q6hjz-kyaaa-aaaah-qcama-cai",
+    "standard": "EXT",
+    "description": "Wrapped version of ICPBunny, a bunny-themed NFT collection that uses utility tokens to enable yieldable and breedable NFTs on the Internet Computer.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/ICPBunny.png"
+  },
+  {
+    "name": "ICTuts",
+    "id": "ahl3d-xqaaa-aaaaj-qacca-cai",
+    "standard": "EXT",
+    "description": "10,000 randomly generated TuTs, a pharaoh-themed NFT collections on the Internet Computer.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/tuts.jpg"
   }
+
+  
 ]
