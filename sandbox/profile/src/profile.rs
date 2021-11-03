@@ -1,8 +1,9 @@
 extern crate unic;
 
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_cdk::*;
-use ic_cdk_macros::*;
+use ic_kit::ic::*;
+use ic_kit::macros::*;
+use ic_kit::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use unic::emoji::char::is_emoji;
@@ -46,7 +47,7 @@ impl ProfileDB {
         self.0.get(account).cloned()
     }
 
-    pub fn set_display_name(&mut self, account: Principal, name: String) {
+    pub fn set_display_name(&mut self, account: Principal, name: String) -> Result<OperationSuccessful, OperationError>{
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.display_name = Some(name);
@@ -66,9 +67,10 @@ impl ProfileDB {
                 );
             }
         }
+        Ok(true)
     }
 
-    pub fn set_description(&mut self, account: Principal, description: String) {
+    pub fn set_description(&mut self, account: Principal, description: String) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.description = Some(description);
@@ -88,9 +90,10 @@ impl ProfileDB {
                 );
             }
         }
+        Ok(true)
     }
 
-    pub fn set_emoji(&mut self, account: Principal, emoji: String) {
+    pub fn set_emoji(&mut self, account: Principal, emoji: String) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.emoji = Some(emoji);
@@ -110,9 +113,10 @@ impl ProfileDB {
                 );
             }
         }
+        Ok(true)
     }
 
-    pub fn set_avatar(&mut self, account: Principal, avatar: String) {
+    pub fn set_avatar(&mut self, account: Principal, avatar: String) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.avatar = Some(avatar);
@@ -132,9 +136,10 @@ impl ProfileDB {
                 );
             }
         }
+        Ok(true)
     }
 
-    pub fn set_banner(&mut self, account: Principal, banner: String) {
+    pub fn set_banner(&mut self, account: Principal, banner: String) -> Result<OperationSuccessful, OperationError> {
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.banner = Some(banner);
@@ -154,10 +159,12 @@ impl ProfileDB {
                 );
             }
         }
+        Ok(true)
     }
 
-    pub fn set_profile(&mut self, account: Principal, profile_data: ProfileMetadata) {
+    pub fn set_profile(&mut self, account: Principal, profile_data: ProfileMetadata) -> Result<OperationSuccessful, OperationError> {
         self.0.insert(account, profile_data);
+        Ok(true)
     }
 }
 
@@ -168,54 +175,60 @@ fn name() -> String {
 
 #[update]
 fn get_profile(account: Option<Principal>) -> Option<ProfileMetadata> {
-    let profile_db = storage::get_mut::<ProfileDB>();
-    profile_db.get_profile(&account.unwrap_or_else(|| caller()))
+    let profile_db = ic::get_mut::<ProfileDB>();
+    profile_db.get_profile(&account.unwrap_or_else(|| ic::caller()))
 }
 
 #[update]
-fn set_display_name(name: String) {
+fn set_display_name(name: String) -> Result<OperationSuccessful, OperationError> {
     if &name.len() < &MAX_DISPLAY_NAME_LIMIT && &name.len() > &2 {
-        let profile_db = storage::get_mut::<ProfileDB>();
-        profile_db.set_display_name(caller(), name);
+        let profile_db = ic::get_mut::<ProfileDB>();
+        profile_db.set_display_name(ic::caller(), name)
     }
+    Err(OperationError::BadParameters)
 }
 
 #[update]
-fn set_description(description: String) {
+fn set_description(description: String) -> Result<OperationSuccessful ,OperationError>{
     if &description.len() < &MAX_DESCRIPTION_LIMIT {
-        let profile_db = storage::get_mut::<ProfileDB>();
-        profile_db.set_description(caller(), description);
+        let profile_db = ic::get_mut::<ProfileDB>();
+        profile_db.set_description(ic::caller(), description)
     }
+    Err(OperationError::BadParameters)
 }
 
 #[update]
-fn set_emoji(input: String) {
+fn set_emoji(input: String) -> Result<OperationSuccessful, OperationError> {
     let emojis: Vec<char> = input.chars().take(1).collect();
-    assert_eq!(is_emoji(emojis[0]), true);
-    let profile_db = storage::get_mut::<ProfileDB>();
-    profile_db.set_emoji(caller(), input);
+    if is_emoji(emojis[0]) {
+        let profile_db = ic::get_mut::<ProfileDB>();
+        profile_db.set_emoji(ic::caller(), input)    
+    }
+    Err(OperationError::BadParameters)
 }
 
 #[update]
-fn set_avatar(url: String) {
+fn set_avatar(url: String) -> Result<OperationSuccessful, OperationError> {
     if validate_url(&url) {
-        let profile_db = storage::get_mut::<ProfileDB>();
-        profile_db.set_avatar(caller(), url);
+        let profile_db = ic::get_mut::<ProfileDB>();
+        profile_db.set_avatar(ic::caller(), url)
     }
+    Err(OperationError::BadParameters)
 }
 
 #[update]
-fn set_banner(url: String) {
+fn set_banner(url: String) -> Result<OperationSuccessful, OperationError>{
     if validate_url(&url) {
-        let profile_db = storage::get_mut::<ProfileDB>();
-        profile_db.set_banner(caller(), url);
+        let profile_db = ic::get_mut::<ProfileDB>();
+        profile_db.set_banner(ic::caller(), url)
     }
+    Err(OperationError::BadParameters)
 }
 
 #[update]
 fn set_profile(profile_data: ProfileMetadata) {
-    let profile_db = storage::get_mut::<ProfileDB>();
-    profile_db.set_profile(caller(), profile_data);
+    let profile_db = ic::get_mut::<ProfileDB>();
+    profile_db.set_profile(ic::caller(), profile_data);
 }
 
 #[cfg(test)]
