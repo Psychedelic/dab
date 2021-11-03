@@ -14,6 +14,7 @@ const MAX_DISPLAY_NAME_LIMIT : usize = 25;
 
 #[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct ProfileMetadata {
+    user_id: Option<String>,
     display_name: Option<String>,
     description: Option<String>,
     emoji: Option<String>,
@@ -56,6 +57,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        user_id: None,
                         display_name: Some(name),
                         description: None,
                         emoji: None,
@@ -78,6 +80,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        user_id: None,
                         display_name: None,
                         description: Some(description),
                         emoji: None,
@@ -100,6 +103,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        user_id: None,
                         display_name: None,
                         description: None,
                         emoji: Some(emoji),
@@ -122,6 +126,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        user_id: None,
                         display_name: None,
                         description: None,
                         emoji: None,
@@ -144,6 +149,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        user_id: None,
                         display_name: None,
                         description: None,
                         emoji: None,
