@@ -8,9 +8,13 @@ use std::collections::BTreeMap;
 use unic::emoji::char::is_emoji;
 use unic::emoji::*;
 use validator::validate_url;
+use rand::Rng;
 
 const MAX_DESCRIPTION_LIMIT  : usize = 1201;
 const MAX_DISPLAY_NAME_LIMIT : usize = 25;
+const MIN_NUMBER_ID : usize = 1000;
+const MAX_NUMBER_ID : usize = 9999;
+
 
 #[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct ProfileMetadata {
@@ -48,16 +52,19 @@ impl ProfileDB {
     }
 
     pub fn set_display_name(&mut self, account: Principal, name: String) {
+        let mut rng = rand::thread_rng();
+        let user_id = Some(format!("{}#{}",name,rng.gen_range(&MIN_NUMBER_ID..&MAX_NUMBER_ID)));
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.display_name = Some(name);
+                x.user_id = Some(user_id);
                 x.version += 1;
             }
             None => {
                 self.0.insert(
                     account,
                     ProfileMetadata {
-                        user_id: None,
+                        user_id: Some(user_id),
                         display_name: Some(name),
                         description: None,
                         emoji: None,
