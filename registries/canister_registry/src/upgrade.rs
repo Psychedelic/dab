@@ -112,7 +112,7 @@ impl From<CanisterMetadataV0> for CanisterMetadata {
             description: cs.description,
             url: cs.url,
             logo_url: cs.logo_url,
-            category: CanisterCategory::Asset,
+            category: CanisterCategory::Service,
             version: cs.version,
         }
     }
