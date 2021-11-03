@@ -62,6 +62,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        username: None,
                         user_id: None,
                         display_name: Some(name),
                         description: None,
@@ -74,12 +75,12 @@ impl ProfileDB {
             }
         }
     }
-=
+
     pub fn set_username(&mut self, account: Principal, username: String) {
+        let mut rng = rand::thread_rng();
+        let user_id = format!("{}#{}",username,rng.gen_range(MIN_USERNAME_LIMIT..MAX_USERNAME_LIMIT));
         match self.0.get_mut(&account) {
             Some(x) => {
-                let mut rng = rand::thread_rng();
-                let user_id = Some(format!("{}#{}",name,rng.gen_range(&MIN_USERNAME_LIMIT..&MAX_USERNAME_LIMIT)));
                 x.username = Some(username);
                 x.user_id = Some(user_id);
                 x.version += 1;
@@ -112,6 +113,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        username: None,
                         user_id: None,
                         display_name: None,
                         description: Some(description),
@@ -135,6 +137,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        username: None,
                         user_id: None,
                         display_name: None,
                         description: None,
@@ -158,6 +161,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        username: None,
                         user_id: None,
                         display_name: None,
                         description: None,
@@ -181,6 +185,7 @@ impl ProfileDB {
                 self.0.insert(
                     account,
                     ProfileMetadata {
+                        username: None,
                         user_id: None,
                         display_name: None,
                         description: None,
