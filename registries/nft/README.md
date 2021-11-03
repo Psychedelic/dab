@@ -1,7 +1,5 @@
 # 🎨 NFT Registry Canister
 
-![Top Photo](https://storageapi.fleek.co/nicopoggi-team-bucket/dab-gh-nft.png)
-
 The NFT registry canister provides a list of different NFT collections on the Internet Computer. Their names, standards they support and Principal IDs are part of the information.
 
 ## Current NFT List & New Submissions 📜
