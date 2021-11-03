@@ -13,7 +13,7 @@ use rand::Rng;
 const MAX_DESCRIPTION_LIMIT  : usize = 1201;
 const MAX_DISPLAY_NAME_LIMIT : usize = 25;
 const MIN_NUMBER_ID : usize = 1000;
-const MAX_NUMBER_ID : usize = 9999;
+const MAX_USERNAME_LIMIT : usize = 9999;
 
 
 #[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
@@ -73,7 +73,6 @@ impl ProfileDB {
             }
         }
     }
-
 
     pub fn set_user_id(&mut self, account: Principal, id: String) {
         match self.0.get_mut(&account) {
@@ -276,7 +275,7 @@ mod tests {
     #[test]
     fn display_name() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_display_name(barry(), String::from("Barry Allen")), ());
         barry_metadata.display_name = Some(String::from("Barry Allen"));
@@ -289,7 +288,7 @@ mod tests {
     #[test]
     fn set_avatar() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_avatar(barry(), String::from("Avatar Link")), ());
         barry_metadata.avatar = Some(String::from("Avatar Link"));
@@ -298,7 +297,7 @@ mod tests {
     #[test]
     fn set_banner() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_banner(barry(), String::from("Banner Link")), ());
         barry_metadata.banner = Some(String::from("Banner Link"));
@@ -307,7 +306,7 @@ mod tests {
     #[test]
     fn get_profile() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_avatar(barry(), String::from("Avatar Link")), ());
         barry_metadata.avatar = Some(String::from("Avatar Link"));
@@ -320,7 +319,7 @@ mod tests {
     #[test]
     fn set_emoji() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_emoji(barry(), String::from("⚡️")), ());
         barry_metadata.emoji = Some(String::from("⚡️"));
@@ -329,7 +328,7 @@ mod tests {
     #[test]
     fn set_description() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_description(barry(), String::from("Fastest man alive!")), ());
         barry_metadata.description = Some(String::from("Fastest man alive!"));
@@ -346,7 +345,7 @@ mod tests {
     #[test]
     fn partial_case() {
         let mut profile_db = ProfileDB::default();
-        let mut alec_metadata: ProfileMetadata = ProfileMetadata { display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut alec_metadata: ProfileMetadata = ProfileMetadata { user_id: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
 
         assert_eq!(profile_db.set_display_name(alec(), String::from("Alec Holland")), ());
         alec_metadata.display_name = Some(String::from("Alec Holland"));
