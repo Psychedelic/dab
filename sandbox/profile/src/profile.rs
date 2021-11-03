@@ -12,12 +12,13 @@ use rand::Rng;
 
 const MAX_DESCRIPTION_LIMIT  : usize = 1201;
 const MAX_DISPLAY_NAME_LIMIT : usize = 25;
-const MIN_NUMBER_ID : usize = 1000;
+const MIN_USERNAME_LIMIT : usize = 1000;
 const MAX_USERNAME_LIMIT : usize = 9999;
 
 
 #[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct ProfileMetadata {
+    username: Option<String>,
     user_id: Option<String>,
     display_name: Option<String>,
     description: Option<String>,
@@ -73,18 +74,22 @@ impl ProfileDB {
             }
         }
     }
-
-    pub fn set_user_id(&mut self, account: Principal, id: String) {
+=
+    pub fn set_username(&mut self, account: Principal, username: String) {
         match self.0.get_mut(&account) {
             Some(x) => {
-                x.user_id = Some(id);
+                let mut rng = rand::thread_rng();
+                let user_id = Some(format!("{}#{}",name,rng.gen_range(&MIN_USERNAME_LIMIT..&MAX_USERNAME_LIMIT)));
+                x.username = Some(username);
+                x.user_id = Some(user_id);
                 x.version += 1;
             }
             None => {
                 self.0.insert(
                     account,
                     ProfileMetadata {
-                        user_id: Some(id),
+                        username: Some(username),
+                        user_id: Some(user_id),
                         display_name: None,
                         description: None,
                         emoji: None,
@@ -252,10 +257,10 @@ fn set_profile(profile_data: ProfileMetadata) {
 }
 
 #[update]
-fn set_user_id(username: String) {
+fn set_username(username: String) {
     if &username.len() < &MAX_USERNAME_LIMIT && &username.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
-        profile_db.set_user_id(caller(), username);
+        profile_db.set_username(caller(), username);
     }
 }
 
