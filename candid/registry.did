@@ -1,7 +1,10 @@
 type canister_category = variant {
-    Asset;
-    Nft;
+    Tools;
+    NFT;
     Service;
+    Token;
+    Social;
+    Games;
 };
 
 type canister_metadata = record {
@@ -10,7 +13,7 @@ type canister_metadata = record {
     url: text;
     logo_url: text;
     version: nat32;
-    category: canister_category
+    category: canister_category;
 };
 
 type input_canister_metadata = record {
@@ -18,7 +21,7 @@ type input_canister_metadata = record {
     description: text;
     url: text;
     logo_url: text;
-    category: canister_category
+    category: canister_category;
 };
 
 type operation_error = variant {

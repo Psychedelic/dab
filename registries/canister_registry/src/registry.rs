@@ -12,10 +12,12 @@ pub struct Fleek(pub Vec<Principal>);
 
 #[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
 pub enum CanisterCategory {
-    Asset,
-    Nft,
+    Tools,
+    NFT,
     Service,
-    // TODO: Add other categories?
+    Token,
+    Social,
+    Games,
 }
 
 impl Default for Fleek {
@@ -26,12 +28,12 @@ impl Default for Fleek {
 
 #[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
 pub struct CanisterMetadata {
-    name: String,
-    description: String,
-    url: String,
-    logo_url: String,
-    version: u32,
-    category: CanisterCategory,
+    pub name: String,
+    pub description: String,
+    pub url: String,
+    pub logo_url: String,
+    pub category: CanisterCategory,
+    pub version: u32,
 }
 
 #[derive(Deserialize, CandidType, Clone)]
@@ -57,7 +59,6 @@ impl CanisterDB {
     }
 
     pub fn get_info(&mut self, canisters: Vec<Principal>) -> Vec<Option<&CanisterMetadata>> {
-        // self.0.get(canister).cloned()
         let mut list: Vec<Option<&CanisterMetadata>> = vec![];
         for canister in canisters {
             let item = self.0.get(&canister);
@@ -93,39 +94,6 @@ impl CanisterDB {
         self.0.remove(canister);
         Ok(())
     }
-
-    /* pub fn set_description(&mut self, account: Principal, canister: &Principal, description: String) {
-        match self.0.get_mut(canister) {
-            Some(x) => {
-                assert!(is_controller(canister, &account));
-                x.description = description;
-                x.version += 1;
-            }
-            None => return,
-        }
-    }
-
-    pub fn set_url(&mut self, account: Principal, canister: &Principal, url: String) {
-        match self.0.get_mut(canister) {
-            Some(x) => {
-                assert!(is_controller(canister, &account));
-                x.url = url;
-                x.version += 1;
-            }
-            None => return,
-        }
-    }
-
-    pub fn set_logo(&mut self, account: Principal, canister: &Principal, logo_url: String) {
-        match self.0.get_mut(canister) {
-            Some(x) => {
-                assert!(is_controller(canister, &account));
-                x.logo_url = logo_url;
-                x.version += 1;
-            }
-            None => return,
-        }
-    } **/
 }
 
 #[derive(CandidType, Debug, PartialEq)]
@@ -235,7 +203,7 @@ mod tests {
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
-            category: CanisterCategory::Asset
+            category: CanisterCategory::Service
         };
 
         let addition = add_canister(mock_principals::xtc(), canister_info.clone());
@@ -273,7 +241,7 @@ mod tests {
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
-            category: CanisterCategory::Asset
+            category: CanisterCategory::Service
         };
 
         let xtc_metadata = CanisterMetadata {
@@ -282,7 +250,7 @@ mod tests {
             url: String::from("https://frontend_url.com"),
             logo_url: String::from("https://logo_url.com"),
             version: 0,
-            category: CanisterCategory::Asset
+            category: CanisterCategory::Service
         };
 
         let addition = add_canister(mock_principals::xtc(), xtc_info.clone());
@@ -349,7 +317,7 @@ mod tests {
                 description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
                 url: String::from("https://frontend_url.com"),
                 logo_url: String::from("https://logo_url.com"),
-                category: CanisterCategory::Asset
+                category: CanisterCategory::Service
             };
 
         let addition = add_canister(mock_principals::xtc(), xtc_info.clone());
@@ -371,27 +339,3 @@ mod tests {
         assert_eq!(remove_operation.err().unwrap(), Failure::NotAuthorized);
     }
 }
-
-/*#[update]
-fn set_url(canister: Principal, url: String) {
-    if validate_url(&url) {
-        let canister_db = ic::get_mut::<CanisterDB>();
-        canister_db.set_url(caller(), &canister, url);
-    }
-}
-
-#[update]
-fn set_description(canister: Principal, description: String) {
-    if &description.len() < &DESCRIPTION_LIMIT {
-        let canister_db = ic::get_mut::<CanisterDB>();
-        canister_db.set_description(caller(), &canister, description);
-    }
-}
-
-#[update]
-fn set_logo(canister: Principal, logo_url: String) {
-    if validate_url(&logo_url) {
-        let canister_db = ic::get_mut::<CanisterDB>();
-        canister_db.set_logo(caller(), &canister, logo_url);
-    }
-} **/
