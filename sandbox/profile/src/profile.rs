@@ -52,20 +52,41 @@ impl ProfileDB {
     }
 
     pub fn set_display_name(&mut self, account: Principal, name: String) {
-        let mut rng = rand::thread_rng();
-        let user_id = Some(format!("{}#{}",name,rng.gen_range(&MIN_NUMBER_ID..&MAX_NUMBER_ID)));
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.display_name = Some(name);
-                x.user_id = Some(user_id);
                 x.version += 1;
             }
             None => {
                 self.0.insert(
                     account,
                     ProfileMetadata {
-                        user_id: Some(user_id),
+                        user_id: None,
                         display_name: Some(name),
+                        description: None,
+                        emoji: None,
+                        avatar: None,
+                        banner: None,
+                        version: 0,
+                    },
+                );
+            }
+        }
+    }
+
+
+    pub fn set_user_id(&mut self, account: Principal, id: String) {
+        match self.0.get_mut(&account) {
+            Some(x) => {
+                x.user_id = Some(id);
+                x.version += 1;
+            }
+            None => {
+                self.0.insert(
+                    account,
+                    ProfileMetadata {
+                        user_id: Some(id),
+                        display_name: None,
                         description: None,
                         emoji: None,
                         avatar: None,
@@ -229,6 +250,14 @@ fn set_banner(url: String) {
 fn set_profile(profile_data: ProfileMetadata) {
     let profile_db = storage::get_mut::<ProfileDB>();
     profile_db.set_profile(caller(), profile_data);
+}
+
+#[update]
+fn set_user_id(username: String) {
+    if &username.len() < &MAX_USERNAME_LIMIT && &username.len() > &2 {
+        let profile_db = storage::get_mut::<ProfileDB>();
+        profile_db.set_user_id(caller(), username);
+    }
 }
 
 #[cfg(test)]
