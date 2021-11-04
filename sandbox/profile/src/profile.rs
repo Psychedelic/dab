@@ -350,12 +350,9 @@ mod tests {
     #[test]
     fn set_username() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
-        println!("barry");
-        println!("{:?}", barry_metadata.username);
-        
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };        
         assert_eq!(profile_db.set_username(barry(), String::from("Barry")), ());
-        //barry_metadata.username = Some(String::from("John"));
+        barry_metadata.username = Some(String::from("Barry"));
     }
 
     #[test]
