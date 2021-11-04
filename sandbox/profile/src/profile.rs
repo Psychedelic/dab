@@ -78,7 +78,7 @@ impl ProfileDB {
 
     pub fn set_username(&mut self, account: Principal, username: String) {
         let mut rng = rand::thread_rng();
-        let user_id = format!("{}#{}",username,rng.gen_range(MIN_USERNAME_LIMIT..MAX_USERNAME_LIMIT));
+        let user_id = rng.gen_range(MIN_USERNAME_LIMIT..MAX_USERNAME_LIMIT);
         match self.0.get_mut(&account) {
             Some(x) => {
                 x.username = Some(username);
