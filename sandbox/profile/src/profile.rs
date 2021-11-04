@@ -12,14 +12,14 @@ use rand::Rng;
 
 const MAX_DESCRIPTION_LIMIT  : usize = 1201;
 const MAX_DISPLAY_NAME_LIMIT : usize = 25;
-const MIN_USERNAME_LIMIT : usize = 1000;
-const MAX_USERNAME_LIMIT : usize = 9999;
+const MIN_USERNAME_LIMIT : u32 = 1000;
+const MAX_USERNAME_LIMIT : u32 = 9999;
 
 
 #[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct ProfileMetadata {
     username: Option<String>,
-    user_id: Option<String>,
+    user_id: Option<u32>,
     display_name: Option<String>,
     description: Option<String>,
     emoji: Option<String>,
@@ -78,29 +78,32 @@ impl ProfileDB {
 
     pub fn set_username(&mut self, account: Principal, username: String) {
         let mut rng = rand::thread_rng();
-        let user_id = rng.gen_range(MIN_USERNAME_LIMIT..MAX_USERNAME_LIMIT);
-        match self.0.get_mut(&account) {
-            Some(x) => {
-                x.username = Some(username);
-                x.user_id = Some(user_id);
-                x.version += 1;
-            }
-            None => {
-                self.0.insert(
-                    account,
-                    ProfileMetadata {
-                        username: Some(username),
-                        user_id: Some(user_id),
-                        display_name: None,
-                        description: None,
-                        emoji: None,
-                        avatar: None,
-                        banner: None,
-                        version: 0,
-                    },
-                );
-            }
-        }
+        let user_id = rng.gen_range(MIN_USERNAME_LIMIT..MAX_USERNAME_LIMIT);   
+        match self.0.contains_key(&account) {
+            false => match self.0.get_mut(&account) {
+                Some(x) => {
+                    x.username = Some(username);
+                    x.user_id = Some(user_id);
+                    x.version += 1;
+                }
+                None => {
+                    self.0.insert(
+                        account,
+                        ProfileMetadata {
+                            username: Some(username),
+                            user_id: Some(user_id),
+                            display_name: None,
+                            description: None,
+                            emoji: None,
+                            avatar: None,
+                            banner: None,
+                            version: 0,
+                        },
+                    );
+                }
+            },
+            true => panic!("Account already exists"),
+        };
     }
 
     pub fn set_description(&mut self, account: Principal, description: String) {
@@ -263,7 +266,7 @@ fn set_profile(profile_data: ProfileMetadata) {
 
 #[update]
 fn set_username(username: String) {
-    if &username.len() < &MAX_USERNAME_LIMIT && &username.len() > &2 {
+    if &username.len() < &(*&MAX_USERNAME_LIMIT as usize) && &username.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
         profile_db.set_username(caller(), username);
     }
@@ -348,10 +351,11 @@ mod tests {
     fn set_username() {
         let mut profile_db = ProfileDB::default();
         let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
-
-        assert_eq!(profile_db.set_username(barry(), String::from("John")), ());
-        barry_metadata.username = Some(String::from("Barry"));
-        barry_metadata.user_id = Some(String::from("Barry"));
+        println!("barry");
+        println!("{:?}", barry_metadata.username);
+        
+        assert_eq!(profile_db.set_username(barry(), String::from("Barry")), ());
+        //barry_metadata.username = Some(String::from("John"));
     }
 
     #[test]
