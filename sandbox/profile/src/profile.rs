@@ -28,8 +28,19 @@ pub struct ProfileMetadata {
     version: u32,
 }
 
+#[derive(CandidType)]  
+pub enum OperationError {
+    NotAuthorized,
+    ParamatersNotPassed,
+    NonExistentCanister,
+    BadParameters,
+}
+
+pub type OperationSuccessful = bool;
+
+
 pub struct ProfileDB(BTreeMap<Principal, ProfileMetadata>);
-pub struct UsersDB(HashMap<u32, String>);
+pub struct UsersDB(HashMap<u32, Principal>);
 
 impl Default for ProfileDB {
     fn default() -> Self {
@@ -214,13 +225,13 @@ impl ProfileDB {
 }
 
 impl UsersDB {
-    pub fn set_username(&mut self, user_id: &u32, username: String) {
-        self.0.insert(&user_id, username);
+    pub fn set_username_id(&mut self, user_id: &u32, account: Principal) -> Result<OperationSuccessful, OperationError> {
+        self.0.insert(*user_id, account);
+        Ok(true)
     }
 
-    pub fn get_username(&mut self, user_id: &u32) -> Option<String> {
-        let username = self.0.get(&user_id);
-        username
+    pub fn get_username_principal(&mut self, user_id: &u32) -> Option<&Principal> {
+        self.0.get(user_id)
     }
 }
 
