@@ -28,19 +28,12 @@ pub struct ProfileMetadata {
     version: u32,
 }
 
-#[derive(CandidType)]  
-pub enum OperationError {
-    NotAuthorized,
-    ParamatersNotPassed,
-    NonExistentCanister,
-    BadParameters,
-}
-
+pub type OperationError = bool;
 pub type OperationSuccessful = bool;
 
 
 pub struct ProfileDB(BTreeMap<Principal, ProfileMetadata>);
-pub struct UsersDB(HashMap<u32, Principal>);
+pub struct UsersDB(HashMap<u32, String>);
 
 impl Default for ProfileDB {
     fn default() -> Self {
@@ -225,12 +218,15 @@ impl ProfileDB {
 }
 
 impl UsersDB {
-    pub fn set_username_id(&mut self, user_id: &u32, account: Principal) -> Result<OperationSuccessful, OperationError> {
-        self.0.insert(*user_id, account);
-        Ok(true)
+    pub fn set_username_id(&mut self, user_id: &u32, username: String) -> bool {
+        if !self.0.contains_key(user_id) {
+            self.0.insert(*user_id, username);
+            return true
+        }
+        false
     }
 
-    pub fn get_username_principal(&mut self, user_id: &u32) -> Option<&Principal> {
+    pub fn get_username(&mut self, user_id: &u32) -> Option<&String> {
         self.0.get(user_id)
     }
 }
@@ -296,8 +292,10 @@ fn set_profile(profile_data: ProfileMetadata) {
 fn set_username(username: String, user_id: u32) {
     if &username.len() < &(*&MAX_USERNAME_LIMIT as usize) && &username.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
-        profile_db.set_username(caller(), username);
-        users_db.set_user_id(username, )
+        let users_db = storage::get_mut::<UsersDB>();
+        if users_db.set_username_id(&user_id, username) {
+            profile_db.set_username(caller(), username, user_id);
+        }
     }
 }
 
