@@ -5,10 +5,10 @@ use ic_cdk::*;
 use ic_cdk_macros::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use unic::emoji::char::is_emoji;
 use unic::emoji::*;
 use validator::validate_url;
-use rand::Rng;
 
 const MAX_DESCRIPTION_LIMIT  : usize = 1201;
 const MAX_DISPLAY_NAME_LIMIT : usize = 25;
@@ -29,6 +29,7 @@ pub struct ProfileMetadata {
 }
 
 pub struct ProfileDB(BTreeMap<Principal, ProfileMetadata>);
+pub struct UsersDB(HashMap<u32, String>);
 
 impl Default for ProfileDB {
     fn default() -> Self {
@@ -36,13 +37,20 @@ impl Default for ProfileDB {
     }
 }
 
+impl Default for UsersDB {
+    fn default() -> Self {
+        Self(HashMap::new())
+    }
+}
+
 impl ProfileDB {
+
     pub fn archive(&mut self) -> Vec<(Principal, ProfileMetadata)> {
         let map = std::mem::replace(&mut self.0, BTreeMap::new());
         map.into_iter()
             .collect()
     }
-    
+
     pub fn load(&mut self, archive: Vec<(Principal, ProfileMetadata)>) {
         self.0 = archive.into_iter().collect();
         // self.0.reserve(25_000 - self.0.len());
@@ -76,9 +84,7 @@ impl ProfileDB {
         }
     }
 
-    pub fn set_username(&mut self, account: Principal, username: String) {
-        let mut rng = rand::thread_rng();
-        let user_id = rng.gen_range(MIN_USERNAME_LIMIT..MAX_USERNAME_LIMIT);   
+    pub fn set_username(&mut self, account: Principal, username: String, user_id: u32) {
         match self.0.contains_key(&account) {
             false => match self.0.get_mut(&account) {
                 Some(x) => {
@@ -207,6 +213,17 @@ impl ProfileDB {
     }
 }
 
+impl UsersDB {
+    pub fn set_username(&mut self, user_id: &u32, username: String) {
+        self.0.insert(&user_id, username);
+    }
+
+    pub fn get_username(&mut self, user_id: &u32) -> Option<String> {
+        let username = self.0.get(&user_id);
+        username
+    }
+}
+
 #[query]
 fn name() -> String {
     String::from("Profile Canister")
@@ -265,10 +282,11 @@ fn set_profile(profile_data: ProfileMetadata) {
 }
 
 #[update]
-fn set_username(username: String) {
+fn set_username(username: String, user_id: u32) {
     if &username.len() < &(*&MAX_USERNAME_LIMIT as usize) && &username.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
         profile_db.set_username(caller(), username);
+        users_db.set_user_id(username, )
     }
 }
 
@@ -350,10 +368,16 @@ mod tests {
     #[test]
     fn set_username() {
         let mut profile_db = ProfileDB::default();
-        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };        
+        let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
         assert_eq!(profile_db.set_username(barry(), String::from("Barry")), ());
         barry_metadata.username = Some(String::from("Barry"));
     }
+
+    // #[test]
+    // fn get_username() {
+    //     let mut users_db = UsersDB::default();
+    //
+    // }
 
     #[test]
     fn null_case() {
@@ -370,7 +394,7 @@ mod tests {
 
         assert_eq!(profile_db.set_display_name(alec(), String::from("Alec Holland")), ());
         alec_metadata.display_name = Some(String::from("Alec Holland"));
-    
+
         assert_eq!(profile_db.get_profile(&alec()).unwrap(), alec_metadata);
     }
 }

@@ -13,5 +13,4 @@ ic-cdk-macros = "0.3"
 ic-types = "0.1.3"
 serde = "1.0.116"
 unic = "0.9"
-rand = "0.8.4"
 validator = { version = "0.12", features = ["derive"] }
