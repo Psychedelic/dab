@@ -28,11 +28,13 @@ pub struct ProfileMetadata {
     version: u32,
 }
 
+pub struct ProfileDB(BTreeMap<Principal, ProfileMetadata>);
+
+
 pub type OperationError = bool;
 pub type OperationSuccessful = bool;
 
-pub struct ProfileDB(BTreeMap<Principal, ProfileMetadata>);
-
+#[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct UserInfo {
     user_id: u32, 
     username: String,
@@ -223,16 +225,16 @@ impl ProfileDB {
 }
 
 impl UsersDB {
-    pub fn set_username_id(&mut self, user_id: &u32, username: String) -> bool {
-        if !self.0.contains_key(user_id) {
-            self.0.insert(*user_id, UserInfo{ user_id: *user_id, username });
+    pub fn set_username_id(&mut self, user_id: u32, username: String) -> bool {
+        if !self.0.contains_key(&user_id) {
+            self.0.insert(user_id, UserInfo{ user_id: user_id, username });
             return true
         }
         false
     }
 
-    pub fn get_user_info(&mut self, user_id: &u32) -> Option<&UserInfo> {
-        self.0.get(user_id)
+    pub fn get_user_info(&mut self, user_id: &u32) -> Option<UserInfo> {
+        self.0.get(user_id).cloned()
     }
 }
 
@@ -242,9 +244,9 @@ fn name() -> String {
 }
 
 #[query]
-fn get_username_id(username: String) -> Option<UserInfo> {
+fn get_username_id(user_id: u32) -> Option<UserInfo> {
     let users_db = storage::get_mut::<UsersDB>();
-    users_db.get_user_info(&username)
+    users_db.get_user_info(&user_id)
 }
 
 #[update]
