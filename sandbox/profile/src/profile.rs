@@ -227,7 +227,7 @@ impl ProfileDB {
 impl UsersDB {
     pub fn set_username_id(&mut self, user_id: u32, username: String) -> bool {
         if !self.0.contains_key(&user_id) {
-            self.0.insert(user_id, UserInfo{ user_id: user_id, username });
+            self.0.insert(user_id, UserInfo{ user_id: user_id, username: username });
             return true
         }
         false
