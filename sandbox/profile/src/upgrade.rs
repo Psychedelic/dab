@@ -1,8 +1,9 @@
 use crate::profile::{ProfileDB, ProfileMetadata};
 
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
-use ic_cdk::*;
-use ic_cdk_macros::*;
+use ic_kit::ic::*;
+use ic_kit::macros::*;
+use ic_kit::*;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
@@ -11,13 +12,13 @@ struct StableStorage {
 
 #[pre_upgrade]
 pub fn pre_upgrade() {
-    let profile_db = storage::get_mut::<ProfileDB>().archive();
+    let profile_db = ic::get_mut::<ProfileDB>().archive();
 
     let stable = StableStorage {
         profile_db,
     };
 
-    match storage::stable_save((stable,)) {
+    match ic::stable_store((stable,)) {
         Ok(_) => (),
         Err(candid_err) => {
             trap(&format!(
@@ -30,7 +31,7 @@ pub fn pre_upgrade() {
 
 #[post_upgrade]
 pub fn post_upgrade() {
-    if let Ok((stable,)) = storage::stable_restore::<(StableStorage,)>() {
-        storage::get_mut::<ProfileDB>().load(stable.profile_db);
+    if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
+        ic::get_mut::<ProfileDB>().load(stable.profile_db);
     }
 }
