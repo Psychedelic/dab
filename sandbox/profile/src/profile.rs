@@ -306,7 +306,7 @@ fn set_username(username: String, user_id: u32) {
     if &username.len() < &(*&MAX_USERNAME_LIMIT as usize) && &username.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
         let users_db = storage::get_mut::<UsersDB>();
-        if users_db.set_username_id(user_id, username) {
+        if users_db.set_username_id(user_id, username.clone()) {
             profile_db.set_username(caller(), username, user_id);
         }
     }
