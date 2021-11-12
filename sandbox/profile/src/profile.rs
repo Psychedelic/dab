@@ -306,7 +306,7 @@ fn set_username(username: String, user_id: u32) {
     if &username.len() < &(*&MAX_USERNAME_LIMIT as usize) && &username.len() > &2 {
         let profile_db = storage::get_mut::<ProfileDB>();
         let users_db = storage::get_mut::<UsersDB>();
-        if users_db.set_username_id(&user_id, username) {
+        if users_db.set_username_id(user_id, username) {
             profile_db.set_username(caller(), username, user_id);
         }
     }
@@ -391,15 +391,9 @@ mod tests {
     fn set_username() {
         let mut profile_db = ProfileDB::default();
         let mut barry_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
-        assert_eq!(profile_db.set_username(barry(), String::from("Barry")), ());
+        assert_eq!(profile_db.set_username(barry(), String::from("Barry"), 1111), ());
         barry_metadata.username = Some(String::from("Barry"));
     }
-
-    // #[test]
-    // fn get_username() {
-    //     let mut users_db = UsersDB::default();
-    //
-    // }
 
     #[test]
     fn null_case() {
