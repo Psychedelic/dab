@@ -7,14 +7,23 @@ type ProfileMetadata = record {
     version: nat32;
 };
 
+type operation_error = variant {
+    BadParameters;
+};
+
+type operation_response = variant {
+    Ok  : opt text;
+    Err : operation_error;
+};
+
 service : {
     "name"               :  () -> (text) query;
 
-    "set_display_name"   : (text) -> ();
-    "set_description"    : (text) -> ();
-    "set_emoji"          : (text)  -> ();
-    "set_avatar"         : (text)  -> ();
-    "set_banner"         : (text)  -> ();
+    "set_display_name"   : (text) -> (operation_response);
+    "set_description"    : (text) -> (operation_response);
+    "set_emoji"          : (text)  -> (operation_response);
+    "set_avatar"         : (text)  -> (operation_response);
+    "set_banner"         : (text)  -> (operation_response);
     "set_profile"        : (ProfileMetadata)  -> ();
     "get_profile"        : (opt principal) -> (opt ProfileMetadata);
 }
