@@ -12,7 +12,7 @@ type operation_error = variant {
 };
 
 type operation_response = variant {
-    Ok  : bool;
+    Ok  : opt text;
     Err : operation_error;
 };
 

@@ -16,7 +16,7 @@ pub enum OperationError {
     BadParameters,
 }
 
-pub type OperationSuccessful = bool;
+pub type OperationSuccessful = Option<String>;
 
 #[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
 pub struct ProfileMetadata {
@@ -183,7 +183,7 @@ fn set_display_name(name: String) -> Result<OperationSuccessful, OperationError>
     if &name.len() < &MAX_DISPLAY_NAME_LIMIT && &name.len() > &2 {
         let profile_db = ic::get_mut::<ProfileDB>();
         profile_db.set_display_name(ic::caller(), name);
-        return Ok(true)
+        return Ok(None)
     }
     return Err(OperationError::BadParameters);
 }
@@ -193,7 +193,7 @@ fn set_description(description: String) -> Result<OperationSuccessful ,Operation
     if &description.len() < &MAX_DESCRIPTION_LIMIT {
         let profile_db = ic::get_mut::<ProfileDB>();
         profile_db.set_description(ic::caller(), description);
-        return Ok(true);
+        return Ok(None);
     }
     return Err(OperationError::BadParameters)
 }
@@ -204,7 +204,7 @@ fn set_emoji(input: String) -> Result<OperationSuccessful, OperationError> {
     if is_emoji(emojis[0]) {
         let profile_db = ic::get_mut::<ProfileDB>();
         profile_db.set_emoji(ic::caller(), input);
-        return Ok(true);  
+        return Ok(None);  
     }
     return Err(OperationError::BadParameters);
 }
@@ -214,7 +214,7 @@ fn set_avatar(url: String) -> Result<OperationSuccessful, OperationError> {
     if validate_url(&url) {
         let profile_db = ic::get_mut::<ProfileDB>();
         profile_db.set_avatar(ic::caller(), url);
-        return Ok(true);
+        return Ok(None);
     }
     return Err(OperationError::BadParameters);
 }
@@ -224,7 +224,7 @@ fn set_banner(url: String) -> Result<OperationSuccessful, OperationError>{
     if validate_url(&url) {
         let profile_db = ic::get_mut::<ProfileDB>();
         profile_db.set_banner(ic::caller(), url);
-        return Ok(true);
+        return Ok(None);
     }
     return Err(OperationError::BadParameters);
 }
