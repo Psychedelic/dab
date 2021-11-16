@@ -32,7 +32,8 @@ function main() {
                 choices: [
                     'Export the csv file of canister registry',
                     'Add / Update NFT registry',
-                    'Add / Update entries in the canister registry'
+                    'Add / Update entries in the canister registry',
+                    'List'
                 ]
             }
         ])
@@ -44,9 +45,34 @@ function main() {
                 add_nft(stream);
             } else if (answer.functionality == 'Export the csv file of canister registry') {
                 csv_canister_registry(stream);
+            } else if (answer.functionality == 'List') {
+                list(stream);
             } else {
                 add_canister(stream);
             }
+        });
+}
+
+function list(stream) {
+    let record;
+    stream
+        .on("data", (data) => {
+            if (data.Name != '' && data.Description != '' && data.URL != '' && data.Logo != '' && data.ID != '') {
+                let item = {
+                    name: data.Name,
+                    id: data.ID,
+                    description: data.Description,
+                    url: data.URL,
+                    logo: data.Logo,
+                };
+                record += `(
+                    "${data.ID}",
+                    CanisterCategory::${data.Category}
+                ),\n`;
+            }
+        })
+        .on("end", () => {
+            console.log(record);
         });
 }
 
@@ -147,6 +173,7 @@ function add_canister(stream) {
                     description: data.Description,
                     url: data.URL,
                     logo: data.Logo,
+                    category: data.Category
                 };
                 results.push(item);
             }
@@ -175,7 +202,8 @@ function add_canister(stream) {
                             description = canister.description,
                             id = canister.id,
                             url = canister.url,
-                            logo = canister.logo;
+                            logo = canister.logo,
+                            category = canister.category;
                         
                         const command = [
                             'dfx',
@@ -185,7 +213,7 @@ function add_canister(stream) {
                             'call',
                             answers.address,
                             'add_canister',
-                            `"(principal \\"${id}\\", record {name= \\"${name}\\"; url= \\"${url}\\"; description= \\"${description}\\"; logo_url= \\"${logo}\\"})"`,
+                            `"(principal \\"${id}\\", record {name= \\"${name}\\"; url= \\"${url}\\"; description= \\"${description}\\"; category= variant {${category}}; logo_url= \\"${logo}\\"})"`,
                         ];
                         try {
                             execSync(command.join(' '));
