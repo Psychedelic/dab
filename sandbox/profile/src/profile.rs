@@ -132,7 +132,7 @@ impl ProfileDB {
                     );
                 }
             },
-            true => panic!("Account already exists"),
+            true => (),
         };
     }
 
