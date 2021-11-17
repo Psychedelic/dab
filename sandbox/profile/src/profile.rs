@@ -25,6 +25,17 @@ pub struct ProfileMetadata {
     version: u32,
 }
 
+#[derive(Deserialize, CandidType, Clone, Debug, PartialEq)]
+pub struct InputProfileMetadata {
+    username: Option<String>,
+    user_id: Option<u32>,
+    display_name: Option<String>,
+    description: Option<String>,
+    emoji: Option<String>,
+    avatar: Option<String>,
+    banner: Option<String>,   
+}
+
 pub struct ProfileDB(BTreeMap<Principal, ProfileMetadata>);
 
 
@@ -221,9 +232,24 @@ impl ProfileDB {
         }
     }
 
-    pub fn set_profile(&mut self, account: Principal, profile_data: ProfileMetadata) {
-        self.0.insert(account, profile_data);
+    pub fn set_profile(&mut self, account: Principal, metadata: InputProfileMetadata) -> bool{
+        let profile_metadata = ProfileMetadata {
+            username: metadata.username,
+            user_id: metadata.user_id,
+            display_name: metadata.display_name,
+            description: metadata.description,
+            emoji: metadata.emoji,
+            avatar: metadata.avatar,
+            banner: metadata.banner,
+            version: 0,
+        };
+        self.0.insert(account, profile_metadata);
+        if !self.0.contains_key(&account) {
+            return false;
+        }
+        true 
     }
+
 }
 
 impl UsersDB {
@@ -309,9 +335,9 @@ fn set_banner(url: String) -> Result<OperationSuccessful, OperationError>{
 }
 
 #[update]
-fn set_profile(profile_data: ProfileMetadata) {
+fn set_profile(metadata: InputProfileMetadata) {
     let profile_db = ic::get_mut::<ProfileDB>();
-    profile_db.set_profile(ic::caller(), profile_data);
+    profile_db.set_profile(ic::caller(), metadata);
 }
 
 #[update]
@@ -346,7 +372,7 @@ mod tests {
         .with_caller(mock_principals::alice())
         .inject();
 
-        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: Some(String::from("Original display name")), description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let alice_profile_metadata: InputProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: Some(String::from("Original display name")), description: None, emoji: None, avatar: None, banner: None };
 
         set_profile(alice_profile_metadata.clone());
 
@@ -393,7 +419,7 @@ mod tests {
         .with_caller(mock_principals::alice())
         .inject();
 
-        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: Some(String::from("http://pre-image.jpeg")), banner: None, version: 0 };
+        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: Some(String::from("http://pre-image.jpeg")), banner: None };
 
         set_profile(alice_profile_metadata.clone());
 
@@ -437,7 +463,7 @@ mod tests {
         .with_caller(mock_principals::alice())
         .inject();
 
-        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: Some(String::from("http://pre-banner.jpeg")), version: 0 };
+        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: Some(String::from("http://pre-banner.jpeg")) };
 
         set_profile(alice_profile_metadata.clone());
 
@@ -470,7 +496,7 @@ mod tests {
         .with_caller(mock_principals::alice())
         .inject();
 
-        let mut alice_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let mut alice_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: None, avatar: None, banner: None };
 
         set_profile(alice_metadata.clone());
         assert_eq!(get_profile(Some(mock_principals::alice())).unwrap(), alice_metadata);
@@ -502,7 +528,7 @@ mod tests {
         .with_caller(mock_principals::alice())
         .inject();
 
-        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: Some(String::from("⚡️")), avatar: None, banner: None, version: 0 };
+        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, display_name: None, description: None, emoji: Some(String::from("⚡️")), avatar: None, banner: None };
 
         set_profile(alice_profile_metadata.clone());
 
@@ -545,7 +571,7 @@ mod tests {
         .with_caller(mock_principals::alice())
         .inject();
 
-        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, description: Some(String::from("Original description")), display_name: None, emoji: None, avatar: None, banner: None, version: 0 };
+        let alice_profile_metadata: ProfileMetadata = ProfileMetadata { user_id: None, username: None, description: Some(String::from("Original description")), display_name: None, emoji: None, avatar: None, banner: None };
 
         set_profile(alice_profile_metadata.clone());
 
