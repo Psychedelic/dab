@@ -94,6 +94,10 @@ impl CanisterDB {
         self.0.remove(canister);
         Ok(())
     }
+
+    pub fn get_all(&self) -> Vec<&CanisterMetadata> {
+        self.0.values().collect()
+    }
 }
 
 #[derive(CandidType, Debug, PartialEq)]
@@ -157,6 +161,12 @@ fn remove_canister(canister: Principal) -> Result<(), Failure> {
     }
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.remove_canister(&canister)
+}
+
+#[query]
+fn get_all() -> Vec<&'static CanisterMetadata> {
+    let canister_db = ic::get_mut::<CanisterDB>();
+    canister_db.get_all()
 }
 
 /* #[update]
