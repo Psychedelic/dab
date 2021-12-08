@@ -1,0 +1,41 @@
+type token = record {
+    principal_id: principal;
+    name: text;
+    symbol: text;
+    description: text;
+    standard: text;
+    total_supply: opt nat64;
+    logo: text;
+    website: text;
+    timestamp: nat64;
+};
+
+type input_add_token = record {
+    principal_id: principal;
+    name: text;
+    symbol: text;
+    description: text;
+    standard: text;
+    total_supply: opt nat64;
+    logo: text;
+    website: text;
+};
+
+type operation_error = variant {
+    NotAuthorized;
+    ParamatersNotPassed;
+    NonExistentCanister;
+    BadParameters;
+};
+
+type operation_response = variant {
+    Ok  : bool;
+    Err : operation_error;
+};
+
+service : {
+    "name" : () -> (text) query;
+    "add"    : (input_add_token) -> (operation_response);
+    "get_all"      : () -> (vec token) query;
+    "set_controller" : (principal) -> (operation_response);
+}

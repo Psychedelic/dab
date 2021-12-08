@@ -3,5 +3,6 @@ members = [
     "sandbox/address",
     "sandbox/profile",
     "registries/canister_registry",
-    "registries/nft"
+    "registries/nft",
+    "registries/tokens"
 ]
