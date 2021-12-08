@@ -38,6 +38,18 @@ pub struct InputAddToken {
     website: String,
 }
 
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct InputEditToken {
+    principal_id: Option<Principal>,
+    name: String,
+    symbol: Option<String>,
+    description: Option<String>,
+    standard: Option<String>,
+    total_supply: Option<u64>,
+    logo: Option<String>,
+    website: Option<String>,
+}
+
 #[derive(Default)]
 pub struct TokenRegistry(HashMap<String, Token>);
 
@@ -52,12 +64,11 @@ impl TokenRegistry {
 
     pub fn add(
         &mut self,
-        name: String,
         token_info: InputAddToken,
     ) -> Result<OperationSuccessful, OperationError> {
         let token = Token {
             principal_id: token_info.principal_id,
-            name: token_info.name,
+            name: token_info.name.clone(),
             symbol: token_info.symbol,
             description: token_info.description,
             standard: token_info.standard,
@@ -67,8 +78,57 @@ impl TokenRegistry {
             timestamp: ic::time(),
         };
 
-        self.0.insert(name, token);
+        self.0.insert(token_info.name.clone(), token);
         Ok(true)
+    }
+
+    pub fn remove(&mut self, name: &String) -> Result<OperationSuccessful, OperationError> {
+        if self.0.contains_key(name) {
+            self.0.remove(name);
+            return Ok(true);
+        }
+
+        Err(OperationError::NonExistentToken)
+    }
+
+    pub fn edit(
+        &mut self,
+        token_info: InputEditToken
+    ) -> Result<OperationSuccessful, OperationError> {
+        match self.0.get_mut(&token_info.name) {
+            None => return Err(OperationError::NonExistentToken),
+            Some(token) => {
+                if token_info.principal_id.is_some() {
+                    token.principal_id = token_info.principal_id.unwrap();
+                }
+
+                if token_info.symbol.is_some() {
+                    token.symbol = token_info.symbol.unwrap();
+                }
+
+                if token_info.description.is_some() {
+                    token.description = token_info.description.unwrap();
+                }
+
+                if token_info.standard.is_some() {
+                    token.standard = token_info.standard.unwrap();
+                }
+
+                if token_info.total_supply.is_some() {
+                    token.total_supply = Some(token_info.total_supply.unwrap());
+                }
+
+                if token_info.logo.is_some() {
+                    token.logo = token_info.logo.unwrap();
+                }
+
+                if token_info.website.is_some() {
+                    token.website = token_info.website.unwrap();
+                }
+
+                return Ok(true);
+            }
+        }
     }
 
     pub fn get_all(&self) -> Vec<&Token> {
@@ -103,7 +163,7 @@ fn name() -> String {
 pub enum OperationError {
     NotAuthorized,
     ParamatersNotPassed,
-    NonExistentCanister,
+    NonExistentToken,
     BadParameters,
 }
 
@@ -111,19 +171,31 @@ pub type OperationSuccessful = bool;
 
 #[update]
 fn add(token_info: InputAddToken) -> Result<OperationSuccessful, OperationError> {
-    // if !is_controller(&ic::caller()) {
-    //     return Err(OperationError::NotAuthorized);
-    // } else if !validate_url(&canister_info.icon) {
-    //     return Err(OperationError::BadParameters);
-    // }
-
     let name = token_info.name.clone();
     if name.len() <= 120 && &token_info.description.len() <= &1200 {
         let db = ic::get_mut::<TokenRegistry>();
-        return db.add(name, token_info);
+        return db.add(token_info);
     }
 
     Err(OperationError::BadParameters)
+}
+
+#[update]
+fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
+    if !is_controller(&ic::caller()) {
+        return Err(OperationError::NotAuthorized);
+    }
+
+    let db = ic::get_mut::<TokenRegistry>();
+    db.remove(&name)
+}
+
+#[update]
+fn edit(
+    token_info: InputEditToken
+) -> Result<OperationSuccessful, OperationError> {
+    let db = ic::get_mut::<TokenRegistry>();
+    return db.edit(token_info);
 }
 
 #[query]
@@ -131,117 +203,3 @@ fn get_all() -> Vec<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_all()
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn test_controller() {
-//         // alice is the controller
-//         let ctx = MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         init();
-
-//         let canister_info = InputNftCanister {
-//             name: String::from("xtc"),
-//             principal_id: mock_principals::xtc(),
-//             standard: String::from("Dank"),
-//             description: String::from("XTC is your cycles wallet."),
-//             icon: String::from("https://google.com"),
-//         };
-
-//         let mut addition = add(canister_info.clone());
-//         assert!(addition.is_ok());
-
-//         let remove_operation = remove(String::from("xtc"));
-//         assert!(remove_operation.is_ok());
-
-//         ctx.update_caller(mock_principals::bob());
-//         addition = add(canister_info);
-//         assert!(addition.is_err());
-//     }
-
-//     #[test]
-//     fn test_add() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .with_data(Controller(mock_principals::alice()))
-//             .inject();
-
-//         let canister_info = InputNftCanister {
-//             name: String::from("xtc"),
-//             principal_id: mock_principals::xtc(),
-//             standard: String::from("Dank"),
-//             description: String::from("XTC is your cycles wallet."),
-//             icon: String::from("https://google.com"),
-//         };
-
-//         assert!(add(canister_info).is_ok());
-//     }
-
-//     #[test]
-//     fn test_remove() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .with_data(Controller(mock_principals::alice()))
-//             .inject();
-
-//         let canister_info = InputNftCanister {
-//             name: String::from("xtc"),
-//             principal_id: mock_principals::xtc(),
-//             standard: String::from("Dank"),
-//             description: String::from("XTC is your cycles wallet."),
-//             icon: String::from("https://google.com"),
-//         };
-
-//         assert!(add(canister_info).is_ok());
-
-//         assert!(remove(String::from("xtc")).is_ok());
-//     }
-
-//     #[test]
-//     fn test_get_canister() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .with_data(Controller(mock_principals::alice()))
-//             .inject();
-
-//         let canister_info = InputNftCanister {
-//             name: String::from("xtc"),
-//             principal_id: mock_principals::xtc(),
-//             standard: String::from("Dank"),
-//             description: String::from("XTC is your cycles wallet."),
-//             icon: String::from("https://google.com"),
-//         };
-
-//         assert!(add(canister_info.clone()).is_ok());
-
-//         assert_eq!(
-//             get_canister(String::from("xtc")).unwrap().name,
-//             canister_info.name
-//         );
-//         assert!(get_canister(String::from("dab")).is_none());
-//     }
-
-//     #[test]
-//     fn test_get_all() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .with_data(Controller(mock_principals::alice()))
-//             .inject();
-
-//         let canister_info = InputNftCanister {
-//             name: String::from("xtc"),
-//             principal_id: mock_principals::xtc(),
-//             standard: String::from("Dank"),
-//             description: String::from("XTC is your cycles wallet."),
-//             icon: String::from("https://google.com"),
-//         };
-
-//         assert!(add(canister_info.clone()).is_ok());
-//         assert_eq!(get_all()[0].name, canister_info.name);
-//     }
-// }

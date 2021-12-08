@@ -21,10 +21,21 @@ type input_add_token = record {
     website: text;
 };
 
+type input_edit_token = record {
+    principal_id: opt principal;
+    name: text;
+    symbol: opt text;
+    description: opt text;
+    standard: opt text;
+    total_supply: opt nat64;
+    logo: opt text;
+    website: opt text; 
+};
+
 type operation_error = variant {
     NotAuthorized;
     ParamatersNotPassed;
-    NonExistentCanister;
+    NonExistentToken;
     BadParameters;
 };
 
@@ -35,7 +46,10 @@ type operation_response = variant {
 
 service : {
     "name" : () -> (text) query;
-    "add"    : (input_add_token) -> (operation_response);
     "get_all"      : () -> (vec token) query;
+
+    "add"    : (input_add_token) -> (operation_response);
+    "edit"   : (input_edit_token) -> (operation_response);
+    "remove" : (text) -> (operation_response);
     "set_controller" : (principal) -> (operation_response);
 }
