@@ -42,8 +42,8 @@ pub struct InputAddToken {
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct InputEditToken {
-    principal_id: Option<Principal>,
-    name: String,
+    principal_id: Principal,
+    name: Option<String>,
     symbol: Option<String>,
     description: Option<String>,
     standard: Option<String>,
@@ -54,14 +54,14 @@ pub struct InputEditToken {
 }
 
 #[derive(Default)]
-pub struct TokenRegistry(HashMap<String, Token>);
+pub struct TokenRegistry(HashMap<Principal, Token>);
 
 impl TokenRegistry {
-    pub fn archive(&mut self) -> Vec<(String, Token)> {
+    pub fn archive(&mut self) -> Vec<(Principal, Token)> {
         let map = std::mem::replace(&mut self.0, HashMap::new());
         map.into_iter().collect()
     }
-    pub fn load(&mut self, archive: Vec<(String, Token)>) {
+    pub fn load(&mut self, archive: Vec<(Principal, Token)>) {
         self.0 = archive.into_iter().collect();
     }
 
@@ -82,13 +82,13 @@ impl TokenRegistry {
             timestamp: ic::time(),
         };
 
-        self.0.insert(token_info.name.clone(), token);
+        self.0.insert(token_info.principal_id.clone(), token);
         Ok(true)
     }
 
-    pub fn remove(&mut self, name: &String) -> Result<OperationSuccessful, OperationError> {
-        if self.0.contains_key(name) {
-            self.0.remove(name);
+    pub fn remove(&mut self, principal_id: &Principal) -> Result<OperationSuccessful, OperationError> {
+        if self.0.contains_key(principal_id) {
+            self.0.remove(principal_id);
             return Ok(true);
         }
 
@@ -99,11 +99,11 @@ impl TokenRegistry {
         &mut self,
         token_info: InputEditToken
     ) -> Result<OperationSuccessful, OperationError> {
-        match self.0.get_mut(&token_info.name) {
+        match self.0.get_mut(&token_info.principal_id) {
             None => return Err(OperationError::NonExistentToken),
             Some(token) => {
-                if token_info.principal_id.is_some() {
-                    token.principal_id = token_info.principal_id.unwrap();
+                if token_info.name.is_some() {
+                    token.name = token_info.name.unwrap();
                 }
 
                 if token_info.symbol.is_some() {
@@ -144,7 +144,6 @@ impl TokenRegistry {
     }
 }
 
-#[init]
 fn init() {
     ic::store(Controller(ic::caller()));
 }
@@ -197,13 +196,13 @@ fn add(token_info: InputAddToken) -> Result<OperationSuccessful, OperationError>
 }
 
 #[update]
-fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
+fn remove(principal_id: Principal) -> Result<OperationSuccessful, OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<TokenRegistry>();
-    db.remove(&name)
+    db.remove(&principal_id)
 }
 
 #[update]
@@ -326,8 +325,8 @@ mod tests {
         assert!(add(token_info).is_ok());
 
         let token_new_info = InputEditToken {
-            principal_id: Some(mock_principals::bob()),
-            name: String::from("Wrapped ICP"),
+            principal_id: mock_principals::xtc(),
+            name: Some(String::from("Wrapped ICP")),
             symbol: None,
             description: None,
             standard: None,
@@ -362,8 +361,8 @@ mod tests {
         assert!(add(token_info).is_ok());
 
         let token_new_info = InputEditToken {
-            principal_id: Some(mock_principals::bob()),
-            name: String::from("Wrapped ICP"),
+            principal_id: mock_principals::bob(),
+            name: Some(String::from("Wrapped ICP")),
             symbol: None,
             description: None,
             standard: None,
@@ -398,8 +397,8 @@ mod tests {
         assert!(add(token_info).is_ok());
 
         let token_new_info = InputEditToken {
-            principal_id: Some(mock_principals::bob()),
-            name: String::from("Wrapped ICP"),
+            principal_id: mock_principals::bob(),
+            name: Some(String::from("Wrapped ICP")),
             symbol: None,
             description: None,
             standard: None,
@@ -435,7 +434,7 @@ mod tests {
 
         assert!(add(token_info).is_ok());
         
-        assert!(remove(String::from("Wrapped ICP")).is_ok());
+        assert!(remove(mock_principals::xtc()).is_ok());
     }
 
     #[test]
@@ -461,7 +460,7 @@ mod tests {
 
         context.update_caller(mock_principals::bob());
 
-        assert!(remove(String::from("Wrapped ICP")).is_err());
+        assert!(remove(mock_principals::xtc()).is_err());
     }
 
     #[test]

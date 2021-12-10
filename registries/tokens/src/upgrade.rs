@@ -6,7 +6,7 @@ use ic_kit::*;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
-    db: Vec<(String, Token)>,
+    db: Vec<(Principal, Token)>,
     controller: Principal,
 }
 

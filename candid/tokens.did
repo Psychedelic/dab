@@ -23,8 +23,8 @@ type input_add_token = record {
 };
 
 type input_edit_token = record {
-    principal_id: opt principal;
-    name: text;
+    principal_id: principal;
+    name: opt text;
     symbol: opt text;
     description: opt text;
     standard: opt text;
