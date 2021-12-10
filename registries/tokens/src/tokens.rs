@@ -179,9 +179,9 @@ pub type OperationSuccessful = bool;
 
 #[update]
 fn add(token_info: InputAddToken) -> Result<OperationSuccessful, OperationError> {
-    // if !is_controller(&ic::caller()) {
-    //     return Err(OperationError::NotAuthorized);
-    // }
+    if !is_controller(&ic::caller()) {
+        return Err(OperationError::NotAuthorized);
+    }
 
     if !validate_url(&token_info.logo) || !validate_url(&token_info.website) {
         return Err(OperationError::BadParameters);
@@ -210,9 +210,9 @@ fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
 fn edit(
     token_info: InputEditToken
 ) -> Result<OperationSuccessful, OperationError> {
-    // if !is_controller(&ic::caller()) {
-    //     return Err(OperationError::NotAuthorized);
-    // }
+    if !is_controller(&ic::caller()) {
+        return Err(OperationError::NotAuthorized);
+    }
 
     if token_info.logo.is_some() && !validate_url(&token_info.logo.clone().unwrap()) {
         return Err(OperationError::BadParameters);
@@ -230,4 +230,118 @@ fn edit(
 fn get_all() -> Vec<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_all()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_token_successfuly() {
+        MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+    }
+
+    #[test]
+    fn test_edit_token_successfuly() {
+        MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+
+        let token_new_info = InputEditToken {
+            principal_id: Some(mock_principals::bob()),
+            name: String::from("Wrapped ICP"),
+            symbol: None,
+            description: None,
+            standard: None,
+            logo: None,
+            website: None,
+            total_supply: None,
+            verified: None,
+        };
+        
+        assert!(edit(token_new_info).is_ok());
+    }
+
+    #[test]
+    fn test_remove_token_successfuly() {
+        MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+
+        
+        assert!(remove(String::from("Wrapped ICP")).is_ok());
+    }
+
+    #[test]
+    fn test_get_all_successfuly() {
+        MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+
+        let tokens = get_all();
+
+        assert_eq!(tokens.len(), 1);
+    }
 }
