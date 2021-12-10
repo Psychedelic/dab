@@ -4,6 +4,7 @@ use ic_kit::macros::*;
 use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
+use validator::validate_url;
 
 pub struct Controller(pub Principal);
 
@@ -23,6 +24,7 @@ pub struct Token {
     total_supply: Option<u64>,
     logo: String,
     website: String,
+    verified: bool,
     timestamp: u64,
 }
 
@@ -48,6 +50,7 @@ pub struct InputEditToken {
     total_supply: Option<u64>,
     logo: Option<String>,
     website: Option<String>,
+    verified: Option<bool>,
 }
 
 #[derive(Default)]
@@ -75,6 +78,7 @@ impl TokenRegistry {
             total_supply: token_info.total_supply,
             logo: token_info.logo,
             website: token_info.website,
+            verified: false,
             timestamp: ic::time(),
         };
 
@@ -126,6 +130,10 @@ impl TokenRegistry {
                     token.website = token_info.website.unwrap();
                 }
 
+                if token_info.verified.is_some() {
+                    token.verified = token_info.verified.unwrap();
+                }
+
                 return Ok(true);
             }
         }
@@ -171,6 +179,14 @@ pub type OperationSuccessful = bool;
 
 #[update]
 fn add(token_info: InputAddToken) -> Result<OperationSuccessful, OperationError> {
+    // if !is_controller(&ic::caller()) {
+    //     return Err(OperationError::NotAuthorized);
+    // }
+
+    if !validate_url(&token_info.logo) || !validate_url(&token_info.website) {
+        return Err(OperationError::BadParameters);
+    }
+
     let name = token_info.name.clone();
     if name.len() <= 120 && &token_info.description.len() <= &1200 {
         let db = ic::get_mut::<TokenRegistry>();
@@ -194,6 +210,18 @@ fn remove(name: String) -> Result<OperationSuccessful, OperationError> {
 fn edit(
     token_info: InputEditToken
 ) -> Result<OperationSuccessful, OperationError> {
+    // if !is_controller(&ic::caller()) {
+    //     return Err(OperationError::NotAuthorized);
+    // }
+
+    if token_info.logo.is_some() && !validate_url(&token_info.logo.clone().unwrap()) {
+        return Err(OperationError::BadParameters);
+    }
+
+    if token_info.website.is_some() && !validate_url(&token_info.website.clone().unwrap()) {
+        return Err(OperationError::BadParameters);
+    }
+
     let db = ic::get_mut::<TokenRegistry>();
     return db.edit(token_info);
 }

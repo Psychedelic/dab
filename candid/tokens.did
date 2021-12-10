@@ -7,6 +7,7 @@ type token = record {
     total_supply: opt nat64;
     logo: text;
     website: text;
+    verified: bool;
     timestamp: nat64;
 };
 
@@ -29,6 +30,7 @@ type input_edit_token = record {
     standard: opt text;
     total_supply: opt nat64;
     logo: opt text;
+    verified: opt bool;
     website: opt text; 
 };
 
