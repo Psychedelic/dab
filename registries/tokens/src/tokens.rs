@@ -167,7 +167,7 @@ fn name() -> String {
     String::from("Token Registry Canister")
 }
 
-#[derive(CandidType)]
+#[derive(CandidType, Debug)]
 pub enum OperationError {
     NotAuthorized,
     ParamatersNotPassed,
@@ -259,6 +259,52 @@ mod tests {
     }
 
     #[test]
+    fn test_add_token_fails_because_of_bad_params() {
+        MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("bad logo url"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_err());
+    }
+
+    #[test]
+    fn test_add_token_fails_because_of_unauthorized_caller() {
+        let context = MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        context.update_caller(mock_principals::bob());
+
+        assert!(add(token_info).is_err());
+    }
+
+    #[test]
     fn test_edit_token_successfuly() {
         MockContext::new()
         .with_caller(mock_principals::alice())
@@ -295,7 +341,7 @@ mod tests {
     }
 
     #[test]
-    fn test_remove_token_successfuly() {
+    fn test_edit_token_fails_because_of_bad_params() {
         MockContext::new()
         .with_caller(mock_principals::alice())
         .inject();
@@ -315,8 +361,107 @@ mod tests {
 
         assert!(add(token_info).is_ok());
 
+        let token_new_info = InputEditToken {
+            principal_id: Some(mock_principals::bob()),
+            name: String::from("Wrapped ICP"),
+            symbol: None,
+            description: None,
+            standard: None,
+            logo: Some(String::from("bad logo url")),
+            website: None,
+            total_supply: None,
+            verified: None,
+        };
+        
+        assert!(edit(token_new_info).is_err());
+    }
+
+    #[test]
+    fn test_edit_token_fails_because_of_unauthorized_caller() {
+        let context = MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+
+        let token_new_info = InputEditToken {
+            principal_id: Some(mock_principals::bob()),
+            name: String::from("Wrapped ICP"),
+            symbol: None,
+            description: None,
+            standard: None,
+            logo: None,
+            website: None,
+            total_supply: None,
+            verified: None,
+        };
+
+        context.update_caller(mock_principals::bob());
+        
+        assert!(edit(token_new_info).is_err());
+    }
+
+    #[test]
+    fn test_remove_token_successfuly() {
+        MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
         
         assert!(remove(String::from("Wrapped ICP")).is_ok());
+    }
+
+    #[test]
+    fn test_remove_token_fails_because_of_unathorized_caller() {
+        let context = MockContext::new()
+        .with_caller(mock_principals::alice())
+        .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+
+        context.update_caller(mock_principals::bob());
+
+        assert!(remove(String::from("Wrapped ICP")).is_err());
     }
 
     #[test]
