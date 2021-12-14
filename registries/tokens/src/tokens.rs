@@ -144,6 +144,7 @@ impl TokenRegistry {
     }
 }
 
+#[init]
 fn init() {
     ic::store(Controller(ic::caller()));
 }
