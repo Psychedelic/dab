@@ -23,6 +23,12 @@
       "candid": "candid/nft.did",
       "wasm": "target/wasm32-unknown-unknown/release/nft-opt.wasm",
       "type": "custom"
+    },
+    "tokens": {
+      "build": "node build.js tokens",
+      "candid": "candid/tokens.did",
+      "wasm": "target/wasm32-unknown-unknown/release/tokens-opt.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.8.3",

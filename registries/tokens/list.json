@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Cycles",
+    "id": "aanaa-xaaaa-aaaah-aaeiq-cai",
+    "standard": "DIP20",
+    "description": "A cycles token by Dank that allows users & developers to hold cycles and develop with them with just a Principal ID. No need for a Cycles Wallet.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/Dank/XTC-DAB.png"
+  },
+  {
+    "name": "WICP",
+    "id": "utozz-siaaa-aaaam-qaaxq-cai",
+    "standard": "DIP20",
+    "description": "Wrapped version of the Internet Computer’s native ICP token that can be held by Principal IDs.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/wicp-logo.png"
+  }
+
+
+  
+]

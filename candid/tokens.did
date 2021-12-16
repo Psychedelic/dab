@@ -1,0 +1,57 @@
+type token = record {
+    name: text;
+    symbol: text;
+    description: text;
+    standard: text;
+    total_supply: opt nat64;
+    logo: text;
+    website: text;
+    verified: bool;
+    timestamp: nat64;
+};
+
+type input_add_token = record {
+    principal_id: principal;
+    name: text;
+    symbol: text;
+    description: text;
+    standard: text;
+    total_supply: opt nat64;
+    logo: text;
+    website: text;
+};
+
+type input_edit_token = record {
+    principal_id: principal;
+    name: opt text;
+    symbol: opt text;
+    description: opt text;
+    standard: opt text;
+    total_supply: opt nat64;
+    logo: opt text;
+    verified: opt bool;
+    website: opt text; 
+};
+
+type operation_error = variant {
+    NotAuthorized;
+    ParamatersNotPassed;
+    NonExistentToken;
+    BadParameters;
+};
+
+type operation_response = variant {
+    Ok  : opt text;
+    Err : operation_error;
+};
+
+service : {
+    "name" : () -> (text) query;
+    "get_all"      : () -> (vec token) query;
+    "get_info"     : (principal) -> (opt token) query;
+
+    "add"    : (input_add_token) -> (operation_response);
+    "edit"   : (input_edit_token) -> (operation_response);
+    "remove" : (principal) -> (operation_response);
+    "set_controller" : (principal) -> (operation_response);
+}

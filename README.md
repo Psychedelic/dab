@@ -15,17 +15,18 @@ All the data an IC app needs to make a seamless experience, accessible directly 
 
 * [x] NFT List
 * [x] Canister List
-* [ ] Token List
+* [X] Token List
 * [ ] Dapp List
 
 ---
 
-## #️⃣ V0.2.0 - DAB's Current Registries.
+## #️⃣ V0.3.0 - DAB's Current Registries.
 
-In v0.2.0, DAB has two registries that developers can integrate with, or submit items to:
+In v0.3.0, DAB has three registries that developers can integrate with, or submit items to:
 
 - The NFT List (auto-surface NFTs in apps and multi-standard support).
 - The Canister List (associate metadata to Canister IDs and auto-surface it in UIs)
+- The Token List (auto-surface Tokens in apps and multi-standard support).
 
 ## 🎨 The NFT List
 
@@ -50,6 +51,21 @@ To interact with DAB's services you need to use the DAB-js library. Read our doc
 
 * [**Read our documentation**](https://docs.dab.ooo)
 * [**DAB-js library - Repository**](https://github.com/psychedelic/dab-js)
+
+## 💠 The Token List
+
+The Token Registry will work exactly like the NFT List. Any Token can get listed on this open registry, regardless of its standard (DIP20, EXT to start), adding metadata for UIs to surface (name, symbol, image, Canister ID, standard…)
+
+Then UIs, apps, and DeFi experiences can consume this list & integrate it using DAB-js to integrate and auto-surface and support all tokens on the list for your users (showing their balance, allowing them to interact with them for example to make transfers), as well as anyone that’s added in the future, without having to do per-token or per-standard integrations.
+
+- [Read our getting started guide](https://docs.dab.ooo/token-list/getting-started/)
+- [DAB-js library - Repository](https://github.com/psychedelic/dab-js)
+
+###  Making New Submissions
+You can see the current listed tokens on our website. **Want to submit a new Token to the list? Use the form below.**
+
+- [View the current Token List📜](registries/tokens/list.json)
+- [Submit a new Token to the list 📫](https://dab-ooo.typeform.com/token-list)
 
 
 ## 🛢️ The Canister List
