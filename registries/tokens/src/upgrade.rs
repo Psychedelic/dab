@@ -1,5 +1,5 @@
-use crate::tokens::{Controller, Token, TokenRegistry};
-use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use crate::tokens::{Controllers, Token, TokenRegistry};
+use ic_kit::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
@@ -7,15 +7,15 @@ use ic_kit::*;
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
     db: Vec<(Principal, Token)>,
-    controller: Principal,
+    controllers: Vec<Principal>,
 }
 
 #[pre_upgrade]
 pub fn pre_upgrade() {
     let db = ic::get_mut::<TokenRegistry>().archive();
-    let controller = ic::get_mut::<Controller>().0;
+    let controllers = ic::get_mut::<Controllers>().0.clone();
 
-    let stable = StableStorage { db, controller };
+    let stable = StableStorage { db, controllers };
 
     match ic::stable_store((stable,)) {
         Ok(_) => (),
@@ -32,6 +32,6 @@ pub fn pre_upgrade() {
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
         ic::get_mut::<TokenRegistry>().load(stable.db);
-        ic::store(Controller(stable.controller));
+        ic::store(Controllers(stable.controllers));
     }
 }

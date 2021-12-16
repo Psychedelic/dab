@@ -1,14 +1,13 @@
-use ic_cdk::export::candid::{CandidType, Principal};
-use ic_kit::ic::*;
+use ic_kit::candid::{CandidType, Principal};
 use ic_kit::macros::*;
 use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 use validator::validate_url;
 
-pub struct Controller(pub Principal);
+pub struct Controllers(pub Vec<Principal>);
 
-impl Default for Controller {
+impl Default for Controllers {
     fn default() -> Self {
         panic!()
     }
@@ -16,7 +15,6 @@ impl Default for Controller {
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Token {
-    principal_id: Principal,
     name: String,
     symbol: String,
     description: String,
@@ -61,16 +59,13 @@ impl TokenRegistry {
         let map = std::mem::replace(&mut self.0, HashMap::new());
         map.into_iter().collect()
     }
+
     pub fn load(&mut self, archive: Vec<(Principal, Token)>) {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(
-        &mut self,
-        token_info: InputAddToken,
-    ) -> Result<OperationSuccessful, OperationError> {
+    pub fn add(&mut self, token_info: InputAddToken) -> Result<(), OperationError> {
         let token = Token {
-            principal_id: token_info.principal_id,
             name: token_info.name.clone(),
             symbol: token_info.symbol,
             description: token_info.description,
@@ -83,22 +78,19 @@ impl TokenRegistry {
         };
 
         self.0.insert(token_info.principal_id.clone(), token);
-        Ok(true)
+        Ok(())
     }
 
-    pub fn remove(&mut self, principal_id: &Principal) -> Result<OperationSuccessful, OperationError> {
+    pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
         if self.0.contains_key(principal_id) {
             self.0.remove(principal_id);
-            return Ok(true);
+            return Ok(());
         }
 
         Err(OperationError::NonExistentToken)
     }
 
-    pub fn edit(
-        &mut self,
-        token_info: InputEditToken
-    ) -> Result<OperationSuccessful, OperationError> {
+    pub fn edit(&mut self, token_info: InputEditToken) -> Result<(), OperationError> {
         match self.0.get_mut(&token_info.principal_id) {
             None => return Err(OperationError::NonExistentToken),
             Some(token) => {
@@ -134,9 +126,13 @@ impl TokenRegistry {
                     token.verified = token_info.verified.unwrap();
                 }
 
-                return Ok(true);
+                return Ok(());
             }
         }
+    }
+
+    pub fn get_info(&self, principal_id: &Principal) -> Option<&Token> {
+        self.0.get(principal_id)
     }
 
     pub fn get_all(&self) -> Vec<&Token> {
@@ -146,18 +142,18 @@ impl TokenRegistry {
 
 #[init]
 fn init() {
-    ic::store(Controller(ic::caller()));
+    ic::store(Controllers(vec![ic::caller()]));
 }
 
 fn is_controller(account: &Principal) -> bool {
-    account == &ic::get::<Controller>().0
+    ic::get::<Controllers>().0.contains(account)
 }
 
 #[update]
-fn set_controller(new_controller: Principal) -> Result<OperationSuccessful, OperationError>{
+fn set_controller(new_controller: Principal) -> Result<(), OperationError> {
     if is_controller(&ic::caller()) {
-        ic::store(Controller(new_controller));   
-        return Ok(true);
+        ic::get_mut::<Controllers>().0.push(new_controller);
+        return Ok(());
     }
     Err(OperationError::NotAuthorized)
 }
@@ -175,10 +171,8 @@ pub enum OperationError {
     BadParameters,
 }
 
-pub type OperationSuccessful = bool;
-
 #[update]
-fn add(token_info: InputAddToken) -> Result<OperationSuccessful, OperationError> {
+fn add(token_info: InputAddToken) -> Result<(), OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -197,7 +191,7 @@ fn add(token_info: InputAddToken) -> Result<OperationSuccessful, OperationError>
 }
 
 #[update]
-fn remove(principal_id: Principal) -> Result<OperationSuccessful, OperationError> {
+fn remove(principal_id: Principal) -> Result<(), OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -207,9 +201,7 @@ fn remove(principal_id: Principal) -> Result<OperationSuccessful, OperationError
 }
 
 #[update]
-fn edit(
-    token_info: InputEditToken
-) -> Result<OperationSuccessful, OperationError> {
+fn edit(token_info: InputEditToken) -> Result<(), OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -227,6 +219,12 @@ fn edit(
 }
 
 #[query]
+fn get_info(principal_id: Principal) -> Option<&'static Token> {
+    let db = ic::get_mut::<TokenRegistry>();
+    db.get_info(&principal_id)
+}
+
+#[query]
 fn get_all() -> Vec<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_all()
@@ -239,8 +237,8 @@ mod tests {
     #[test]
     fn test_add_token_successfuly() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -261,8 +259,8 @@ mod tests {
     #[test]
     fn test_add_token_fails_because_of_bad_params() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -283,8 +281,8 @@ mod tests {
     #[test]
     fn test_add_token_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -307,8 +305,8 @@ mod tests {
     #[test]
     fn test_edit_token_successfuly() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -336,15 +334,15 @@ mod tests {
             total_supply: None,
             verified: None,
         };
-        
+
         assert!(edit(token_new_info).is_ok());
     }
 
     #[test]
     fn test_edit_token_fails_because_of_bad_params() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -372,15 +370,15 @@ mod tests {
             total_supply: None,
             verified: None,
         };
-        
+
         assert!(edit(token_new_info).is_err());
     }
 
     #[test]
     fn test_edit_token_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -410,15 +408,15 @@ mod tests {
         };
 
         context.update_caller(mock_principals::bob());
-        
+
         assert!(edit(token_new_info).is_err());
     }
 
     #[test]
     fn test_remove_token_successfuly() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -434,15 +432,15 @@ mod tests {
         };
 
         assert!(add(token_info).is_ok());
-        
+
         assert!(remove(mock_principals::xtc()).is_ok());
     }
 
     #[test]
     fn test_remove_token_fails_because_of_unathorized_caller() {
         let context = MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -467,8 +465,8 @@ mod tests {
     #[test]
     fn test_get_all_successfuly() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .inject();
+            .with_caller(mock_principals::alice())
+            .inject();
 
         init();
 
@@ -488,5 +486,57 @@ mod tests {
         let tokens = get_all();
 
         assert_eq!(tokens.len(), 1);
+    }
+
+    #[test]
+    fn test_get_all_returns_none_successfuly() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let tokens = get_all();
+
+        assert_eq!(tokens.len(), 0);
+    }
+
+    #[test]
+    fn test_get_info_succesfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let token_info = InputAddToken {
+            principal_id: mock_principals::xtc(),
+            name: String::from("Wrapped ICP"),
+            symbol: String::from("WICP"),
+            description: String::from("Wrapped IPC description"),
+            standard: String::from("DIP20"),
+            logo: String::from("https://logo.com"),
+            website: String::from("https://website.com"),
+            total_supply: Some(1000),
+        };
+
+        assert!(add(token_info).is_ok());
+
+        let token = get_info(mock_principals::xtc());
+
+        assert!(token.is_some());
+    }
+
+    #[test]
+    fn test_get_info_returns_none_succesfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let token = get_info(mock_principals::xtc());
+
+        assert!(token.is_none());
     }
 }

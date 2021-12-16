@@ -1,5 +1,4 @@
 type token = record {
-    principal_id: principal;
     name: text;
     symbol: text;
     description: text;
@@ -42,16 +41,17 @@ type operation_error = variant {
 };
 
 type operation_response = variant {
-    Ok  : bool;
+    Ok  : opt text;
     Err : operation_error;
 };
 
 service : {
     "name" : () -> (text) query;
     "get_all"      : () -> (vec token) query;
+    "get_info"     : (principal) -> (opt token) query;
 
     "add"    : (input_add_token) -> (operation_response);
     "edit"   : (input_edit_token) -> (operation_response);
-    "remove" : (text) -> (operation_response);
+    "remove" : (principal) -> (operation_response);
     "set_controller" : (principal) -> (operation_response);
 }
