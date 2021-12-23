@@ -12,8 +12,5 @@
     "standard": "DIP20",
     "description": "Wrapped version of the Internet Computer’s native ICP token that can be held by Principal IDs.",
     "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/wicp-logo.png"
-  }
-
-
-  
+  }  
 ]
