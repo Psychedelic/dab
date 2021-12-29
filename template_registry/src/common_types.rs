@@ -1,4 +1,3 @@
-use ic_kit::*;
 use ic_kit::candid::CandidType;
 
 #[derive(CandidType)]
