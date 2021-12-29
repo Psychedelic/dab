@@ -3,6 +3,7 @@ type registry = record {
     name: text;
     description: text;
     logo_url: text;
+    front_end: opt text;
 };
 
 type input_add_registry = record {
@@ -10,6 +11,7 @@ type input_add_registry = record {
     name: text;
     description: text;
     logo_url: text;
+    front_end: opt text;
 };
 
 type operation_error = variant {

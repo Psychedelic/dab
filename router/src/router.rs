@@ -19,6 +19,7 @@ pub struct Registry {
     pub name: String,
     pub description: String,
     pub logo_url: String,
+    pub front_end: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
@@ -27,6 +28,7 @@ pub struct InputAddRegistry {
     name: String,
     description: String,
     logo_url: String,
+    front_end: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
@@ -56,6 +58,7 @@ impl Registries {
             name: registry_info.name,
             description: registry_info.description,
             logo_url: registry_info.logo_url,
+            front_end: registry_info.front_end,
         };
 
         self.0.insert(registry_info.principal_id.clone(), registry);
@@ -70,27 +73,6 @@ impl Registries {
         }
 
         Err(OperationError::NonExistentRegistry)
-    }
-
-    pub fn edit(&mut self, registry_info: InputEditRegistry) -> Result<(), OperationError> {
-        match self.0.get_mut(&registry_info.principal_id) {
-            None => return Err(OperationError::NonExistentRegistry),
-            Some(registry) => {
-                if registry_info.name.is_some() {
-                    registry.name = registry_info.name.unwrap();
-                }
-
-                if registry_info.description.is_some() {
-                    registry.description = registry_info.description.unwrap();
-                }
-
-                if registry_info.logo_url.is_some() {
-                    registry.logo_url = registry_info.logo_url.unwrap();
-                }
-
-                return Ok(());
-            }
-        }
     }
 
     pub fn get(&self, principal_id: &Principal) -> Option<&Registry> {
@@ -160,20 +142,6 @@ fn remove(principal_id: Principal) -> Result<(), OperationError> {
 
     let db = ic::get_mut::<Registries>();
     db.remove(&principal_id)
-}
-
-#[update]
-fn edit(registry_info: InputEditRegistry) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
-        return Err(OperationError::NotAuthorized);
-    }
-
-    if registry_info.logo_url.is_some() && !validate_url(&registry_info.logo_url.clone().unwrap()) {
-        return Err(OperationError::BadParameters);
-    }
-
-    let db = ic::get_mut::<Registries>();
-    return db.edit(registry_info);
 }
 
 #[query]
