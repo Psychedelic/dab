@@ -29,6 +29,12 @@
       "candid": "candid/tokens.did",
       "wasm": "target/wasm32-unknown-unknown/release/tokens-opt.wasm",
       "type": "custom"
+    },
+    "router": {
+      "build": "node build.js router",
+      "candid": "candid/router.did",
+      "wasm": "target/wasm32-unknown-unknown/release/tokens-opt.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.8.3",
