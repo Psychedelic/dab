@@ -1,0 +1,59 @@
+use crate::common_types::*;
+use ic_kit::*;
+use ic_kit::macros::*;
+use serde::Deserialize;
+use std::collections::HashMap;
+use validator::validate_url;
+
+// The metadata structure that you want to store in your registry.
+pub struct CanisterMetadata {
+    name: String,
+    thumbnail: String,
+    frontend: String,
+    description: String,
+}
+
+// BTreeMaps and HashMaps are the solutions we follow to store our metadata.
+#[derive(Default)]
+pub struct CanisterDB(HashMap<Principal, CanisterMetadata>);
+
+impl CanisterDB {
+    // The archive method is called by the pre_upgrade method from the upgrade script.
+    pub fn archive(&mut self) -> Vec<(Principal, CanisterMetadata)> {
+        let map = std::mem::replace(&mut self.0, HashMap::new());
+        map.into_iter().collect()
+    }
+
+    // The load method is called by the post_upgrade method from the upgrade script.
+    pub fn load(&mut self, archive: Vec<(Principal, CanisterMetadata)>) {
+        self.0 = archive.into_iter().collect();
+    }
+
+    pub fn get(&self, canister: Principal) -> Option<&CanisterMetadata> {
+        self.0.get(&canister)
+    }
+
+    pub fn add(&mut self, canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
+        if self.0.contains_key(&canister) {
+            // Canister has already been added to the canister.
+            return Err(Error::CanisterAlreadyExists);
+        } else {
+            // This is a new canister and it can be added to the registry safely.
+            self.0.insert(canister, metadata);
+            return Ok(());
+        }
+    }
+
+    pub fn remove(&mut self, canister: Principal) -> Result<(), Error> {
+        if self.0.contains_key(&canister) {
+            // Canister has been added to the registry.
+            // We can safely remove it from the registry.
+            self.0.remove(&canister);
+            return Ok(());
+        } else {
+            // No metadata has been associated with this canister principal id.
+            // We can't remove it if it's not there.
+            return Err(Error::NonExistantCanister);
+        }
+    }
+}

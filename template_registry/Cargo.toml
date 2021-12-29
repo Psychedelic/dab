@@ -1,5 +1,5 @@
 [package]
-name = "registry"
+name = "template_registry"
 version = "0.1.0"
 authors = ["Nima Rasooli <nima@fleek.co>"]
 edition = "2018"
