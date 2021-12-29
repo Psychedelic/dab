@@ -93,11 +93,11 @@ impl Registries {
         }
     }
 
-    pub fn get_registry(&self, principal_id: &Principal) -> Option<&Registry> {
+    pub fn get(&self, principal_id: &Principal) -> Option<&Registry> {
         self.0.get(principal_id)
     }
 
-    pub fn get_registries(&self) -> Vec<&Registry> {
+    pub fn get_all(&self) -> Vec<&Registry> {
         self.0.values().collect()
     }
 }
@@ -177,13 +177,13 @@ fn edit(registry_info: InputEditRegistry) -> Result<(), OperationError> {
 }
 
 #[query]
-fn get_info(principal_id: Principal) -> Option<&'static Registry> {
+fn get_registry(principal_id: Principal) -> Option<&'static Registry> {
     let db = ic::get_mut::<Registries>();
-    db.get_registry(&principal_id)
+    db.get(&principal_id)
 }
 
 #[query]
 fn get_all() -> Vec<&'static Registry> {
     let db = ic::get_mut::<Registries>();
-    db.get_registries()
+    db.get_all()
 }

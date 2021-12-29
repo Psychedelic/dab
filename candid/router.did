@@ -1,28 +1,21 @@
-type router = record {
+type registry = record {
     principal_id: principal;
     name: text;
     description: text;
     logo_url: text;
 };
 
-type input_add_router = record {
+type input_add_registry = record {
     principal_id: principal;
     name: text;
     description: text;
     logo_url: text;
-};
-
-type input_edit_router = record {
-    principal_id: principal;
-    name: opt text;
-    description: opt text;
-    logo_url: opt text;
 };
 
 type operation_error = variant {
     NotAuthorized;
     ParamatersNotPassed;
-    NonExistentRouter;
+    NonExistentRegistry;
     BadParameters;
 };
 
@@ -33,11 +26,10 @@ type operation_response = variant {
 
 service : {
     "name" : () -> (text) query;
-    "get_all"      : () -> (vec router) query;
-    "get_info"     : (principal) -> (opt router) query;
+    "get_all"      : () -> (vec registry) query;
+    "get_registry"     : (principal) -> (opt registry) query;
 
-    "add_registry"    : (input_add_router) -> (operation_response);
-    "edit_registry"   : (input_edit_router) -> (operation_response);
+    "add_registry"    : (input_add_registry) -> (operation_response);
     "remove_registry" : (principal) -> (operation_response);
     "set_admin" : (principal) -> (operation_response);
 }
