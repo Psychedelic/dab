@@ -1,11 +1,15 @@
 use crate::common_types::*;
+use crate::management::*;
+
 use ic_kit::*;
+use ic_kit::candid::CandidType;
 use ic_kit::macros::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 use validator::validate_url;
 
 // The metadata structure that you want to store in your registry.
+#[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
 pub struct CanisterMetadata {
     name: String,
     thumbnail: String,
@@ -56,4 +60,34 @@ impl CanisterDB {
             return Err(Error::NonExistantCanister);
         }
     }
+}
+
+#[query]
+fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
+    let db = ic::get::<CanisterDB>();
+    db.get(canister)
+}
+
+#[update]
+fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
+    if is_admin(&ic::caller()) {
+        // The caller is one of the admins.
+        // The next step is verifying URLs
+        if validate_url(metadata.thumbnail.clone()) && validate_url(metadata.frontend.clone()) {
+            let db = ic::get_mut::<CanisterDB>();
+            return db.add(canister, metadata);
+        }
+        return Err(Error::BadParameters);
+    }
+    Err(Error::NotAuthorized)
+}
+
+#[update]
+fn remove(canister: Principal) -> Result<(), Error> {
+    if is_admin(&ic::caller()) {
+        // The caller is one of the admins.
+        let db = ic::get_mut::<CanisterDB>();
+        return db.remove(canister);
+    }
+    Err(Error::NotAuthorized)
 }
