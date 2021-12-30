@@ -6,4 +6,5 @@ members = [
     "registries/nft",
     "registries/tokens",
     "router",
+    "template_registry"
 ]
