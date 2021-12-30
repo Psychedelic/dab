@@ -23,12 +23,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container:
-      image: ghcr.io/psychedelic/dank-explorer-ci:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.PRIVATE_ACCESS_TOKEN }}
-
     steps:
       - uses: actions/checkout@v2
 
