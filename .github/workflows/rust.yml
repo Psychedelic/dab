@@ -13,7 +13,12 @@ jobs:
   lint:
 
     runs-on: ubuntu-latest
-
+    
+    container:
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.PRIVATE_ACCESS_TOKEN }}
+        
     steps:
     - uses: actions/checkout@v2
     - name: Lint
