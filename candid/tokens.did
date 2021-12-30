@@ -1,4 +1,5 @@
 type token = record {
+    principal_id: principal;
     name: text;
     symbol: text;
     description: text;

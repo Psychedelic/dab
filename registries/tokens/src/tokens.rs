@@ -15,6 +15,7 @@ impl Default for Controllers {
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Token {
+    principal_id: Principal,
     name: String,
     symbol: String,
     description: String,
@@ -66,6 +67,7 @@ impl TokenRegistry {
 
     pub fn add(&mut self, token_info: InputAddToken) -> Result<(), OperationError> {
         let token = Token {
+            principal_id: token_info.principal_id,
             name: token_info.name.clone(),
             symbol: token_info.symbol,
             description: token_info.description,

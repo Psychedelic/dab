@@ -1,0 +1,29 @@
+type registry = record {
+    principal_id: principal;
+    name: text;
+    description: text;
+    logo_url: text;
+    front_end: opt text;
+};
+
+type operation_error = variant {
+    NotAuthorized;
+    ParamatersNotPassed;
+    NonExistentRegistry;
+    BadParameters;
+};
+
+type operation_response = variant {
+    Ok  : opt text;
+    Err : operation_error;
+};
+
+service : {
+    "name" : () -> (text) query;
+    "get_all"      : () -> (vec registry) query;
+    "get_registry"     : (principal) -> (opt registry) query;
+
+    "add_registry"    : (principal, registry) -> (operation_response);
+    "remove_registry" : (principal) -> (operation_response);
+    "set_admin" : (principal) -> (operation_response);
+}

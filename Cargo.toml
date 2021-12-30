@@ -5,5 +5,6 @@ members = [
     "registries/canister_registry",
     "registries/nft",
     "registries/tokens",
+    "router",
     "template_registry"
 ]
