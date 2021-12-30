@@ -1,43 +1,12 @@
+use crate::common_types::*;
+use crate::management::*;
+
 use ic_kit::candid::{CandidType, Principal};
 use ic_kit::macros::*;
 use ic_kit::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 use validator::validate_url;
-
-pub struct Admins(pub Vec<Principal>);
-
-impl Default for Admins {
-    fn default() -> Self {
-        panic!()
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct Registry {
-    pub principal_id: Principal,
-    pub name: String,
-    pub description: String,
-    pub logo_url: String,
-    pub front_end: Option<String>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct InputAddRegistry {
-    principal_id: Principal,
-    name: String,
-    description: String,
-    logo_url: String,
-    front_end: Option<String>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct InputEditRegistry {
-    principal_id: Principal,
-    name: Option<String>,
-    description: Option<String>,
-    logo_url: Option<String>,
-}
 
 #[derive(Default)]
 pub struct Registries(HashMap<Principal, Registry>);
@@ -84,35 +53,9 @@ impl Registries {
     }
 }
 
-#[init]
-fn init() {
-    ic::store(Admins(vec![ic::caller()]));
-}
-
-fn is_admin(account: &Principal) -> bool {
-    ic::get::<Admins>().0.contains(account)
-}
-
-#[update]
-fn set_admin(new_admin: Principal) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) {
-        ic::get_mut::<Admins>().0.push(new_admin);
-        return Ok(());
-    }
-    Err(OperationError::NotAuthorized)
-}
-
 #[query]
 fn name() -> String {
     String::from("Router Canister")
-}
-
-#[derive(CandidType, Debug)]
-pub enum OperationError {
-    NotAuthorized,
-    ParamatersNotPassed,
-    NonExistentRegistry,
-    BadParameters,
 }
 
 #[update]

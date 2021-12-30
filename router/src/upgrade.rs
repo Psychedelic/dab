@@ -1,4 +1,7 @@
-use crate::router::{Admins, Registry, Registries};
+use crate::common_types::Registry;
+use crate::management::Admins;
+use crate::router::Registries;
+
 use ic_kit::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
