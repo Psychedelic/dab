@@ -38,14 +38,11 @@ impl CanisterDB {
     }
 
     pub fn add(&mut self, canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
-        if self.0.contains_key(&canister) {
-            // Canister has already been added to the canister.
-            return Err(Error::CanisterAlreadyExists);
-        } else {
-            // This is a new canister and it can be added to the registry safely.
-            self.0.insert(canister, metadata);
-            return Ok(());
-        }
+        // Whether the canister has already been added to the registry or not
+        // this method will add it to the hashmap. If it is already a part of 
+        // the HashMap, its metadata will be replaced by the new metadata.
+        self.0.insert(canister, metadata);
+        return Ok(());
     }
 
     pub fn remove(&mut self, canister: Principal) -> Result<(), Error> {
@@ -73,6 +70,9 @@ fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
     db.get(canister)
 }
 
+
+// The add method will add new entries to the HashMap
+// This method updates the entry if it already exists
 #[update]
 fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
     if is_admin(&ic::caller()) {
