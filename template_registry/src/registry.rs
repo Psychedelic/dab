@@ -63,6 +63,11 @@ impl CanisterDB {
 }
 
 #[query]
+fn name() -> String {
+    String::from("Template Registry Canister")
+}
+
+#[query]
 fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
     let db = ic::get::<CanisterDB>();
     db.get(canister)
