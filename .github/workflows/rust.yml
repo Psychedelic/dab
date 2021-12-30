@@ -69,9 +69,3 @@ jobs:
       - name: Collect Coverage
         id: coverage
         uses: actions-rs/grcov@v0.1
-
-      - name: Coveralls upload
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ${{ steps.coverage.outputs.report }}
