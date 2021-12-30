@@ -6,14 +6,6 @@ type registry = record {
     front_end: opt text;
 };
 
-type input_add_registry = record {
-    principal_id: principal;
-    name: text;
-    description: text;
-    logo_url: text;
-    front_end: opt text;
-};
-
 type operation_error = variant {
     NotAuthorized;
     ParamatersNotPassed;
@@ -31,7 +23,7 @@ service : {
     "get_all"      : () -> (vec registry) query;
     "get_registry"     : (principal) -> (opt registry) query;
 
-    "add_registry"    : (input_add_registry) -> (operation_response);
+    "add_registry"    : (principal, registry) -> (operation_response);
     "remove_registry" : (principal) -> (operation_response);
     "set_admin" : (principal) -> (operation_response);
 }

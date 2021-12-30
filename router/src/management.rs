@@ -15,10 +15,10 @@ pub fn is_admin(account: &Principal) -> bool {
 }
 
 #[update]
-fn set_admin(account: Principal) -> Result<(), Error> {
+fn set_admin(account: Principal) -> Result<(), OperationError> {
     if is_admin(&ic::caller()) {
         ic::get_mut::<Admins>().0.push(account);
         return Ok(());
     }
-    Err(Error::NotAuthorized)
+    Err(OperationError::NotAuthorized)
 }

@@ -21,16 +21,8 @@ impl Registries {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, registry_info: InputAddRegistry) -> Result<(), OperationError> {
-        let registry = Registry {
-            principal_id: registry_info.principal_id,
-            name: registry_info.name,
-            description: registry_info.description,
-            logo_url: registry_info.logo_url,
-            front_end: registry_info.front_end,
-        };
-
-        self.0.insert(registry_info.principal_id.clone(), registry);
+    pub fn add(&mut self, canister: Principal, registry_info: Registry) -> Result<(), OperationError> {
+        self.0.insert(canister, registry_info);
         Ok(())
     }
     
@@ -59,7 +51,7 @@ fn name() -> String {
 }
 
 #[update]
-fn add(registry_info: InputAddRegistry) -> Result<(), OperationError> {
+fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -71,7 +63,7 @@ fn add(registry_info: InputAddRegistry) -> Result<(), OperationError> {
     let name = registry_info.name.clone();
     if name.len() <= 120 && &registry_info.description.len() <= &1200 {
         let db = ic::get_mut::<Registries>();
-        return db.add(registry_info);
+        return db.add(canister, registry_info);
     }
 
     Err(OperationError::BadParameters)
