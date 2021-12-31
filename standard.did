@@ -1,3 +1,15 @@
+type detail_value = variant {
+  I64 : int64;
+  U64 : nat64;
+  Vec : vec detail_value;
+  Slice : vec nat8;
+  Text : text;
+  True;
+  False;
+  Float : float64;
+  Principal : principal;
+};
+
 type metadata = record {
     name: text;
     description: text;
