@@ -1,5 +1,6 @@
 // Project imports
-use crate::registry::{CanisterDB, CanisterMetadata};
+use crate::common_types::CanisterMetadata;
+use crate::registry::CanisterDB;
 use crate::management::Admins;
 
 // IC imports

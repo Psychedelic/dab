@@ -1,6 +1,5 @@
-use ic_kit::candid::{CandidType, Principal};
-use ic_kit::macros::*;
-use ic_kit::*;
+use ic_kit::candid::CandidType;
+use serde::Deserialize;
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Registry {

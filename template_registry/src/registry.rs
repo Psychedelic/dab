@@ -2,20 +2,9 @@ use crate::common_types::*;
 use crate::management::*;
 
 use ic_kit::*;
-use ic_kit::candid::CandidType;
 use ic_kit::macros::*;
-use serde::Deserialize;
 use std::collections::HashMap;
 use validator::validate_url;
-
-// The metadata structure that you want to store in your registry.
-#[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
-pub struct CanisterMetadata {
-    name: String,
-    thumbnail: String,
-    frontend: String,
-    description: String,
-}
 
 // BTreeMaps and HashMaps are the solutions we follow to store our metadata.
 #[derive(Default)]
@@ -69,7 +58,6 @@ fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
     let db = ic::get::<CanisterDB>();
     db.get(canister)
 }
-
 
 // The add method will add new entries to the HashMap
 // This method updates the entry if it already exists
