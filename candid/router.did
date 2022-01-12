@@ -1,9 +1,10 @@
 type registry = record {
-    principal_id: principal;
-    name: text;
-    description: text;
-    logo_url: text;
-    front_end: opt text;
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    details     : vec record { text; detail_value }
+    version     : nat32;
 };
 
 type operation_error = variant {
@@ -20,10 +21,11 @@ type operation_response = variant {
 
 service : {
     "name" : () -> (text) query;
-    "get_all"      : () -> (vec registry) query;
-    "get_registry"     : (principal) -> (opt registry) query;
 
-    "add_registry"    : (principal, registry) -> (operation_response);
-    "remove_registry" : (principal) -> (operation_response);
+    "get"       : (principal) -> (opt registry) query;
+    "add"       : (principal, registry) -> (operation_response);
+    "remove"    : (principal) -> (operation_response);
+    
+    "get_all"   : () -> (vec registry) query;
     "set_admin" : (principal) -> (operation_response);
 }

@@ -5,8 +5,10 @@ use serde::Deserialize;
 pub struct Registry {
     pub name: String,
     pub description: String,
-    pub logo_url: String,
-    pub front_end: Option<String>,
+    pub thumbnail: String,
+    pub frontend: Option<String>,
+    pub details: Vec<(String, String)>,
+    pub version: u32
 }
 
 #[derive(CandidType, Debug)]

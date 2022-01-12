@@ -56,7 +56,7 @@ fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationErro
         return Err(OperationError::NotAuthorized);
     }
 
-    if !validate_url(&registry_info.logo_url) {
+    if !validate_url(&registry_info.thumbnail) {
         return Err(OperationError::BadParameters);
     }
 
@@ -80,7 +80,7 @@ fn remove(principal_id: Principal) -> Result<(), OperationError> {
 }
 
 #[query]
-fn get_registry(principal_id: Principal) -> Option<&'static Registry> {
+fn get(principal_id: Principal) -> Option<&'static Registry> {
     let db = ic::get_mut::<Registries>();
     db.get(&principal_id)
 }

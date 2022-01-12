@@ -15,7 +15,7 @@ pub struct CanisterMetadata {
     pub name: String,
     pub description: String,
     pub thumbnail: String,
-    pub frontend: String,
+    pub frontend: Option<String>,
     pub details: Vec<(String, String)>,
     pub version: u32
 }
