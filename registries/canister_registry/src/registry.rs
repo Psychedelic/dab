@@ -30,19 +30,9 @@ impl Default for Fleek {
 pub struct CanisterMetadata {
     pub name: String,
     pub description: String,
-    pub url: String,
-    pub logo_url: String,
-    pub category: CanisterCategory,
-    pub version: u32,
-}
-
-#[derive(Deserialize, CandidType, Clone)]
-pub struct InputCanisterMetadata {
-    name: String,
-    description: String,
-    url: String,
-    logo_url: String,
-    category: CanisterCategory,
+    pub frontend: Option<String>,
+    pub thumbnail: String,
+    pub details: Vec<(String, String)>,
 }
 
 #[derive(Default)]
@@ -70,19 +60,11 @@ impl CanisterDB {
     pub fn add_canister(
         &mut self,
         canister: Principal,
-        metadata: InputCanisterMetadata,
+        metadata: CanisterMetadata,
     ) -> Result<(), Failure> {
-        let canister_metadata = CanisterMetadata {
-            name: metadata.name,
-            description: metadata.description,
-            url: metadata.url,
-            logo_url: metadata.logo_url,
-            version: 0,
-            category: metadata.category,
-        };
-        self.0.insert(canister, canister_metadata);
+        self.0.insert(canister, metadata);
         if !self.0.contains_key(&canister) {
-            return Err(Failure::UnknownError);
+            return Err(Failure::Unknown(String::from("Something unexpected happend. Try again.")));
         }
         Ok(())
     }
@@ -105,8 +87,7 @@ pub enum Failure {
     NotAuthorized,
     BadParameters,
     NonExistentCanister,
-    InterCanisterCall(String),
-    UnknownError,
+    Unknown(String),
 }
 
 #[init]
@@ -139,13 +120,13 @@ fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>>
 }
 
 #[update]
-fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Result<(), Failure> {
+fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Failure> {
     if !is_fleek(&ic::caller()) {
         return Err(Failure::NotAuthorized);
     } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
-        || !validate_url(&metadata.logo_url)
-        || !validate_url(&metadata.url)
+        || !validate_url(&metadata.thumbnail)
+        || (metadata.frontend.is_some() && !validate_url(&metadata.frontend.clone().unwrap()))
     {
         return Err(Failure::BadParameters);
     }
@@ -155,7 +136,7 @@ fn add_canister(canister: Principal, metadata: InputCanisterMetadata) -> Result<
 }
 
 #[update]
-fn remove_canister(canister: Principal) -> Result<(), Failure> {
+fn remove(canister: Principal) -> Result<(), Failure> {
     if !is_fleek(&ic::caller()) {
         return Err(Failure::NotAuthorized);
     }
@@ -208,23 +189,23 @@ mod tests {
 
         init();
 
-        let canister_info = InputCanisterMetadata {
+        let canister_info = CanisterMetadata {
             name: String::from("XTC"),
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
-            url: String::from("https://frontend_url.com"),
-            logo_url: String::from("https://logo_url.com"),
-            category: CanisterCategory::Service
+            frontend: Some(String::from("https://frontend_url.com")),
+            thumbnail: String::from("https://logo_url.com"),
+            details: vec![(String::from("category"), String::from("service"))]
         };
 
-        let addition = add_canister(mock_principals::xtc(), canister_info.clone());
+        let addition = add(mock_principals::xtc(), canister_info.clone());
         assert!(addition.is_ok());
 
-        let remove_operation = remove_canister(mock_principals::xtc());
+        let remove_operation = remove(mock_principals::xtc());
         assert!(remove_operation.is_ok());
 
         // Bob is not an admin so the operation should not be successful
         ctx.update_caller(mock_principals::bob());
-        let addition = add_canister(mock_principals::xtc(), canister_info.clone());
+        let addition = add(mock_principals::xtc(), canister_info.clone());
         assert!(addition.is_err());
 
         // Alice makes Bob an admin and now he can add/remove canisters
@@ -233,7 +214,7 @@ mod tests {
         assert!(operation.is_ok());
 
         ctx.update_caller(mock_principals::bob());
-        let addition = add_canister(mock_principals::xtc(), canister_info);
+        let addition = add(mock_principals::xtc(), canister_info);
         assert!(addition.is_ok());
     }
 
@@ -246,28 +227,19 @@ mod tests {
 
         init();
 
-        let xtc_info = InputCanisterMetadata {
+        let xtc_info = CanisterMetadata {
             name: String::from("XTC"),
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
-            url: String::from("https://frontend_url.com"),
-            logo_url: String::from("https://logo_url.com"),
-            category: CanisterCategory::Service
+            frontend: Some(String::from("https://frontend_url.com")),
+            thumbnail: String::from("https://logo_url.com"),
+            details: vec![(String::from("category"), String::from("service"))]
         };
 
-        let xtc_metadata = CanisterMetadata {
-            name: String::from("XTC"),
-            description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
-            url: String::from("https://frontend_url.com"),
-            logo_url: String::from("https://logo_url.com"),
-            version: 0,
-            category: CanisterCategory::Service
-        };
-
-        let addition = add_canister(mock_principals::xtc(), xtc_info.clone());
+        let addition = add(mock_principals::xtc(), xtc_info.clone());
         assert!(addition.is_ok());
 
         let operation_get_info = get_info(vec![mock_principals::xtc()]);
-        let expected_response: Vec<Option<&CanisterMetadata>> = vec![Some(&xtc_metadata)];
+        let expected_response: Vec<Option<&CanisterMetadata>> = vec![Some(&xtc_info)];
         assert_eq!(
             operation_get_info[0].unwrap(),
             expected_response[0].unwrap()
@@ -285,36 +257,27 @@ mod tests {
         // We switch back to alice to add another canister
         ctx.update_caller(mock_principals::alice());
 
-        let nft_info = InputCanisterMetadata {
+        let nft_info = CanisterMetadata {
             name: String::from("NFT Registry"),
             description: String::from("DAB's NFT registry provides its users with information for every nft canister in the registry."),
-            url: String::from("https://frontend_url.com"),
-            logo_url: String::from("https://logo_url.com"),
-            category: CanisterCategory::Service
+            frontend: Some(String::from("https://frontend_url.com")),
+            thumbnail: String::from("https://logo_url.com"),
+            details: vec![(String::from("category"), String::from("service"))]
         };
 
-        let nft_metadata = CanisterMetadata {
-            name: String::from("NFT Registry"),
-            description: String::from("DAB's NFT registry provides its users with information for every nft canister in the registry."),
-            url: String::from("https://frontend_url.com"),
-            logo_url: String::from("https://logo_url.com"),
-            version: 0,
-            category: CanisterCategory::Service
-        };
-
-        let addition = add_canister(nft_registry(), nft_info);
+        let addition = add(nft_registry(), nft_info.clone());
         assert!(addition.is_ok());
 
         // Now Bob should be able to ask for both xtc and nft registry canister
         ctx.update_caller(mock_principals::bob());
         let operation_get_info = get_info(vec![mock_principals::xtc(), nft_registry()]);
         let expected_response: Vec<Option<&CanisterMetadata>> =
-            vec![Some(&xtc_metadata), Some(&nft_metadata)];
+            vec![Some(&xtc_info), Some(&nft_info)];
         assert_eq!(operation_get_info, expected_response);
     }
 
     #[test]
-    fn remove() {
+    fn remove_test() {
         // Alice is an admin
         let ctx = MockContext::new()
             .with_caller(mock_principals::alice())
@@ -322,22 +285,22 @@ mod tests {
 
         init();
 
-        let xtc_info = InputCanisterMetadata {
+        let xtc_info = CanisterMetadata {
                 name: String::from("XTC"),
                 description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
-                url: String::from("https://frontend_url.com"),
-                logo_url: String::from("https://logo_url.com"),
-                category: CanisterCategory::Service
+                frontend: Some(String::from("https://frontend_url.com")),
+                thumbnail: String::from("https://logo_url.com"),
+                details: vec![(String::from("category"), String::from("service"))]
             };
 
-        let addition = add_canister(mock_principals::xtc(), xtc_info.clone());
+        let addition = add(mock_principals::xtc(), xtc_info.clone());
         assert!(addition.is_ok());
 
-        let remove_operation = remove_canister(mock_principals::xtc());
+        let remove_operation = remove(mock_principals::xtc());
         assert!(remove_operation.is_ok());
 
         // the canister should return an error if we try to remove a non-existent canister
-        let remove_operation = remove_canister(mock_principals::xtc());
+        let remove_operation = remove(mock_principals::xtc());
         assert_eq!(
             remove_operation.err().unwrap(),
             Failure::NonExistentCanister
@@ -345,7 +308,7 @@ mod tests {
 
         // Bob should not be able to remove a canister because he is not an admin
         ctx.update_caller(mock_principals::bob());
-        let remove_operation = remove_canister(mock_principals::xtc());
+        let remove_operation = remove(mock_principals::xtc());
         assert_eq!(remove_operation.err().unwrap(), Failure::NotAuthorized);
     }
 }
