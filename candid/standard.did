@@ -16,7 +16,6 @@ type metadata = record {
     thumbnail   : text;
     frontend    : opt text;
     details     : vec record { text; detail_value }
-    version     : nat32;
 };
 
 type error = variant {
