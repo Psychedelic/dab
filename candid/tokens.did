@@ -1,44 +1,28 @@
+type detail_value = variant {
+  True;
+  False;
+  I64       : int64;
+  U64       : nat64;
+  Vec       : vec detail_value;
+  Slice     : vec nat8;
+  Text      : text;
+  Float     : float64;
+  Principal : principal;
+};
+
 type token = record {
-    principal_id: principal;
-    name: text;
-    symbol: text;
-    description: text;
-    standard: text;
-    total_supply: opt nat64;
-    logo: text;
-    website: text;
-    verified: bool;
-    timestamp: nat64;
-};
-
-type input_add_token = record {
-    principal_id: principal;
-    name: text;
-    symbol: text;
-    description: text;
-    standard: text;
-    total_supply: opt nat64;
-    logo: text;
-    website: text;
-};
-
-type input_edit_token = record {
-    principal_id: principal;
-    name: opt text;
-    symbol: opt text;
-    description: opt text;
-    standard: opt text;
-    total_supply: opt nat64;
-    logo: opt text;
-    verified: opt bool;
-    website: opt text; 
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    details     : vec record { text; detail_value }
 };
 
 type operation_error = variant {
     NotAuthorized;
-    ParamatersNotPassed;
-    NonExistentToken;
+    NonExistentItem;
     BadParameters;
+    Unknown : text;
 };
 
 type operation_response = variant {
@@ -47,12 +31,13 @@ type operation_response = variant {
 };
 
 service : {
-    "name" : () -> (text) query;
-    "get_all"      : () -> (vec token) query;
-    "get_info"     : (principal) -> (opt token) query;
-
-    "add"    : (input_add_token) -> (operation_response);
-    "edit"   : (input_edit_token) -> (operation_response);
+    // DRS Methods
+    "name"   : () -> (text) query;
+    "get"    : (principal) -> (opt token) query;
+    "add"    : (principal, token) -> (operation_response);
     "remove" : (principal) -> (operation_response);
+    
+    // Canister methods
+    "get_all"  : () -> (vec token) query;
     "set_controller" : (principal) -> (operation_response);
 }

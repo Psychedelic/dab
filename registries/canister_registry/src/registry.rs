@@ -61,7 +61,7 @@ impl CanisterDB {
 
     pub fn remove_canister(&mut self, canister: &Principal) -> Result<(), Failure> {
         if !self.0.contains_key(canister) {
-            return Err(Failure::NonExistentCanister);
+            return Err(Failure::NonExistentItem);
         }
         self.0.remove(canister);
         Ok(())
@@ -76,7 +76,7 @@ impl CanisterDB {
 pub enum Failure {
     NotAuthorized,
     BadParameters,
-    NonExistentCanister,
+    NonExistentItem,
     Unknown(String),
 }
 

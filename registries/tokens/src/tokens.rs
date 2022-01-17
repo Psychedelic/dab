@@ -15,41 +15,11 @@ impl Default for Controllers {
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Token {
-    principal_id: Principal,
-    name: String,
-    symbol: String,
-    description: String,
-    standard: String,
-    total_supply: Option<u64>,
-    logo: String,
-    website: String,
-    verified: bool,
-    timestamp: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct InputAddToken {
-    principal_id: Principal,
-    name: String,
-    symbol: String,
-    description: String,
-    standard: String,
-    total_supply: Option<u64>,
-    logo: String,
-    website: String,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct InputEditToken {
-    principal_id: Principal,
-    name: Option<String>,
-    symbol: Option<String>,
-    description: Option<String>,
-    standard: Option<String>,
-    total_supply: Option<u64>,
-    logo: Option<String>,
-    website: Option<String>,
-    verified: Option<bool>,
+    pub name: String,
+    pub description: String,
+    pub thumbnail: String,
+    pub frontend: Option<String>,
+    pub details: Vec<(String, String)>,
 }
 
 #[derive(Default)]
@@ -65,21 +35,12 @@ impl TokenRegistry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, token_info: InputAddToken) -> Result<(), OperationError> {
-        let token = Token {
-            principal_id: token_info.principal_id,
-            name: token_info.name.clone(),
-            symbol: token_info.symbol,
-            description: token_info.description,
-            standard: token_info.standard,
-            total_supply: token_info.total_supply,
-            logo: token_info.logo,
-            website: token_info.website,
-            verified: false,
-            timestamp: ic::time(),
-        };
-
-        self.0.insert(token_info.principal_id.clone(), token);
+    pub fn add(
+        &mut self,
+        principal_id: Principal,
+        token_info: Token,
+    ) -> Result<(), OperationError> {
+        self.0.insert(principal_id, token_info);
         Ok(())
     }
 
@@ -89,48 +50,7 @@ impl TokenRegistry {
             return Ok(());
         }
 
-        Err(OperationError::NonExistentToken)
-    }
-
-    pub fn edit(&mut self, token_info: InputEditToken) -> Result<(), OperationError> {
-        match self.0.get_mut(&token_info.principal_id) {
-            None => return Err(OperationError::NonExistentToken),
-            Some(token) => {
-                if token_info.name.is_some() {
-                    token.name = token_info.name.unwrap();
-                }
-
-                if token_info.symbol.is_some() {
-                    token.symbol = token_info.symbol.unwrap();
-                }
-
-                if token_info.description.is_some() {
-                    token.description = token_info.description.unwrap();
-                }
-
-                if token_info.standard.is_some() {
-                    token.standard = token_info.standard.unwrap();
-                }
-
-                if token_info.total_supply.is_some() {
-                    token.total_supply = Some(token_info.total_supply.unwrap());
-                }
-
-                if token_info.logo.is_some() {
-                    token.logo = token_info.logo.unwrap();
-                }
-
-                if token_info.website.is_some() {
-                    token.website = token_info.website.unwrap();
-                }
-
-                if token_info.verified.is_some() {
-                    token.verified = token_info.verified.unwrap();
-                }
-
-                return Ok(());
-            }
-        }
+        Err(OperationError::NonExistentItem)
     }
 
     pub fn get_info(&self, principal_id: &Principal) -> Option<&Token> {
@@ -168,28 +88,45 @@ fn name() -> String {
 #[derive(CandidType, Debug)]
 pub enum OperationError {
     NotAuthorized,
-    ParamatersNotPassed,
-    NonExistentToken,
+    NonExistentItem,
     BadParameters,
+    Unknown(String),
 }
 
 #[update]
-fn add(token_info: InputAddToken) -> Result<(), OperationError> {
+fn add(principal_id: Principal, token: Token) -> Result<(), OperationError> {
+    // Check authorization
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
-    if !validate_url(&token_info.logo) || !validate_url(&token_info.website) {
+    // Check URLs
+    if !validate_url(&token.thumbnail)
+        || (token.frontend.is_some() && !validate_url(&token.frontend.clone().unwrap()))
+    {
         return Err(OperationError::BadParameters);
     }
 
-    let name = token_info.name.clone();
-    if name.len() <= 120 && &token_info.description.len() <= &1200 {
-        let db = ic::get_mut::<TokenRegistry>();
-        return db.add(token_info);
+    // Check Character Limits
+    let name = token.name.clone();
+    if name.len() > 120 && &token.description.len() > &1200 {
+        return Err(OperationError::BadParameters);
     }
 
-    Err(OperationError::BadParameters)
+    // Check details
+    if token.details.len() != 4
+        || token.details[0].0 != String::from("symbol")
+        || token.details[1].0 != String::from("standard")
+        || token.details[2].0 != String::from("total_supply")
+        || token.details[3].0 != String::from("verified")
+        || (token.details[3].1 != String::from("true")
+            && token.details[3].1 != String::from("false"))
+    {
+        return Err(OperationError::BadParameters);
+    }
+
+    let db = ic::get_mut::<TokenRegistry>();
+    return db.add(principal_id, token);
 }
 
 #[update]
@@ -202,26 +139,8 @@ fn remove(principal_id: Principal) -> Result<(), OperationError> {
     db.remove(&principal_id)
 }
 
-#[update]
-fn edit(token_info: InputEditToken) -> Result<(), OperationError> {
-    if !is_controller(&ic::caller()) {
-        return Err(OperationError::NotAuthorized);
-    }
-
-    if token_info.logo.is_some() && !validate_url(&token_info.logo.clone().unwrap()) {
-        return Err(OperationError::BadParameters);
-    }
-
-    if token_info.website.is_some() && !validate_url(&token_info.website.clone().unwrap()) {
-        return Err(OperationError::BadParameters);
-    }
-
-    let db = ic::get_mut::<TokenRegistry>();
-    return db.edit(token_info);
-}
-
 #[query]
-fn get_info(principal_id: Principal) -> Option<&'static Token> {
+fn get(principal_id: Principal) -> Option<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_info(&principal_id)
 }
@@ -244,18 +163,20 @@ mod tests {
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("https://logo.com"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(mock_principals::xtc(), token_info).is_ok());
     }
 
     #[test]
@@ -266,18 +187,20 @@ mod tests {
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("bad logo url"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("bad logo url"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
-        assert!(add(token_info).is_err());
+        assert!(add(mock_principals::xtc(), token_info).is_err());
     }
 
     #[test]
@@ -288,130 +211,22 @@ mod tests {
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("https://logo.com"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
         context.update_caller(mock_principals::bob());
 
-        assert!(add(token_info).is_err());
-    }
-
-    #[test]
-    fn test_edit_token_successfuly() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
-            name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
-            description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
-        };
-
-        assert!(add(token_info).is_ok());
-
-        let token_new_info = InputEditToken {
-            principal_id: mock_principals::xtc(),
-            name: Some(String::from("Wrapped ICP")),
-            symbol: None,
-            description: None,
-            standard: None,
-            logo: None,
-            website: None,
-            total_supply: None,
-            verified: None,
-        };
-
-        assert!(edit(token_new_info).is_ok());
-    }
-
-    #[test]
-    fn test_edit_token_fails_because_of_bad_params() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
-            name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
-            description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
-        };
-
-        assert!(add(token_info).is_ok());
-
-        let token_new_info = InputEditToken {
-            principal_id: mock_principals::bob(),
-            name: Some(String::from("Wrapped ICP")),
-            symbol: None,
-            description: None,
-            standard: None,
-            logo: Some(String::from("bad logo url")),
-            website: None,
-            total_supply: None,
-            verified: None,
-        };
-
-        assert!(edit(token_new_info).is_err());
-    }
-
-    #[test]
-    fn test_edit_token_fails_because_of_unauthorized_caller() {
-        let context = MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
-            name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
-            description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
-        };
-
-        assert!(add(token_info).is_ok());
-
-        let token_new_info = InputEditToken {
-            principal_id: mock_principals::bob(),
-            name: Some(String::from("Wrapped ICP")),
-            symbol: None,
-            description: None,
-            standard: None,
-            logo: None,
-            website: None,
-            total_supply: None,
-            verified: None,
-        };
-
-        context.update_caller(mock_principals::bob());
-
-        assert!(edit(token_new_info).is_err());
+        assert!(add(mock_principals::xtc(), token_info).is_err());
     }
 
     #[test]
@@ -422,18 +237,20 @@ mod tests {
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("https://logo.com"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(mock_principals::xtc(), token_info).is_ok());
 
         assert!(remove(mock_principals::xtc()).is_ok());
     }
@@ -446,18 +263,20 @@ mod tests {
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("https://logo.com"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(mock_principals::xtc(), token_info).is_ok());
 
         context.update_caller(mock_principals::bob());
 
@@ -472,18 +291,20 @@ mod tests {
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("https://logo.com"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(mock_principals::xtc(), token_info).is_ok());
 
         let tokens = get_all();
 
@@ -504,40 +325,42 @@ mod tests {
     }
 
     #[test]
-    fn test_get_info_succesfully() {
+    fn test_get_succesfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
 
         init();
 
-        let token_info = InputAddToken {
-            principal_id: mock_principals::xtc(),
+        let token_info = Token {
             name: String::from("Wrapped ICP"),
-            symbol: String::from("WICP"),
             description: String::from("Wrapped IPC description"),
-            standard: String::from("DIP20"),
-            logo: String::from("https://logo.com"),
-            website: String::from("https://website.com"),
-            total_supply: Some(1000),
+            thumbnail: String::from("https://logo.com"),
+            frontend: Some(String::from("https://website.com")),
+            details: vec![
+                (String::from("symbol"), String::from("WICP")),
+                (String::from("standard"), String::from("DIP20")),
+                (String::from("total_supply"), String::from("1000")),
+                (String::from("verified"), String::from("true")),
+            ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(mock_principals::xtc(), token_info).is_ok());
 
-        let token = get_info(mock_principals::xtc());
+        let token = get(mock_principals::xtc());
 
         assert!(token.is_some());
     }
 
     #[test]
-    fn test_get_info_returns_none_succesfully() {
+    fn test_get_returns_none_succesfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
 
         init();
 
-        let token = get_info(mock_principals::xtc());
+        let token = get(mock_principals::xtc());
 
         assert!(token.is_none());
     }

@@ -20,7 +20,7 @@ type metadata = record {
 
 type error = variant {
     NotAuthorized;
-    NonExistantCanister;
+    NonExistentItem;
     BadParameters;
     Unknown : text;
 }
