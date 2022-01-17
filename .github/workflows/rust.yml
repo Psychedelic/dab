@@ -1,0 +1,70 @@
+name: DAB Test/Coverage Runner
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+
+    runs-on: ubuntu-latest
+    
+    container:
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.PRIVATE_ACCESS_TOKEN }}
+        
+    steps:
+    - uses: actions/checkout@v2
+    - name: Lint
+      run: cargo fmt --all -- --check
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Rust toolchain
+        run: .github/scripts/rust-toolchain.sh
+
+      - name: Target clean cache
+        id: target-clean-cache
+        uses: actions/cache@v2
+        with:
+          path: .github/target_clean
+          key: cache-${{ runner.os }}-target-clean-cache-${{ hashFiles('.github/target_clean') }}
+
+      - name: Target dir cache
+        id: target-dir-cache
+        uses: actions/cache@v2
+        with:
+          path: target
+          key: cache-${{ runner.os }}-target-dir-cache-${{ hashFiles('cargo.lock') }}
+
+      - name: Target dir clean
+        # if: steps.target-dir-cache.outputs.cache-hit != 'true' || steps.target-clean-cache.outputs.cache-hit != 'true'
+        run: cargo clean
+
+      - name: Build
+        run: node build.js registry && node build.js nft && node build.js tokens
+
+      - name: Cargo Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --no-fail-fast
+        env:
+          CARGO_INCREMENTAL: '0'
+          RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Cpanic=abort -Zpanic_abort_tests'
+          RUSTDOCFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+
+      - name: Collect Coverage
+        id: coverage
+        uses: actions-rs/grcov@v0.1
