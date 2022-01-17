@@ -1,8 +1,8 @@
 use crate::common_types::*;
 use crate::management::*;
 
-use ic_kit::*;
 use ic_kit::macros::*;
+use ic_kit::*;
 use std::collections::HashMap;
 use validator::validate_url;
 
@@ -28,7 +28,7 @@ impl CanisterDB {
 
     pub fn add(&mut self, canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
         // Whether the canister has already been added to the registry or not
-        // this method will add it to the hashmap. If it is already a part of 
+        // this method will add it to the hashmap. If it is already a part of
         // the HashMap, its metadata will be replaced by the new metadata.
         self.0.insert(canister, metadata);
         return Ok(());
@@ -43,7 +43,7 @@ impl CanisterDB {
         } else {
             // No metadata has been associated with this canister principal id.
             // We can't remove it if it's not there.
-            return Err(Error::NonExistantCanister);
+            return Err(Error::NonExistentItem);
         }
     }
 }
@@ -66,11 +66,14 @@ fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
     if is_admin(&ic::caller()) {
         // The caller is one of the admins.
         // The next step is verifying URLs
-        if validate_url(metadata.thumbnail.clone()) && validate_url(metadata.frontend.clone()) {
-            let db = ic::get_mut::<CanisterDB>();
-            return db.add(canister, metadata);
+        if metadata.details.len() != 0
+            || !validate_url(metadata.thumbnail.clone())
+            || (metadata.frontend.is_some() && !validate_url(metadata.frontend.clone().unwrap()))
+        {
+            return Err(Error::BadParameters);
         }
-        return Err(Error::BadParameters);
+        let db = ic::get_mut::<CanisterDB>();
+        return db.add(canister, metadata);
     }
     Err(Error::NotAuthorized)
 }

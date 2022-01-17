@@ -1,6 +1,6 @@
 use crate::common_types::*;
-use ic_kit::*;
 use ic_kit::macros::*;
+use ic_kit::*;
 
 #[derive(Default)]
 pub struct Admins(pub Vec<Principal>);

@@ -3,10 +3,10 @@ use serde::Deserialize;
 
 #[derive(CandidType)]
 pub enum Error {
-    CanisterAlreadyExists,
+    NotAuthorized,
     BadParameters,
-    NonExistantCanister,
-    NotAuthorized
+    NonExistentItem,
+    Unknown(String),
 }
 
 // The metadata structure that you want to store in your registry.
@@ -17,5 +17,4 @@ pub struct CanisterMetadata {
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub details: Vec<(String, String)>,
-    pub version: u32
 }

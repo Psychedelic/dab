@@ -1,13 +1,13 @@
 // Project imports
 use crate::common_types::CanisterMetadata;
-use crate::registry::CanisterDB;
 use crate::management::Admins;
+use crate::registry::CanisterDB;
 
 // IC imports
-use ic_kit::*;
+use ic_kit::candid::CandidType;
 use ic_kit::ic::*;
 use ic_kit::macros::*;
-use ic_kit::candid::CandidType;
+use ic_kit::*;
 use serde::Deserialize;
 
 #[derive(CandidType, Deserialize)]
