@@ -1,17 +1,28 @@
+type detail_value = variant {
+  True;
+  False;
+  I64       : int64;
+  U64       : nat64;
+  Vec       : vec detail_value;
+  Slice     : vec nat8;
+  Text      : text;
+  Float     : float64;
+  Principal : principal;
+};
+
 type registry = record {
     name        : text;
     description : text;
     thumbnail   : text;
     frontend    : opt text;
     details     : vec record { text; detail_value }
-    version     : nat32;
 };
 
 type operation_error = variant {
     NotAuthorized;
-    ParamatersNotPassed;
-    NonExistentRegistry;
+    NonExistentItem;
     BadParameters;
+    Unknown : text;
 };
 
 type operation_response = variant {
@@ -20,12 +31,13 @@ type operation_response = variant {
 };
 
 service : {
-    "name" : () -> (text) query;
-
-    "get"       : (principal) -> (opt registry) query;
-    "add"       : (principal, registry) -> (operation_response);
-    "remove"    : (principal) -> (operation_response);
+    // DRS methods
+    "name"   : () -> (text) query;
+    "get"    : (principal) -> (opt registry) query;
+    "add"    : (principal, registry) -> (operation_response);
+    "remove" : (principal) -> (operation_response);
     
+    // Canister methods
     "get_all"   : () -> (vec registry) query;
     "set_admin" : (principal) -> (operation_response);
 }

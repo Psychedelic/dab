@@ -1,10 +1,9 @@
 use crate::common_types::*;
 use crate::management::*;
 
-use ic_kit::candid::{CandidType, Principal};
+use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
-use serde::Deserialize;
 use std::collections::HashMap;
 use validator::validate_url;
 
@@ -21,11 +20,14 @@ impl Registries {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, canister: Principal, registry_info: Registry) -> Result<(), OperationError> {
+    pub fn add(
+        &mut self,
+        canister: Principal,
+        registry_info: Registry,
+    ) -> Result<(), OperationError> {
         self.0.insert(canister, registry_info);
         Ok(())
     }
-    
 
     pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
         if self.0.contains_key(principal_id) {
@@ -33,7 +35,7 @@ impl Registries {
             return Ok(());
         }
 
-        Err(OperationError::NonExistentRegistry)
+        Err(OperationError::NonExistentItem)
     }
 
     pub fn get(&self, principal_id: &Principal) -> Option<&Registry> {
@@ -61,7 +63,10 @@ fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationErro
     }
 
     let name = registry_info.name.clone();
-    if name.len() <= 120 && &registry_info.description.len() <= &1200 {
+    if name.len() <= 120
+        && &registry_info.description.len() <= &1200
+        && registry_info.details.len() == 0
+    {
         let db = ic::get_mut::<Registries>();
         return db.add(canister, registry_info);
     }

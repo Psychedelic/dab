@@ -8,13 +8,12 @@ pub struct Registry {
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub details: Vec<(String, String)>,
-    pub version: u32
 }
 
 #[derive(CandidType, Debug)]
 pub enum OperationError {
     NotAuthorized,
-    ParamatersNotPassed,
-    NonExistentRegistry,
+    NonExistentItem,
     BadParameters,
+    Unknown(String),
 }
