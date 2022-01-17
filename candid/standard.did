@@ -22,7 +22,7 @@ type error = variant {
     NotAuthorized;
     NonExistantCanister;
     BadParameters;
-    Unknown;
+    Unknown : text;
 }
 
 type response = variant {
