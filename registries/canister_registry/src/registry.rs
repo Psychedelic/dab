@@ -10,16 +10,6 @@ const NAME_LIMIT: usize = 24;
 
 pub struct Fleek(pub Vec<Principal>);
 
-#[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
-pub enum CanisterCategory {
-    Tools,
-    NFT,
-    Service,
-    Token,
-    Social,
-    Games,
-}
-
 impl Default for Fleek {
     fn default() -> Self {
         panic!()
