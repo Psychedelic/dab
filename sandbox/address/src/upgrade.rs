@@ -1,4 +1,4 @@
-use crate::ab::{AddressBook};
+use crate::ab::AddressBook;
 
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_cdk::*;
@@ -15,9 +15,7 @@ struct StableStorage {
 pub fn pre_upgrade() {
     let address_book = storage::get_mut::<AddressBook>().archive();
 
-    let stable = StableStorage {
-        address_book,
-    };
+    let stable = StableStorage { address_book };
 
     match storage::stable_save((stable,)) {
         Ok(_) => (),

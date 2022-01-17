@@ -14,9 +14,7 @@ struct StableStorage {
 pub fn pre_upgrade() {
     let profile_db = ic::get_mut::<ProfileDB>().archive();
 
-    let stable = StableStorage {
-        profile_db,
-    };
+    let stable = StableStorage { profile_db };
 
     match ic::stable_store((stable,)) {
         Ok(_) => (),
