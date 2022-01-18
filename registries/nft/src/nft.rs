@@ -150,11 +150,11 @@ pub type OperationSuccessful = bool;
 
 #[update]
 fn add(canister_info: InputNftCanister) -> Result<OperationSuccessful, OperationError> {
-    // if !is_controller(&ic::caller()) {
-    //     return Err(OperationError::NotAuthorized);
-    // } else if !validate_url(&canister_info.icon) {
-    //     return Err(OperationError::BadParameters);
-    // }
+    if !is_controller(&ic::caller()) {
+        return Err(OperationError::NotAuthorized);
+    } else if !validate_url(&canister_info.icon) {
+        return Err(OperationError::BadParameters);
+    }
 
     let name = canister_info.name.clone();
     if name.len() <= 120 && &canister_info.description.len() <= &1200 {

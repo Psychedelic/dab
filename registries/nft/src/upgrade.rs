@@ -42,7 +42,6 @@ pub fn post_upgrade() {
 
         for (_key, nft_canister) in stable.db.into_iter().enumerate() {
             let mut nft_canister_metadata: NftCanister = nft_canister.1.into();
-            nft_canister_metadata.name = String::from("NEW TEST NAME");
             updated_nft_canisters.push((nft_canister_metadata.principal_id, nft_canister_metadata));
         }
 
