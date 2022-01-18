@@ -3,7 +3,6 @@ use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
-use std::collections::HashMap;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorageV0 {
@@ -41,7 +40,7 @@ pub fn post_upgrade() {
         let mut updated_nft_canisters = Vec::with_capacity(stable.db.len());
 
         for (_key, nft_canister) in stable.db.into_iter().enumerate() {
-            let mut nft_canister_metadata: NftCanister = nft_canister.1.into();
+            let nft_canister_metadata: NftCanister = nft_canister.1.into();
             updated_nft_canisters.push((nft_canister_metadata.principal_id, nft_canister_metadata));
         }
 

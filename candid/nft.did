@@ -34,7 +34,7 @@ service : {
     "remove" : (principal) -> (operation_response);
     "edit"   : (principal, opt text, opt text, opt text, opt text) -> (operation_response);
     
-    "get_canister" : (principal) -> (opt nft_canister) query;
+    "get" : (principal) -> (opt nft_canister) query;
     "get_all"      : () -> (vec nft_canister) query;
     "set_controller" : (principal) -> (operation_response);
 }

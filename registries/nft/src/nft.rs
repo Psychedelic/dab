@@ -124,7 +124,7 @@ impl Registry {
         }
     }
 
-    pub fn get_canister(&self, principal_id: &Principal) -> Option<&NftCanister> {
+    pub fn get(&self, principal_id: &Principal) -> Option<&NftCanister> {
         self.0.get(principal_id)
     }
 
@@ -198,9 +198,9 @@ fn edit(
 }
 
 #[query]
-fn get_canister(principal_id: Principal) -> Option<&'static NftCanister> {
+fn get(principal_id: Principal) -> Option<&'static NftCanister> {
     let db = ic::get_mut::<Registry>();
-    db.get_canister(&principal_id)
+    db.get(&principal_id)
 }
 
 #[query]
@@ -280,7 +280,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_canister() {
+    fn test_get() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .with_data(Controller(mock_principals::alice()))
@@ -297,10 +297,10 @@ mod tests {
         assert!(add(canister_info.clone()).is_ok());
 
         assert_eq!(
-            get_canister(mock_principals::xtc()).unwrap().name,
+            get(mock_principals::xtc()).unwrap().name,
             canister_info.name
         );
-        assert!(get_canister(mock_principals::alice()).is_none());
+        assert!(get(mock_principals::alice()).is_none());
     }
 
     #[test]
