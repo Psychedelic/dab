@@ -92,38 +92,6 @@ impl Registry {
         Err(OperationError::NonExistentCanister)
     }
 
-    pub fn edit(
-        &mut self,
-        principal_id: Principal,
-        name: Option<String>,
-        standard: Option<String>,
-        icon: Option<String>,
-        description: Option<String>,
-    ) -> Result<OperationSuccessful, OperationError> {
-        match self.0.get_mut(&principal_id) {
-            None => return Err(OperationError::NonExistentCanister),
-            Some(canister) => {
-                if name.is_some() {
-                    canister.name = name.unwrap();
-                }
-
-                if standard.is_some() {
-                    canister.standard = standard.unwrap();
-                }
-
-                if icon.is_some() {
-                    canister.icon = icon.unwrap();
-                }
-
-                if description.is_some() {
-                    canister.description = description.unwrap();
-                }
-
-                return Ok(true);
-            }
-        }
-    }
-
     pub fn get(&self, principal_id: &Principal) -> Option<&NftCanister> {
         self.0.get(principal_id)
     }
@@ -173,28 +141,6 @@ fn remove(principal_id: Principal) -> Result<OperationSuccessful, OperationError
 
     let db = ic::get_mut::<Registry>();
     db.remove(&principal_id)
-}
-
-#[update]
-fn edit(
-    principal_id: Principal,
-    name: Option<String>,
-    standard: Option<String>,
-    icon: Option<String>,
-    description: Option<String>,
-) -> Result<OperationSuccessful, OperationError> {
-    if !is_controller(&ic::caller()) {
-        return Err(OperationError::NotAuthorized);
-    } else if name.is_none() && standard.is_none() && icon.is_none() && description.is_none() {
-        return Err(OperationError::ParamatersNotPassed);
-    } else if !validate_url(&icon.clone().unwrap()) {
-        return Err(OperationError::BadParameters);
-    } else if &description.clone().unwrap().len() > &1200 {
-        return Err(OperationError::BadParameters);
-    } else {
-        let db = ic::get_mut::<Registry>();
-        return db.edit(principal_id, name, standard, icon, description);
-    }
 }
 
 #[query]
