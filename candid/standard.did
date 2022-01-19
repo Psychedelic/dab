@@ -11,11 +11,12 @@ type detail_value = variant {
 };
 
 type metadata = record {
-    name        : text;
-    description : text;
-    thumbnail   : text;
-    frontend    : opt text;
-    details     : vec record { text; detail_value }
+    name         : text;
+    description  : text;
+    thumbnail    : text;
+    frontend     : opt text;
+    principal_id : principal;
+    details      : vec record { text; detail_value }
 };
 
 type error = variant {
