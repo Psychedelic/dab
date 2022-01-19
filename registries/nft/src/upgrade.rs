@@ -1,4 +1,4 @@
-use crate::nft::{Controller, NftCanister, Registry};
+use crate::nft::{Controller, NftCanister, NftCanisterV0, Detail, Registry};
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
@@ -6,7 +6,7 @@ use ic_kit::*;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorageV0 {
-    db: Vec<(String, NftCanister)>,
+    db: Vec<(String, NftCanisterV0)>,
     controller: Principal,
 }
 
@@ -40,8 +40,19 @@ pub fn post_upgrade() {
         let mut updated_nft_canisters = Vec::with_capacity(stable.db.len());
 
         for (_key, nft_canister) in stable.db.into_iter().enumerate() {
-            let nft_canister_metadata: NftCanister = nft_canister.1.into();
-            updated_nft_canisters.push((nft_canister_metadata.principal_id, nft_canister_metadata));
+            let nft_canister_metadata: NftCanisterV0 = nft_canister.1.into();
+            
+            let updated_nft_canister_metadata: NftCanister = NftCanister {
+                principal_id: nft_canister_metadata.principal_id,
+                name: nft_canister_metadata.name.clone(),
+                description: nft_canister_metadata.description.clone(),
+                thumbnail: nft_canister_metadata.icon.clone(),
+                details: vec![
+                    (String::from("timestamp"), Detail::Number(nft_canister_metadata.timestamp)),
+                ],
+            };
+
+            updated_nft_canisters.push((updated_nft_canister_metadata.principal_id, updated_nft_canister_metadata));
         }
 
         ic::get_mut::<Registry>().load(updated_nft_canisters);

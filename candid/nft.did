@@ -12,7 +12,7 @@ type input_nft_canister = record {
     name: text;
     standard: text;
     description: text;
-    icon: text;
+    thumbnail: text;
 };
 
 type operation_error = variant {
@@ -32,7 +32,6 @@ service : {
 
     "add"    : (input_nft_canister) -> (operation_response);
     "remove" : (principal) -> (operation_response);
-    "edit"   : (principal, opt text, opt text, opt text, opt text) -> (operation_response);
     
     "get" : (principal) -> (opt nft_canister) query;
     "get_all"      : () -> (vec nft_canister) query;
