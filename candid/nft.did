@@ -1,39 +1,44 @@
+type detail_value = variant {
+  True;
+  False;
+  I64       : int64;
+  U64       : nat64;
+  Vec       : vec detail_value;
+  Slice     : vec nat8;
+  Text      : text;
+  Float     : float64;
+  Principal : principal;
+};
+
 type nft_canister = record {
     principal_id: principal;
     name: text;
-    standard: text;
-    description: text;
-    icon: text;
-    timestamp: nat64
-};
-
-type input_nft_canister = record {
-    principal_id: principal;
-    name: text;
-    standard: text;
     description: text;
     thumbnail: text;
+    frontend: opt text;
+    details     : vec record { text; detail_value };
 };
 
 type operation_error = variant {
     NotAuthorized;
-    ParamatersNotPassed;
-    NonExistentCanister;
+    NonExistentItem;
     BadParameters;
+    Unknown : text;
 };
 
 type operation_response = variant {
-    Ok  : bool;
+    Ok  : opt text;
     Err : operation_error;
 };
 
 service : {
+    // DRS methods
     "name" : () -> (text) query;
-
-    "add"    : (input_nft_canister) -> (operation_response);
+    "get" : (principal) -> (principal) query;
+    "add"    : (nft_canister) -> (operation_response);
     "remove" : (principal) -> (operation_response);
-    
-    "get" : (principal) -> (opt nft_canister) query;
+
+    // Canister ethods    
     "get_all"      : () -> (vec nft_canister) query;
     "set_controller" : (principal) -> (operation_response);
 }

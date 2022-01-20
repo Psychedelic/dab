@@ -23,10 +23,10 @@ fn is_controller(account: &Principal) -> bool {
 }
 
 #[update]
-fn set_controller(new_controller: Principal) -> Result<OperationSuccessful, OperationError> {
+fn set_controller(new_controller: Principal) -> Result<(), OperationError> {
     if is_controller(&ic::caller()) {
         ic::store(Controller(new_controller));
-        return Ok(true);
+        return Ok(());
     }
     Err(OperationError::NotAuthorized)
 }
@@ -36,15 +36,9 @@ pub struct NftCanisterV0 {
     pub principal_id: Principal,
     pub name: String,
     pub description: String,
+    pub standard: String,
     pub icon: String,
     pub timestamp: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub enum Detail {
-    Principal,
-    String,
-    Number(u64),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
@@ -53,7 +47,8 @@ pub struct NftCanister {
     pub name: String,
     pub description: String,
     pub thumbnail: String,
-    pub details: Vec<(String, Detail)>,
+    pub frontend: Option<String>,
+    pub details: Vec<(String, String)>,
 }
 
 #[derive(Default)]
@@ -64,31 +59,29 @@ impl Registry {
         let map = std::mem::replace(&mut self.0, HashMap::new());
         map.into_iter().collect()
     }
+
     pub fn load(&mut self, archive: Vec<(Principal, NftCanister)>) {
         self.0 = archive.into_iter().collect();
     }
 
     pub fn add(
         &mut self,
-        mut canister_info: NftCanister,
-    ) -> Result<OperationSuccessful, OperationError> {
-
-        canister_info.details.push((String::from("timestamp"), Detail::Number(ic::time())));
-
+        canister_info: NftCanister,
+    ) -> Result<(), OperationError> {
         self.0.insert(canister_info.principal_id, canister_info);
-        Ok(true)
+        Ok(())
     }
 
     pub fn remove(
         &mut self,
         principal_id: &Principal,
-    ) -> Result<OperationSuccessful, OperationError> {
+    ) -> Result<(), OperationError> {
         if self.0.contains_key(principal_id) {
             self.0.remove(principal_id);
-            return Ok(true);
+            return Ok(());
         }
 
-        Err(OperationError::NonExistentCanister)
+        Err(OperationError::NonExistentItem)
     }
 
     pub fn get(&self, principal_id: &Principal) -> Option<&NftCanister> {
@@ -108,17 +101,22 @@ fn name() -> String {
 #[derive(CandidType)]
 pub enum OperationError {
     NotAuthorized,
-    NonExistentCanister,
+    NonExistentItem,
     BadParameters,
+    Unknown(String),
 }
 
-pub type OperationSuccessful = bool;
-
 #[update]
-fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError> {
+fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
-    } else if !validate_url(&canister_info.thumbnail) {
+    } 
+    
+    if !validate_url(&canister_info.thumbnail) {
+        return Err(OperationError::BadParameters);
+    }
+
+    if canister_info.frontend.is_some() && !validate_url(&canister_info.frontend.clone().unwrap()) {
         return Err(OperationError::BadParameters);
     }
 
@@ -144,7 +142,7 @@ fn add(canister_info: NftCanister) -> Result<OperationSuccessful, OperationError
 }
 
 #[update]
-fn remove(principal_id: Principal) -> Result<OperationSuccessful, OperationError> {
+fn remove(principal_id: Principal) -> Result<(), OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }

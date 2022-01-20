@@ -1,4 +1,4 @@
-use crate::nft::{Controller, NftCanister, NftCanisterV0, Detail, Registry};
+use crate::nft::{Controller, NftCanister, NftCanisterV0, Registry};
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
@@ -47,9 +47,8 @@ pub fn post_upgrade() {
                 name: nft_canister_metadata.name.clone(),
                 description: nft_canister_metadata.description.clone(),
                 thumbnail: nft_canister_metadata.icon.clone(),
-                details: vec![
-                    (String::from("timestamp"), Detail::Number(nft_canister_metadata.timestamp)),
-                ],
+                frontend: None,
+                details: vec![(String::from("standard"), nft_canister_metadata.standard)],
             };
 
             updated_nft_canisters.push((updated_nft_canister_metadata.principal_id, updated_nft_canister_metadata));
