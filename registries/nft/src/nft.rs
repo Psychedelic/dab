@@ -32,16 +32,6 @@ fn set_controller(new_controller: Principal) -> Result<(), OperationError> {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct NftCanisterV0 {
-    pub principal_id: Principal,
-    pub name: String,
-    pub description: String,
-    pub standard: String,
-    pub icon: String,
-    pub timestamp: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct NftCanister {
     pub principal_id: Principal,
     pub name: String,
