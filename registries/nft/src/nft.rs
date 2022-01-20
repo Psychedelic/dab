@@ -100,13 +100,11 @@ pub enum OperationError {
 fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
-    }
-
-    if !validate_url(&canister_info.thumbnail) {
+    } else if !validate_url(&canister_info.thumbnail) {
         return Err(OperationError::BadParameters);
-    }
-
-    if canister_info.frontend.is_some() && !validate_url(&canister_info.frontend.clone().unwrap()) {
+    } else if canister_info.frontend.is_some() && !validate_url(&canister_info.frontend.clone().unwrap()) {
+        return Err(OperationError::BadParameters);
+    } else if canister_info.details[0].0 != String::from("standard") {
         return Err(OperationError::BadParameters);
     }
 
