@@ -111,16 +111,10 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     }
 
     // Check details
-    // if canister_info.details.len() != 4
-    //     || canister_info.details[0].0 != String::from("symbol")
-    //     || canister_info.details[1].0 != String::from("standard")
-    //     || canister_info.details[2].0 != String::from("total_supply")
-    //     || canister_info.details[3].0 != String::from("verified")
-    //     || (canister_info.details[3].1 != String::from("true")
-    //         && canister_info.details[3].1 != String::from("false"))
-    // {
-    //     return Err(OperationError::BadParameters);
-    // }
+    if canister_info.details.len() != 1 || canister_info.details[1].0 != String::from("standard")
+    {
+        return Err(OperationError::BadParameters);
+    }
 
     let name = canister_info.name.clone();
     if name.len() <= 120 && &canister_info.description.len() <= &1200 {
