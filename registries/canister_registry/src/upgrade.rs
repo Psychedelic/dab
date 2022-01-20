@@ -41,7 +41,8 @@ impl From<CanisterMetadataV0> for CanisterMetadata {
             description: cs.description,
             frontend: Some(cs.url),
             thumbnail: cs.logo_url,
-            details: vec![(String::from("category"), cs.category.to_string())],
+            principal_id: Principal::from_text("aaaa").unwrap(),
+            details: vec![(String::from("category"), cs.category.to_string())]
         }
     }
 }
@@ -82,8 +83,9 @@ pub fn post_upgrade() {
         let mut canister_list = Vec::with_capacity(stable.db.len());
 
         for (_key, canister_info) in stable.db.into_iter().enumerate() {
-            let metadata_info: CanisterMetadata = canister_info.1.into();
+            let mut metadata_info: CanisterMetadata = canister_info.1.into();
             let principal_info: Principal = canister_info.0.into();
+            metadata_info.principal_id = principal_info;
 
             canister_list.push((principal_info, metadata_info));
         }
