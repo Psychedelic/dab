@@ -33,6 +33,7 @@ impl From<TokenV0> for Token {
             description: cs.description,
             frontend: Some(cs.website),
             thumbnail: cs.logo,
+            principal_id: Principal::from_text("aaaa").unwrap(),
             details: vec![
                 (String::from("symbol"), cs.symbol),
                 (String::from("standard"), cs.standard),
@@ -82,8 +83,9 @@ pub fn post_upgrade() {
         let mut token_list = Vec::with_capacity(stable.db.len());
 
         for (_key, token_info) in stable.db.into_iter().enumerate() {
-            let metadata_info: Token = token_info.1.into();
+            let mut metadata_info: Token = token_info.1.into();
             let principal_info: Principal = token_info.0.into();
+            metadata_info.principal_id = principal_info;
 
             token_list.push((principal_info, metadata_info));
         }
