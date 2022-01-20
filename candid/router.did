@@ -11,6 +11,7 @@ type detail_value = variant {
 };
 
 type registry = record {
+    principal_id: principal;
     name        : text;
     description : text;
     thumbnail   : text;
@@ -34,7 +35,7 @@ service : {
     // DRS methods
     "name"   : () -> (text) query;
     "get"    : (principal) -> (opt registry) query;
-    "add"    : (principal, registry) -> (operation_response);
+    "add"    : (registry) -> (operation_response);
     "remove" : (principal) -> (operation_response);
     
     // Canister methods

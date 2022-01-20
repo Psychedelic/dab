@@ -22,10 +22,9 @@ impl Registries {
 
     pub fn add(
         &mut self,
-        canister: Principal,
         registry_info: Registry,
     ) -> Result<(), OperationError> {
-        self.0.insert(canister, registry_info);
+        self.0.insert(registry_info.principal_id, registry_info);
         Ok(())
     }
 
@@ -48,12 +47,12 @@ impl Registries {
 }
 
 #[query]
-fn name() -> String {
+pub fn name() -> String {
     String::from("Router Canister")
 }
 
 #[update]
-fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationError> {
+pub fn add(registry_info: Registry) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -68,14 +67,14 @@ fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationErro
         && registry_info.details.len() == 0
     {
         let db = ic::get_mut::<Registries>();
-        return db.add(canister, registry_info);
+        return db.add(registry_info);
     }
 
     Err(OperationError::BadParameters)
 }
 
 #[update]
-fn remove(principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -85,13 +84,13 @@ fn remove(principal_id: Principal) -> Result<(), OperationError> {
 }
 
 #[query]
-fn get(principal_id: Principal) -> Option<&'static Registry> {
+pub fn get(principal_id: Principal) -> Option<&'static Registry> {
     let db = ic::get_mut::<Registries>();
     db.get(&principal_id)
 }
 
 #[query]
-fn get_all() -> Vec<&'static Registry> {
+pub fn get_all() -> Vec<&'static Registry> {
     let db = ic::get_mut::<Registries>();
     db.get_all()
 }

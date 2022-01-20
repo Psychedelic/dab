@@ -6,7 +6,7 @@ use ic_kit::*;
 pub struct Admins(pub Vec<Principal>);
 
 #[init]
-fn init() {
+pub fn init() {
     ic::store(Admins(vec![ic::caller()]));
 }
 
