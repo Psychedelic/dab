@@ -41,7 +41,7 @@ impl From<CanisterMetadataV0> for CanisterMetadata {
             description: cs.description,
             frontend: Some(cs.url),
             thumbnail: cs.logo_url,
-            details: vec![(String::from("category"), cs.category.to_string())]
+            details: vec![(String::from("category"), cs.category.to_string())],
         }
     }
 }
@@ -51,7 +51,6 @@ struct StableStorageV0 {
     db: Vec<(Principal, CanisterMetadataV0)>,
     fleek: Vec<Principal>,
 }
-
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {

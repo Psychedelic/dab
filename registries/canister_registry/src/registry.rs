@@ -54,7 +54,9 @@ impl CanisterDB {
     ) -> Result<(), Failure> {
         self.0.insert(canister, metadata);
         if !self.0.contains_key(&canister) {
-            return Err(Failure::Unknown(String::from("Something unexpected happend. Try again.")));
+            return Err(Failure::Unknown(String::from(
+                "Something unexpected happend. Try again.",
+            )));
         }
         Ok(())
     }

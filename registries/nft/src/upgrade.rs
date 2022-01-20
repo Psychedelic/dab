@@ -1,6 +1,6 @@
 use crate::nft::{Controller, NftCanister, Registry};
-use ic_kit::ic::*;
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
 
@@ -23,14 +23,12 @@ struct StableStorageV0 {
 impl From<NftCanisterV0> for NftCanister {
     fn from(nft_canister: NftCanisterV0) -> Self {
         NftCanister {
-            principal_id: nft_canister.principal_id, 
             name: nft_canister.name,
             description: nft_canister.description,
-            frontend: None,
             thumbnail: nft_canister.icon,
-            details: vec![
-                (String::from("standard"), nft_canister.standard),
-            ],
+            principal_id: nft_canister.principal_id,
+            frontend: None,
+            details: vec![(String::from("standard"), nft_canister.standard)],
         }
     }
 }
