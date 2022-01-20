@@ -53,7 +53,6 @@ struct StableStorageV0 {
     fleek: Vec<Principal>,
 }
 
-
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
     db: Vec<(Principal, CanisterMetadata)>,
