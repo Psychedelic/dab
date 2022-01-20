@@ -1,8 +1,9 @@
-use ic_kit::candid::CandidType;
+use ic_kit::candid::{CandidType, Principal};
 use serde::Deserialize;
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Registry {
+    pub principal_id: Principal,
     pub name: String,
     pub description: String,
     pub thumbnail: String,

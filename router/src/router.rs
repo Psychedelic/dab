@@ -22,10 +22,9 @@ impl Registries {
 
     pub fn add(
         &mut self,
-        canister: Principal,
         registry_info: Registry,
     ) -> Result<(), OperationError> {
-        self.0.insert(canister, registry_info);
+        self.0.insert(registry_info.principal_id, registry_info);
         Ok(())
     }
 
@@ -53,7 +52,7 @@ fn name() -> String {
 }
 
 #[update]
-fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationError> {
+fn add(registry_info: Registry) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -68,7 +67,7 @@ fn add(canister: Principal, registry_info: Registry) -> Result<(), OperationErro
         && registry_info.details.len() == 0
     {
         let db = ic::get_mut::<Registries>();
-        return db.add(canister, registry_info);
+        return db.add(registry_info);
     }
 
     Err(OperationError::BadParameters)
