@@ -47,8 +47,9 @@ impl CanisterDB {
         &mut self,
         metadata: CanisterMetadata,
     ) -> Result<(), Failure> {
+        let id : Principal = metadata.principal_id;
         self.0.insert(metadata.principal_id, metadata);
-        if !self.0.contains_key(&metadata.principal_id) {
+        if !self.0.contains_key(&id) {
             return Err(Failure::Unknown(String::from("Something unexpected happend. Try again.")));
         }
         Ok(())
@@ -183,7 +184,7 @@ mod tests {
             details: vec![(String::from("category"), String::from("service"))]
         };
 
-        let addition = add(mock_principals::xtc(), canister_info.clone());
+        let addition = add(canister_info.clone());
         assert!(addition.is_ok());
 
         let remove_operation = remove(mock_principals::xtc());
@@ -191,7 +192,7 @@ mod tests {
 
         // Bob is not an admin so the operation should not be successful
         ctx.update_caller(mock_principals::bob());
-        let addition = add(mock_principals::xtc(), canister_info.clone());
+        let addition = add(canister_info.clone());
         assert!(addition.is_err());
 
         // Alice makes Bob an admin and now he can add/remove canisters
@@ -200,7 +201,7 @@ mod tests {
         assert!(operation.is_ok());
 
         ctx.update_caller(mock_principals::bob());
-        let addition = add(mock_principals::xtc(), canister_info);
+        let addition = add(canister_info);
         assert!(addition.is_ok());
     }
 
@@ -222,22 +223,22 @@ mod tests {
             details: vec![(String::from("category"), String::from("service"))]
         };
 
-        let addition = add(mock_principals::xtc(), xtc_info.clone());
+        let addition = add(xtc_info.clone());
         assert!(addition.is_ok());
 
-        let operation_get_info = get_info(vec![mock_principals::xtc()]);
-        let expected_response: Vec<Option<&CanisterMetadata>> = vec![Some(&xtc_info)];
+        let operation_get_info = get(mock_principals::xtc());
+        let expected_response: Option<&CanisterMetadata> = Some(&xtc_info);
         assert_eq!(
-            operation_get_info[0].unwrap(),
-            expected_response[0].unwrap()
+            operation_get_info.unwrap(),
+            expected_response.unwrap()
         );
 
         // Users who are not admins should be able to access the information, too
         ctx.update_caller(mock_principals::bob());
-        let operation_get_info = get_info(vec![mock_principals::xtc()]);
+        let operation_get_info = get(mock_principals::xtc());
         assert_eq!(
-            operation_get_info[0].unwrap(),
-            expected_response[0].unwrap()
+            operation_get_info.unwrap(),
+            expected_response.unwrap()
         );
 
         // users should be able to ask for multiple canisters
@@ -249,19 +250,21 @@ mod tests {
             description: String::from("DAB's NFT registry provides its users with information for every nft canister in the registry."),
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
-            principal_id: mock_principals::xtc(),
+            principal_id: nft_registry(),
             details: vec![(String::from("category"), String::from("service"))]
         };
 
-        let addition = add(nft_registry(), nft_info.clone());
+        let addition = add(nft_info.clone());
         assert!(addition.is_ok());
 
         // Now Bob should be able to ask for both xtc and nft registry canister
         ctx.update_caller(mock_principals::bob());
-        let operation_get_info = get_info(vec![mock_principals::xtc(), nft_registry()]);
-        let expected_response: Vec<Option<&CanisterMetadata>> =
-            vec![Some(&xtc_info), Some(&nft_info)];
-        assert_eq!(operation_get_info, expected_response);
+        let operation_get_info_xtc = get(mock_principals::xtc());
+        let operation_get_info_nft = get(nft_registry());
+        let expected_response_xtc: Option<&CanisterMetadata> = Some(&xtc_info);
+        let expected_response_nft: Option<&CanisterMetadata> = Some(&nft_info);
+        assert_eq!(operation_get_info_xtc, expected_response_xtc);
+        assert_eq!(operation_get_info_nft, expected_response_nft);
     }
 
     #[test]
@@ -282,7 +285,7 @@ mod tests {
                 details: vec![(String::from("category"), String::from("service"))]
             };
 
-        let addition = add(mock_principals::xtc(), xtc_info.clone());
+        let addition = add(xtc_info.clone());
         assert!(addition.is_ok());
 
         let remove_operation = remove(mock_principals::xtc());
@@ -292,7 +295,7 @@ mod tests {
         let remove_operation = remove(mock_principals::xtc());
         assert_eq!(
             remove_operation.err().unwrap(),
-            Failure::NonExistentCanister
+            Failure::NonExistentItem
         );
 
         // Bob should not be able to remove a canister because he is not an admin
