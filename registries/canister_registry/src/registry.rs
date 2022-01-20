@@ -20,8 +20,9 @@ impl Default for Fleek {
 pub struct CanisterMetadata {
     pub name: String,
     pub description: String,
-    pub frontend: Option<String>,
     pub thumbnail: String,
+    pub frontend: Option<String>,
+    pub principal_id: Principal,
     pub details: Vec<(String, String)>,
 }
 
@@ -44,11 +45,10 @@ impl CanisterDB {
 
     pub fn add_canister(
         &mut self,
-        canister: Principal,
         metadata: CanisterMetadata,
     ) -> Result<(), Failure> {
-        self.0.insert(canister, metadata);
-        if !self.0.contains_key(&canister) {
+        self.0.insert(metadata.principal_id, metadata);
+        if !self.0.contains_key(&metadata.principal_id) {
             return Err(Failure::Unknown(String::from("Something unexpected happend. Try again.")));
         }
         Ok(())
@@ -105,7 +105,7 @@ fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 }
 
 #[update]
-fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Failure> {
+fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
     if !is_fleek(&ic::caller()) {
         return Err(Failure::NotAuthorized);
     } else if &metadata.name.len() > &NAME_LIMIT
@@ -117,7 +117,7 @@ fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Failure> {
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.add_canister(canister, metadata)
+    canister_db.add_canister(metadata)
 }
 
 #[update]
@@ -179,6 +179,7 @@ mod tests {
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
+            principal_id: mock_principals::xtc(),
             details: vec![(String::from("category"), String::from("service"))]
         };
 
@@ -217,6 +218,7 @@ mod tests {
             description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
+            principal_id: mock_principals::xtc(),
             details: vec![(String::from("category"), String::from("service"))]
         };
 
@@ -247,6 +249,7 @@ mod tests {
             description: String::from("DAB's NFT registry provides its users with information for every nft canister in the registry."),
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
+            principal_id: mock_principals::xtc(),
             details: vec![(String::from("category"), String::from("service"))]
         };
 
@@ -275,6 +278,7 @@ mod tests {
                 description: String::from("XTC is one of Dank's products which allows its users manage their canisters and cycles."),
                 frontend: Some(String::from("https://frontend_url.com")),
                 thumbnail: String::from("https://logo_url.com"),
+                principal_id: mock_principals::xtc(),
                 details: vec![(String::from("category"), String::from("service"))]
             };
 
