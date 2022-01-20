@@ -38,13 +38,8 @@ impl CanisterDB {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn get_info(&mut self, canisters: Vec<Principal>) -> Vec<Option<&CanisterMetadata>> {
-        let mut list: Vec<Option<&CanisterMetadata>> = vec![];
-        for canister in canisters {
-            let item = self.0.get(&canister);
-            list.push(item);
-        }
-        list
+    pub fn get_info(&mut self, canister: Principal) -> Option<&CanisterMetadata> {
+        self.0.get(&canister)
     }
 
     pub fn add_canister(
@@ -104,9 +99,9 @@ fn name() -> String {
 }
 
 #[query]
-fn get_info(canisters: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>> {
+fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
     let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.get_info(canisters)
+    canister_db.get_info(canister)
 }
 
 #[update]
