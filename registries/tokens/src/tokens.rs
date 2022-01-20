@@ -19,6 +19,7 @@ pub struct Token {
     pub description: String,
     pub thumbnail: String,
     pub frontend: Option<String>,
+    pub principal_id: Principal,
     pub details: Vec<(String, String)>,
 }
 
@@ -37,10 +38,9 @@ impl TokenRegistry {
 
     pub fn add(
         &mut self,
-        principal_id: Principal,
         token_info: Token,
     ) -> Result<(), OperationError> {
-        self.0.insert(principal_id, token_info);
+        self.0.insert(token_info.principal_id, token_info);
         Ok(())
     }
 
@@ -94,7 +94,7 @@ pub enum OperationError {
 }
 
 #[update]
-fn add(principal_id: Principal, token: Token) -> Result<(), OperationError> {
+fn add(token: Token) -> Result<(), OperationError> {
     // Check authorization
     if !is_controller(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
@@ -126,7 +126,7 @@ fn add(principal_id: Principal, token: Token) -> Result<(), OperationError> {
     }
 
     let db = ic::get_mut::<TokenRegistry>();
-    return db.add(principal_id, token);
+    return db.add(token);
 }
 
 #[update]
@@ -168,6 +168,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -176,7 +177,7 @@ mod tests {
             ],
         };
 
-        assert!(add(mock_principals::xtc(), token_info).is_ok());
+        assert!(add(token_info).is_ok());
     }
 
     #[test]
@@ -192,6 +193,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("bad logo url"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -200,7 +202,7 @@ mod tests {
             ],
         };
 
-        assert!(add(mock_principals::xtc(), token_info).is_err());
+        assert!(add(token_info).is_err());
     }
 
     #[test]
@@ -216,6 +218,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -226,7 +229,7 @@ mod tests {
 
         context.update_caller(mock_principals::bob());
 
-        assert!(add(mock_principals::xtc(), token_info).is_err());
+        assert!(add(token_info).is_err());
     }
 
     #[test]
@@ -242,6 +245,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -250,7 +254,7 @@ mod tests {
             ],
         };
 
-        assert!(add(mock_principals::xtc(), token_info).is_ok());
+        assert!(add(token_info).is_ok());
 
         assert!(remove(mock_principals::xtc()).is_ok());
     }
@@ -268,6 +272,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -276,7 +281,7 @@ mod tests {
             ],
         };
 
-        assert!(add(mock_principals::xtc(), token_info).is_ok());
+        assert!(add(token_info).is_ok());
 
         context.update_caller(mock_principals::bob());
 
@@ -296,6 +301,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -304,7 +310,7 @@ mod tests {
             ],
         };
 
-        assert!(add(mock_principals::xtc(), token_info).is_ok());
+        assert!(add(token_info).is_ok());
 
         let tokens = get_all();
 
@@ -337,6 +343,7 @@ mod tests {
             description: String::from("Wrapped IPC description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
             details: vec![
                 (String::from("symbol"), String::from("WICP")),
                 (String::from("standard"), String::from("DIP20")),
@@ -345,7 +352,7 @@ mod tests {
             ],
         };
 
-        assert!(add(mock_principals::xtc(), token_info).is_ok());
+        assert!(add(token_info).is_ok());
 
         let token = get(mock_principals::xtc());
 
