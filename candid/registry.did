@@ -43,7 +43,7 @@ service : {
     "name"    : () -> (text) query;
 
     "get"     : (principal) -> (opt canister_metadata) query;
-    "add"     : (principal, canister_metadata) -> (operation_response);
+    "add"     : (canister_metadata) -> (operation_response);
     "remove"  : (principal) -> (operation_response);
     "get_all" : () -> (vec canister_metadata) query;
 }
