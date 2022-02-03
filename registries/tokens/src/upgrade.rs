@@ -1,4 +1,4 @@
-use crate::tokens::{Controllers, Token, TokenRegistry, DetailValue};
+use crate::tokens::{Controllers, DetailValue, Token, TokenRegistry};
 use std::fmt::{self, Debug};
 
 use ic_kit::candid::{CandidType, Deserialize, Principal};
@@ -49,7 +49,11 @@ impl From<TokenV0> for Token {
 
 impl From<bool> for DetailValue {
     fn from(val: bool) -> Self {
-        if val { DetailValue::True } else { DetailValue::False }
+        if val {
+            DetailValue::True
+        } else {
+            DetailValue::False
+        }
     }
 }
 
@@ -86,7 +90,11 @@ pub fn pre_upgrade() {
 //#[post_upgrade]
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorageV0,)>() {
-        let token_list = stable.db.into_iter().map(|(p, m)| (p.into(), m.into())).collect();
+        let token_list = stable
+            .db
+            .into_iter()
+            .map(|(p, m)| (p.into(), m.into()))
+            .collect();
         ic::get_mut::<TokenRegistry>().load(token_list);
 
         //ic::get_mut::<TokenRegistry>().load(stable.db);

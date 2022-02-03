@@ -1,4 +1,4 @@
-use crate::nft::{Controller, NftCanister, Registry, DetailValue};
+use crate::nft::{Controller, DetailValue, NftCanister, Registry};
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
@@ -28,7 +28,10 @@ impl From<NftCanisterV0> for NftCanister {
             thumbnail: nft_canister.icon,
             principal_id: nft_canister.principal_id,
             frontend: None,
-            details: vec![(String::from("standard"), DetailValue::Text(nft_canister.standard))],
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(nft_canister.standard),
+            )],
         }
     }
 }

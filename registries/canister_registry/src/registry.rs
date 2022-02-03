@@ -57,14 +57,13 @@ impl CanisterDB {
         self.0.get(&canister)
     }
 
-    pub fn add_canister(
-        &mut self,
-        metadata: CanisterMetadata,
-    ) -> Result<(), Failure> {
-        let id : Principal = metadata.principal_id;
+    pub fn add_canister(&mut self, metadata: CanisterMetadata) -> Result<(), Failure> {
+        let id: Principal = metadata.principal_id;
         self.0.insert(metadata.principal_id, metadata);
         if !self.0.contains_key(&id) {
-            return Err(Failure::Unknown(String::from("Something unexpected happend. Try again.")));
+            return Err(Failure::Unknown(String::from(
+                "Something unexpected happend. Try again.",
+            )));
         }
         Ok(())
     }
@@ -242,18 +241,12 @@ mod tests {
 
         let operation_get_info = get(mock_principals::xtc());
         let expected_response: Option<&CanisterMetadata> = Some(&xtc_info);
-        assert_eq!(
-            operation_get_info.unwrap(),
-            expected_response.unwrap()
-        );
+        assert_eq!(operation_get_info.unwrap(), expected_response.unwrap());
 
         // Users who are not admins should be able to access the information, too
         ctx.update_caller(mock_principals::bob());
         let operation_get_info = get(mock_principals::xtc());
-        assert_eq!(
-            operation_get_info.unwrap(),
-            expected_response.unwrap()
-        );
+        assert_eq!(operation_get_info.unwrap(), expected_response.unwrap());
 
         // users should be able to ask for multiple canisters
         // We switch back to alice to add another canister
@@ -307,10 +300,7 @@ mod tests {
 
         // the canister should return an error if we try to remove a non-existent canister
         let remove_operation = remove(mock_principals::xtc());
-        assert_eq!(
-            remove_operation.err().unwrap(),
-            Failure::NonExistentItem
-        );
+        assert_eq!(remove_operation.err().unwrap(), Failure::NonExistentItem);
 
         // Bob should not be able to remove a canister because he is not an admin
         ctx.update_caller(mock_principals::bob());

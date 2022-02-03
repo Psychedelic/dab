@@ -50,10 +50,7 @@ impl TokenRegistry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(
-        &mut self,
-        token_info: Token,
-    ) -> Result<(), OperationError> {
+    pub fn add(&mut self, token_info: Token) -> Result<(), OperationError> {
         self.0.insert(token_info.principal_id, token_info);
         Ok(())
     }
@@ -115,8 +112,8 @@ fn add(token: Token) -> Result<(), OperationError> {
     }
 
     // Check URLs
-    if !validate_url(&token.thumbnail)
-        || !token.clone().frontend.map(validate_url).unwrap_or(true) {
+    if !validate_url(&token.thumbnail) || !token.clone().frontend.map(validate_url).unwrap_or(true)
+    {
         return Err(OperationError::BadParameters);
     }
 
@@ -132,8 +129,7 @@ fn add(token: Token) -> Result<(), OperationError> {
         || token.details[1].0 != String::from("standard")
         || token.details[2].0 != String::from("total_supply")
         || token.details[3].0 != String::from("verified")
-        || (token.details[3].1 != DetailValue::True
-            && token.details[3].1 != DetailValue::False)
+        || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
     {
         return Err(OperationError::BadParameters);
     }
@@ -183,9 +179,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -208,9 +213,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -233,9 +247,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -260,9 +283,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -287,9 +319,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -316,9 +357,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -358,9 +408,18 @@ mod tests {
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("symbol"), DetailValue::Text(String::from("WICP"))),
-                (String::from("standard"), DetailValue::Text(String::from("DIP20"))),
-                (String::from("total_supply"), DetailValue::Text(String::from("1000"))),
+                (
+                    String::from("symbol"),
+                    DetailValue::Text(String::from("WICP")),
+                ),
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP20")),
+                ),
+                (
+                    String::from("total_supply"),
+                    DetailValue::Text(String::from("1000")),
+                ),
                 (String::from("verified"), DetailValue::True),
             ],
         };

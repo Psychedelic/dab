@@ -110,7 +110,9 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         return Err(OperationError::NotAuthorized);
     } else if !validate_url(&canister_info.thumbnail) {
         return Err(OperationError::BadParameters);
-    } else if canister_info.frontend.is_some() && !validate_url(&canister_info.frontend.clone().unwrap()) {
+    } else if canister_info.frontend.is_some()
+        && !validate_url(&canister_info.frontend.clone().unwrap())
+    {
         return Err(OperationError::BadParameters);
     } else if canister_info.details[0].0 != String::from("standard") {
         return Err(OperationError::BadParameters);
@@ -168,7 +170,10 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
         };
 
         let mut addition = add(canister_info.clone());
@@ -195,7 +200,10 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
         };
 
         assert!(add(canister_info).is_ok());
@@ -214,7 +222,10 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
         };
 
         assert!(add(canister_info).is_ok());
@@ -235,7 +246,10 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
         };
 
         assert!(add(canister_info.clone()).is_ok());
@@ -260,7 +274,10 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
         };
 
         assert!(add(canister_info.clone()).is_ok());

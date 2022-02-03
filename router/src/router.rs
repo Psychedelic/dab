@@ -20,10 +20,7 @@ impl Registries {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(
-        &mut self,
-        registry_info: Registry,
-    ) -> Result<(), OperationError> {
+    pub fn add(&mut self, registry_info: Registry) -> Result<(), OperationError> {
         self.0.insert(registry_info.principal_id, registry_info);
         Ok(())
     }
