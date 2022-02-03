@@ -3,8 +3,17 @@ use ic_kit::macros::*;
 use ic_kit::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::any::Any;
 use validator::validate_url;
 
+pub trait Object {
+    fn type_name(&self) -> &str;
+    fn as_any(&self) -> &dyn Any;
+}
+
+pub fn is_of_type<T: 'static>(x: &dyn Object) -> bool {
+    x.as_any().is::<T>()
+}
 pub struct Controllers(pub Vec<Principal>);
 
 impl Default for Controllers {
@@ -189,7 +198,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],
@@ -223,7 +232,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],
@@ -257,7 +266,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],
@@ -293,7 +302,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],
@@ -329,7 +338,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],
@@ -367,7 +376,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],
@@ -418,7 +427,7 @@ mod tests {
                 ),
                 (
                     String::from("total_supply"),
-                    DetailValue::Text(String::from("1000")),
+                    DetailValue::U64(1000),
                 ),
                 (String::from("verified"), DetailValue::True),
             ],

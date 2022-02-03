@@ -18,11 +18,11 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![],
+            details: vec![(String::from("verified"), DetailValue::True)],
         };
 
         assert!(add(registry_info).is_ok());
@@ -38,11 +38,71 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
+            thumbnail: String::from("bad thumbnail :("),
+            frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
+            details: vec![(String::from("verified"), DetailValue::True)],
+        };
+
+        assert!(add(registry_info).is_err());
+    }
+
+    #[test]
+    fn test_add_registry_fails_because_of_details_field() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let registry_info = Registry {
+            name: String::from("Wrapped ICP"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("bad thumbnail :("),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
             details: vec![],
+        };
+
+        assert!(add(registry_info).is_err());
+    }
+
+    #[test]
+    fn test_add_registry_fails_because_of_details_field_with_wrong_value() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let registry_info = Registry {
+            name: String::from("Wrapped ICP"),
+            description: String::from("Wrapped ICP description"),
+            thumbnail: String::from("bad thumbnail :("),
+            frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
+            details: vec![(String::from("verified"), DetailValue::Text(String::from("wrong type")))],
+        };
+
+        assert!(add(registry_info).is_err());
+    }
+
+    #[test]
+    fn test_add_registry_fails_because_of_details_field_with_wrong_key() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let registry_info = Registry {
+            name: String::from("Wrapped ICP"),
+            description: String::from("Wrapped ICP description"),
+            thumbnail: String::from("bad thumbnail :("),
+            frontend: Some(String::from("https://website.com")),
+            principal_id: mock_principals::xtc(),
+            details: vec![(String::from("verify_wrong"), DetailValue::True)],
         };
 
         assert!(add(registry_info).is_err());
@@ -58,11 +118,11 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![],
+            details: vec![(String::from("verified"), DetailValue::True)],
         };
 
         context.update_caller(mock_principals::bob());
@@ -80,11 +140,11 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![],
+            details: vec![(String::from("verified"), DetailValue::True)],
         };
 
         assert!(add(registry_info).is_ok());
@@ -102,11 +162,11 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![],
+            details: vec![(String::from("verified"), DetailValue::True)],
         };
 
         assert!(add(registry_info).is_ok());
@@ -126,11 +186,11 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![],
+            details: vec![(String::from("verified"), DetailValue::True)],
         };
 
         assert!(add(registry_info).is_ok());
@@ -163,11 +223,11 @@ mod tests {
 
         let registry_info = Registry {
             name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
+            description: String::from("Wrapped ICP description"),
             thumbnail: String::from("https://logo.com"),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![],
+            details: vec![(String::from("verified"), DetailValue::True)],
         };
 
         assert!(add(registry_info).is_ok());

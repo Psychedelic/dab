@@ -60,7 +60,9 @@ pub fn add(registry_info: Registry) -> Result<(), OperationError> {
     let name = registry_info.name.clone();
     if name.len() <= 120
         && &registry_info.description.len() <= &1200
-        && registry_info.details.len() == 0
+        && registry_info.details.len() == 1
+        && registry_info.details[0].0 == String::from("verified")
+        && (registry_info.details[0].1 == DetailValue::True || registry_info.details[0].1 == DetailValue::False)
     {
         let db = ic::get_mut::<Registries>();
         return db.add(registry_info);
