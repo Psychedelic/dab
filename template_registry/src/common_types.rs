@@ -1,5 +1,19 @@
-use ic_kit::candid::CandidType;
-use serde::Deserialize;
+use ic_kit::{candid::CandidType, Principal};
+use serde::{Deserialize, Serialize};
+
+#[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub enum DetailValue {
+    True,
+    False,
+    U64(u64),
+    I64(i64),
+    Float(f64),
+    Text(String),
+    Principal(Principal),
+    #[serde(with = "serde_bytes")]
+    Slice(Vec<u8>),
+    Vec(Vec<DetailValue>),
+}
 
 #[derive(CandidType)]
 pub enum Error {

@@ -1,4 +1,4 @@
-use crate::tokens::{Controllers, Token, TokenRegistry};
+use crate::tokens::{Controllers, Token, TokenRegistry, DetailValue};
 use std::fmt::{self, Debug};
 
 use ic_kit::candid::{CandidType, Deserialize, Principal};
@@ -35,15 +35,21 @@ impl From<TokenV0> for Token {
             thumbnail: cs.logo,
             principal_id: Principal::from_text("aaaa").unwrap(),
             details: vec![
-                (String::from("symbol"), cs.symbol),
-                (String::from("standard"), cs.standard),
+                (String::from("symbol"), DetailValue::Text(cs.symbol)),
+                (String::from("standard"), DetailValue::Text(cs.standard)),
                 (
                     String::from("total_supply"),
-                    cs.total_supply.unwrap_or_else(|| 0).to_string(),
+                    DetailValue::U64(cs.total_supply.unwrap_or_else(|| 0)),
                 ),
-                (String::from("verified"), cs.verified.to_string()),
+                (String::from("verified"), cs.verified.into()),
             ],
         }
+    }
+}
+
+impl From<bool> for DetailValue {
+    fn from(val: bool) -> Self {
+        if val { DetailValue::True } else { DetailValue::False }
     }
 }
 
@@ -77,19 +83,10 @@ pub fn pre_upgrade() {
     };
 }
 
-#[post_upgrade]
+//#[post_upgrade]
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorageV0,)>() {
-        let mut token_list = Vec::with_capacity(stable.db.len());
-
-        for (_key, token_info) in stable.db.into_iter().enumerate() {
-            let mut metadata_info: Token = token_info.1.into();
-            let principal_info: Principal = token_info.0.into();
-            metadata_info.principal_id = principal_info;
-
-            token_list.push((principal_info, metadata_info));
-        }
-
+        let token_list = stable.db.into_iter().map(|(p, m)| (p.into(), m.into())).collect();
         ic::get_mut::<TokenRegistry>().load(token_list);
 
         //ic::get_mut::<TokenRegistry>().load(stable.db);

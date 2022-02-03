@@ -68,7 +68,7 @@ fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
         // The next step is verifying URLs
         if metadata.details.len() != 0
             || !validate_url(metadata.thumbnail.clone())
-            || (metadata.frontend.is_some() && !validate_url(metadata.frontend.clone().unwrap()))
+            || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
         {
             return Err(Error::BadParameters);
         }

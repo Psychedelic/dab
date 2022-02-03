@@ -41,7 +41,7 @@ impl From<CanisterMetadataV0> for CanisterMetadata {
             description: cs.description,
             frontend: Some(cs.url),
             thumbnail: cs.logo_url,
-            principal_id: Principal::from_text("aaaa").unwrap(),
+            principal_id: Principal::management_canister(),
             details: vec![(String::from("category"), cs.category.to_string())]
         }
     }

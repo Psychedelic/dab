@@ -1,7 +1,7 @@
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_kit::macros::*;
 use ic_kit::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use validator::validate_url;
 
@@ -31,6 +31,20 @@ fn set_controller(new_controller: Principal) -> Result<(), OperationError> {
     Err(OperationError::NotAuthorized)
 }
 
+#[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub enum DetailValue {
+    True,
+    False,
+    U64(u64),
+    I64(i64),
+    Float(f64),
+    Text(String),
+    Principal(Principal),
+    #[serde(with = "serde_bytes")]
+    Slice(Vec<u8>),
+    Vec(Vec<DetailValue>),
+}
+
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct NftCanister {
     pub name: String,
@@ -38,7 +52,7 @@ pub struct NftCanister {
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub principal_id: Principal,
-    pub details: Vec<(String, String)>,
+    pub details: Vec<(String, DetailValue)>,
 }
 
 #[derive(Default)]
@@ -51,23 +65,17 @@ impl Registry {
     }
 
     pub fn load(&mut self, archive: Vec<(Principal, NftCanister)>) {
+        assert!(self.0.is_empty());
         self.0 = archive.into_iter().collect();
     }
 
     pub fn add(&mut self, canister_info: NftCanister) -> Result<(), OperationError> {
-        let key_value = canister_info.principal_id;
         self.0.insert(canister_info.principal_id, canister_info);
-        if !self.0.contains_key(&key_value) {
-            return Err(OperationError::Unknown(String::from(
-                "Something unexpected happend. Try again.",
-            )));
-        }
         Ok(())
     }
 
     pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if self.0.contains_key(principal_id) {
-            self.0.remove(principal_id);
+        if self.0.remove(&principal_id).is_some() {
             return Ok(());
         }
 
@@ -105,6 +113,8 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     } else if canister_info.frontend.is_some() && !validate_url(&canister_info.frontend.clone().unwrap()) {
         return Err(OperationError::BadParameters);
     } else if canister_info.details[0].0 != String::from("standard") {
+        return Err(OperationError::BadParameters);
+    } else if canister_info.details.len() != 1 {
         return Err(OperationError::BadParameters);
     }
 
@@ -158,7 +168,7 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), String::from("Dank"))],
+            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
         };
 
         let mut addition = add(canister_info.clone());
@@ -185,7 +195,7 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), String::from("Dank"))],
+            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
         };
 
         assert!(add(canister_info).is_ok());
@@ -204,7 +214,7 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), String::from("Dank"))],
+            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
         };
 
         assert!(add(canister_info).is_ok());
@@ -225,7 +235,7 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), String::from("Dank"))],
+            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
         };
 
         assert!(add(canister_info.clone()).is_ok());
@@ -250,7 +260,7 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("https://google.com"),
             frontend: None,
-            details: vec![(String::from("standard"), String::from("Dank"))],
+            details: vec![(String::from("standard"), DetailValue::Text(String::from("Dank")))],
         };
 
         assert!(add(canister_info.clone()).is_ok());

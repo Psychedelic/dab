@@ -29,8 +29,7 @@ impl Registries {
     }
 
     pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if self.0.contains_key(principal_id) {
-            self.0.remove(principal_id);
+        if self.0.remove(principal_id).is_some() {
             return Ok(());
         }
 

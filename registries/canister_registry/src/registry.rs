@@ -1,9 +1,23 @@
 use ic_cdk::export::candid::{CandidType, Principal};
 use ic_kit::macros::*;
 use ic_kit::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use validator::validate_url;
+
+#[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub enum DetailValue {
+    True,
+    False,
+    U64(u64),
+    I64(i64),
+    Float(f64),
+    Text(String),
+    Principal(Principal),
+    #[serde(with = "serde_bytes")]
+    Slice(Vec<u8>),
+    Vec(Vec<DetailValue>),
+}
 
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 24;
@@ -23,7 +37,7 @@ pub struct CanisterMetadata {
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub principal_id: Principal,
-    pub details: Vec<(String, String)>,
+    pub details: Vec<(String, DetailValue)>,
 }
 
 #[derive(Default)]
@@ -112,7 +126,7 @@ fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
     } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || !validate_url(&metadata.thumbnail)
-        || (metadata.frontend.is_some() && !validate_url(&metadata.frontend.clone().unwrap()))
+        || !metadata.frontend.map(validate_url).unwrap_or(true)
     {
         return Err(Failure::BadParameters);
     }
@@ -181,7 +195,7 @@ mod tests {
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
             principal_id: mock_principals::xtc(),
-            details: vec![(String::from("category"), String::from("service"))]
+            details: vec![(String::from("category"), DetailValue::Text(String::from("service")))]
         };
 
         let addition = add(canister_info.clone());
@@ -220,7 +234,7 @@ mod tests {
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
             principal_id: mock_principals::xtc(),
-            details: vec![(String::from("category"), String::from("service"))]
+            details: vec![(String::from("category"), DetailValue::Text(String::from("service")))]
         };
 
         let addition = add(xtc_info.clone());
@@ -251,7 +265,7 @@ mod tests {
             frontend: Some(String::from("https://frontend_url.com")),
             thumbnail: String::from("https://logo_url.com"),
             principal_id: nft_registry(),
-            details: vec![(String::from("category"), String::from("service"))]
+            details: vec![(String::from("category"), DetailValue::Text(String::from("service")))]
         };
 
         let addition = add(nft_info.clone());
@@ -282,7 +296,7 @@ mod tests {
                 frontend: Some(String::from("https://frontend_url.com")),
                 thumbnail: String::from("https://logo_url.com"),
                 principal_id: mock_principals::xtc(),
-                details: vec![(String::from("category"), String::from("service"))]
+                details: vec![(String::from("category"), DetailValue::Text(String::from("service")))]
             };
 
         let addition = add(xtc_info.clone());
