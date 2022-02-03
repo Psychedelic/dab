@@ -87,7 +87,7 @@ pub fn pre_upgrade() {
     };
 }
 
-//#[post_upgrade]
+#[post_upgrade]
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorageV0,)>() {
         let token_list = stable

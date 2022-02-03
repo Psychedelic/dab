@@ -125,7 +125,7 @@ fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
     } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || !validate_url(&metadata.thumbnail)
-        || !metadata.frontend.map(validate_url).unwrap_or(true)
+        || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
     {
         return Err(Failure::BadParameters);
     }
