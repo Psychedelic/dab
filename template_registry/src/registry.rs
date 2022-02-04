@@ -26,11 +26,11 @@ impl CanisterDB {
         self.0.get(&canister)
     }
 
-    pub fn add(&mut self, canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
+    pub fn add(&mut self, metadata: CanisterMetadata) -> Result<(), Error> {
         // Whether the canister has already been added to the registry or not
         // this method will add it to the hashmap. If it is already a part of
         // the HashMap, its metadata will be replaced by the new metadata.
-        self.0.insert(canister, metadata);
+        self.0.insert(metadata.principal_id, metadata);
         return Ok(());
     }
 
@@ -62,10 +62,11 @@ fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 // The add method will add new entries to the HashMap
 // This method updates the entry if it already exists
 #[update]
-fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
+fn add(metadata: CanisterMetadata) -> Result<(), Error> {
     if is_admin(&ic::caller()) {
         // The caller is one of the admins.
         // The next step is verifying URLs
+        // We don't expect anything in the details field.
         if metadata.details.len() != 0
             || !validate_url(metadata.thumbnail.clone())
             || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
@@ -73,7 +74,7 @@ fn add(canister: Principal, metadata: CanisterMetadata) -> Result<(), Error> {
             return Err(Error::BadParameters);
         }
         let db = ic::get_mut::<CanisterDB>();
-        return db.add(canister, metadata);
+        return db.add(metadata);
     }
     Err(Error::NotAuthorized)
 }

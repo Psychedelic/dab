@@ -15,6 +15,7 @@ type token = record {
     description : text;
     thumbnail   : text;
     frontend    : opt text;
+    principal_id : principal;
     details     : vec record { text; detail_value }
 };
 
@@ -34,7 +35,7 @@ service : {
     // DRS Methods
     "name"   : () -> (text) query;
     "get"    : (principal) -> (opt token) query;
-    "add"    : (principal, token) -> (operation_response);
+    "add"    : (token) -> (operation_response);
     "remove" : (principal) -> (operation_response);
     
     // Canister methods

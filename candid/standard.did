@@ -24,12 +24,12 @@ type error = variant {
     NonExistentItem;
     BadParameters;
     Unknown : text;
-}
+};
 
 type response = variant {
     Ok  : opt text;
     Err : error;
-}
+};
 
 service : {
     "name"   : () -> (text) query;

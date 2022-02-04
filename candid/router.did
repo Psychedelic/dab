@@ -11,11 +11,11 @@ type detail_value = variant {
 };
 
 type registry = record {
-    principal_id: principal;
     name        : text;
     description : text;
     thumbnail   : text;
     frontend    : opt text;
+    principal_id : principal;
     details     : vec record { text; detail_value }
 };
 

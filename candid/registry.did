@@ -24,13 +24,14 @@ type canister_metadata = record {
     description : text;
     thumbnail   : text;
     frontend    : opt text;
+    principal_id : principal;
     details     : vec record { text; detail_value };
 };
 
 type operation_error = variant {
     NotAuthorized;
     BadParameters;
-    NonExistentCanister;
+    NonExistentItem;
     Unknown: text;
 };
 
