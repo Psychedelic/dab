@@ -93,7 +93,7 @@ pub fn post_upgrade() {
         let token_list = stable
             .db
             .into_iter()
-            .map(|(p, m)| (p.into(), m.into()))
+            .map(|(p, m)| {let mut new : Token = m.into(); new.principal_id = p.into(); (p.into(), new)})
             .collect();
         ic::get_mut::<TokenRegistry>().load(token_list);
 
