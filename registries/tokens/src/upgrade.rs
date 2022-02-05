@@ -33,7 +33,7 @@ impl From<TokenV0> for Token {
             description: cs.description,
             frontend: Some(cs.website),
             thumbnail: cs.logo,
-            principal_id: Principal::from_text("aaaa").unwrap(),
+            principal_id: Principal::management_canister(),
             details: vec![
                 (String::from("symbol"), DetailValue::Text(cs.symbol)),
                 (String::from("standard"), DetailValue::Text(cs.standard)),
