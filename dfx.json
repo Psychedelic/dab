@@ -29,9 +29,21 @@
       "candid": "candid/tokens.did",
       "wasm": "target/wasm32-unknown-unknown/release/tokens-opt.wasm",
       "type": "custom"
+    },
+    "router": {
+      "build": "node build.js router",
+      "candid": "candid/router.did",
+      "wasm": "target/wasm32-unknown-unknown/release/router-opt.wasm",
+      "type": "custom"
+    },
+    "template_registry": {
+      "build": "node build.js template_registry",
+      "candid": "candid/standard.did",
+      "wasm": "target/wasm32-unknown-unknown/release/template_registry-opt.wasm",
+      "type": "custom"
     }
   },
-  "dfx": "0.8.3",
+  "dfx": "0.8.4",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",

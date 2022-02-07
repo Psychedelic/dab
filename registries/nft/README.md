@@ -87,3 +87,7 @@ $ dfx canister --network=ic call aipdg-waaaa-aaaah-aaq5q-cai get_all
 ```
 
 That's it for now! You can also find the related script to these commands [here](https://github.com/Psychedelic/dab/blob/main/scripts/nft-tests.sh)
+
+### NOTE:
+
+The `details` field in this canister contains the **standard** of the entry NFT canister: `Vec<(String, DetailValue::Text(String))>`

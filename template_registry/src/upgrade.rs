@@ -1,20 +1,27 @@
-use crate::profile::{ProfileDB, ProfileMetadata};
+// Project imports
+use crate::common_types::CanisterMetadata;
+use crate::management::Admins;
+use crate::registry::CanisterDB;
 
-use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+// IC imports
+use ic_kit::candid::CandidType;
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
+use serde::Deserialize;
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
-    profile_db: Vec<(Principal, ProfileMetadata)>,
+    db: Vec<(Principal, CanisterMetadata)>,
+    admins: Vec<Principal>,
 }
 
 #[pre_upgrade]
 pub fn pre_upgrade() {
-    let profile_db = ic::get_mut::<ProfileDB>().archive();
+    let db = ic::get_mut::<CanisterDB>().archive();
+    let admins = ic::get_mut::<Admins>().0.clone();
 
-    let stable = StableStorage { profile_db };
+    let stable = StableStorage { db, admins };
 
     match ic::stable_store((stable,)) {
         Ok(_) => (),
@@ -30,6 +37,7 @@ pub fn pre_upgrade() {
 #[post_upgrade]
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
-        ic::get_mut::<ProfileDB>().load(stable.profile_db);
+        ic::get_mut::<CanisterDB>().load(stable.db);
+        ic::store(Admins(stable.admins));
     }
 }

@@ -252,3 +252,11 @@ burnXTC()
 ```
 
 This call returns one object with the metadata of the specific token queried.
+
+### NOTE:
+
+The `details` field in this canister contains these information about the canister:
+- **symbol** of the entry token canister -> `(String, DetailValue::Text(String))`
+- **total_supply** of the entry token canister -> `(String, DetailValue::U64(u64))`
+- **standard** of the entry token canister -> `(String, DetailValue::Text(String))`
+- **verified** status of the entry token canister -> `(String, DetailValue::True) || (String, DetailValue::False)`

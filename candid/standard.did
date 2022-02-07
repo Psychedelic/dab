@@ -24,17 +24,17 @@ type error = variant {
     NonExistentItem;
     BadParameters;
     Unknown : text;
-}
+};
 
 type response = variant {
     Ok  : opt text;
     Err : error;
-}
+};
 
 service : {
     "name"   : () -> (text) query;
     
     "get"    : (principal) -> (opt metadata) query;
-    "add"    : (principal, metadata) -> (response);
+    "add"    : (metadata) -> (response);
     "remove" : (principal) -> (response);
 }

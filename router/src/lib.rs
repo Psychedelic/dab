@@ -1,4 +1,5 @@
 mod common_types;
 mod management;
-mod registry;
+mod router;
+mod tests;
 mod upgrade;

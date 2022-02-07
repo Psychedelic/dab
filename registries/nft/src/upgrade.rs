@@ -1,12 +1,44 @@
-use crate::nft::{Controller, NftCanister, Registry};
+use crate::nft::{Controller, DetailValue, NftCanister, Registry};
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
 
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct NftCanisterV0 {
+    pub principal_id: Principal,
+    pub name: String,
+    pub description: String,
+    pub standard: String,
+    pub icon: String,
+    pub timestamp: u64,
+}
+
+#[derive(CandidType, Deserialize)]
+struct StableStorageV0 {
+    db: Vec<(String, NftCanisterV0)>,
+    controller: Principal,
+}
+
+impl From<NftCanisterV0> for NftCanister {
+    fn from(nft_canister: NftCanisterV0) -> Self {
+        NftCanister {
+            name: nft_canister.name,
+            description: nft_canister.description,
+            thumbnail: nft_canister.icon,
+            principal_id: nft_canister.principal_id,
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(nft_canister.standard),
+            )],
+        }
+    }
+}
+
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
-    db: Vec<(String, NftCanister)>,
+    db: Vec<(Principal, NftCanister)>,
     controller: Principal,
 }
 
@@ -30,8 +62,16 @@ pub fn pre_upgrade() {
 
 #[post_upgrade]
 pub fn post_upgrade() {
-    if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
-        ic::get_mut::<Registry>().load(stable.db);
+    if let Ok((stable,)) = ic::stable_restore::<(StableStorageV0,)>() {
+        let mut updated_nft_canisters = Vec::with_capacity(stable.db.len());
+
+        for (_key, nft_canister) in stable.db.into_iter().enumerate() {
+            let nft_canister_metadata: NftCanister = nft_canister.1.into();
+
+            updated_nft_canisters.push((nft_canister_metadata.principal_id, nft_canister_metadata));
+        }
+
+        ic::get_mut::<Registry>().load(updated_nft_canisters);
         ic::store(Controller(stable.controller));
     }
 }

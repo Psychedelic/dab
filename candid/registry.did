@@ -7,29 +7,32 @@ type canister_category = variant {
     Games;
 };
 
-type canister_metadata = record {
-    name: text;
-    description: text;
-    url: text;
-    logo_url: text;
-    version: nat32;
-    category: canister_category;
+type detail_value = variant {
+  True;
+  False;
+  I64       : int64;
+  U64       : nat64;
+  Vec       : vec detail_value;
+  Slice     : vec nat8;
+  Text      : text;
+  Float     : float64;
+  Principal : principal;
 };
 
-type input_canister_metadata = record {
-    name: text;
-    description: text;
-    url: text;
-    logo_url: text;
-    category: canister_category;
+type canister_metadata = record {
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    principal_id : principal;
+    details     : vec record { text; detail_value };
 };
 
 type operation_error = variant {
     NotAuthorized;
     BadParameters;
-    NonExistentCanister;
-    InterCanisterCall: text;
-    UnknownError;
+    NonExistentItem;
+    Unknown: text;
 };
 
 type operation_response = variant {
@@ -38,10 +41,10 @@ type operation_response = variant {
 };
 
 service : {
-    "name"               : () -> (text) query;
+    "name"    : () -> (text) query;
 
-    "get_info"           : (vec principal) -> (vec opt canister_metadata) query;
-    "add_canister"       : (principal, input_canister_metadata) -> (operation_response);
-    "remove_canister"    : (principal) -> (operation_response);
-    "get_all"      : () -> (vec canister_metadata) query;
+    "get"     : (principal) -> (opt canister_metadata) query;
+    "add"     : (canister_metadata) -> (operation_response);
+    "remove"  : (principal) -> (operation_response);
+    "get_all" : () -> (vec canister_metadata) query;
 }

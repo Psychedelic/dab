@@ -65,3 +65,7 @@ $ dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai get_info "(vec {pri
   },
 )
 ```
+
+### NOTE:
+
+The `details` field in this canister contains the **category** of the entry canister: `Vec<(String, DetailValue::Text(String))>`

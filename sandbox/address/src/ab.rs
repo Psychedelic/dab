@@ -28,10 +28,9 @@ impl Default for AddressBook {
 impl AddressBook {
     pub fn archive(&mut self) -> Vec<(Key, Principal)> {
         let map = std::mem::replace(&mut self.0, BTreeMap::new());
-        map.into_iter()
-            .collect()
+        map.into_iter().collect()
     }
-    
+
     pub fn load(&mut self, archive: Vec<(Key, Principal)>) {
         self.0 = archive.into_iter().collect();
         // self.0.reserve(25_000 - self.0.len());
@@ -65,7 +64,7 @@ impl AddressBook {
             // return Some((canister_name, canister_id));
             return Some(CanisterAddress {
                 canister_name: canister_name,
-                canister_id: canister_id
+                canister_id: canister_id,
             });
         }
         return None;

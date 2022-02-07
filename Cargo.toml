@@ -4,5 +4,7 @@ members = [
     "sandbox/profile",
     "registries/canister_registry",
     "registries/nft",
-    "registries/tokens"
+    "registries/tokens",
+    "router",
+    "template_registry"
 ]
