@@ -40,14 +40,13 @@ function main() {
         .then((answer) => {
             let stream = fs.createReadStream(inputFile)
                 .pipe(csv());
-
-            if (answer.functionality == 'Add / Update NFT canister') {
+            if (answer.functionality == 'Add / Update NFT registry') {
                 add_nft(stream);
             } else if (answer.functionality == 'Export the csv file of canister registry') {
                 csv_canister_registry(stream);
             } else if (answer.functionality == 'List') {
                 list(stream);
-            } else {
+            } else if (answer.functionality == 'Add / Update entries in the canister registry') {
                 add_canister(stream);
             }
         });
@@ -98,15 +97,19 @@ function csv_canister_registry(stream) {
 }
 
 function add_nft(stream) {
+    console.log("HELLOO");
     stream
     .on("data", (data) => {
-            if (data.name != '' && data.standard != '' && data.id != '' && data.description != '' && data.icon != '') {
+        console.log('heeey');
+        console.log(data.name);
+            if (data.name != '' && data.standard != '' && data.id != '' && data.description != '' && data.thumbnail != '') {
                 let item = {
                     name: data.name,
                     id: data.id,
                     standard: data.standard,
                     description: data.description,
-                    icon: data.icon,
+                    thumbnail: data.thumbnail,
+                    frontend: data.frontend
                 };
                 results.push(item);
             }
@@ -135,7 +138,8 @@ function add_nft(stream) {
                             standard = canister.standard,
                             id = canister.id,
                             description = canister.description,
-                            icon = canister.icon;
+                            thumbnail = canister.thumbnail,
+                            frontend = canister.frontend;
                         
                         const command = [
                             'dfx',
@@ -145,7 +149,7 @@ function add_nft(stream) {
                             'call',
                             answers.address,
                             'add',
-                            `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; standard= \\"${standard}\\"; description= \\"${description}\\"; icon= \\"${icon}\\"})"`,
+                            `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"standard\\"; variant { Text= \\"${standard}\\" } } } })"`,
                         ];
                         try {
                             execSync(command.join(' '));
