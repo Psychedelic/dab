@@ -1,6 +1,6 @@
 [package]
 name = "tokens"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Nima Rasooli <nima@fleek.co>"]
 edition = "2018"
 
