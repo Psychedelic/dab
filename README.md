@@ -9,7 +9,7 @@
 
 > An Internet Computer open internet service for data.
 
-All the data an IC app needs to make a seamless experience, accessible directly on the IC. [DAB](https://dab.ooo/) is an open internet service for NFT, Token, Canister, and Dapp registries.
+All the data an IC app needs to make a seamless experience, accessible directly on the IC. [DAB](https://dab.ooo/) is an open internet service that keeps track of and provides accessibility to verified and non-verified registries on the Internet Computer.
 
 ### 🛣️ DAB's Roadmap (Order is not set)
 
@@ -20,9 +20,19 @@ All the data an IC app needs to make a seamless experience, accessible directly 
 
 ---
 
-## #️⃣ V0.3.0 - DAB's Current Registries.
+## 🛠 Creating Your Own Registry
 
-In v0.3.0, DAB has three registries that developers can integrate with, or submit items to:
+Anyone is able to create their own DAB registry by following the [DAB Registry Standard](https://github.com/Psychedelic/dab/blob/278f25c20ad426c58f8d97dfa352c20dfb9999de/candid/STANDARD.md). Any additional logic you'd like to add to your registry is up to your own discretion but it is imperative that the Registry Standard is implemented without fault. If not, your canister will not work with services built for DAB registries such as [DAB-js](https://github.com/Psychedelic/DAB-js).
+
+If you're unsure of how an implementation of the DAB Registry Standard would look like, we have created an example implementation in rust that we are calling [the Template Registry](https://github.com/Psychedelic/dab/tree/main/template_registry).
+
+All newly created registries are unverified. To request verification of your registry, submit [this form](https://dab-ooo.typeform.com/to/m8qBZHWu?typeform-source=admin.typeform.com).
+
+---
+
+## #️⃣ V1.0.0 - DAB's Current Verified Registries.
+
+In v1.0.0, DAB has three registries that developers can integrate with, or submit items to:
 
 - The NFT List (auto-surface NFTs in apps and multi-standard support).
 - The Canister List (associate metadata to Canister IDs and auto-surface it in UIs)
@@ -88,11 +98,11 @@ Want to submit a new Canister ID to the registry to associate metadat to it, and
 
 * [**Submit a new Canister to the list 📫**](https://dab-ooo.typeform.com/canister-list)
 
-For V0.2.0, the review process for submissions is manual and done by the DAB core team; in the future we will automate the process, and migrate to a community-governed and trustless system.
+For V1.0.0, the review process for submissions is manual and done by the DAB core team; in the future we will automate the process, and migrate to a community-governed and trustless system.
 
 **We are exploring an automated way of adding Canister IDs and their metadata to the registry**. The main issues are confirming the controller is the one submitting it, and then adding a verification layer to avoid duplicates/phishing/impersonation.
 
-### 🧰 Start Integrating DAB's Canister List into your App
+### 🧰 Start Integrating DAB's Registries into your App
 
 To interact with DAB's services you need to use the DAB-js library. Read our documentation or visit the DAB-js repository to get started.
 
