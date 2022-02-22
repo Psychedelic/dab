@@ -246,7 +246,38 @@ mod tests {
     }
 
     #[test]
-    fn test_add_canister_fails_because_of_bad_params() {
+    fn test_add_canister_with_frontend_field_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: Some(String::from("https://google.com")),
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_some());
+        assert_eq!(
+            added_canister.unwrap().frontend,
+            Some(String::from("https://google.com"))
+        );
+    }
+
+    #[test]
+    fn test_add_canister_fails_because_of_thumbnail_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -259,6 +290,34 @@ mod tests {
             description: String::from("XTC is your cycles wallet."),
             thumbnail: String::from("bad url"),
             frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_err());
+        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_none());
+    }
+
+    #[test]
+    fn test_add_canister_fails_because_of_bad_frontend_param() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: Some(String::from("bad url")),
             details: vec![(
                 String::from("standard"),
                 DetailValue::Text(String::from("Dank")),
