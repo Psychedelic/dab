@@ -379,7 +379,8 @@ mod tests {
             )],
         };
 
-        add(canister_metadata.clone());
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
 
         let remove_result = remove(mock_principals::xtc());
         assert!(remove_result.is_ok());
@@ -421,7 +422,8 @@ mod tests {
             )],
         };
 
-        add(canister_metadata.clone());
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
 
         context.update_caller(mock_principals::bob());
 
@@ -450,7 +452,8 @@ mod tests {
             )],
         };
 
-        add(canister_metadata);
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
 
         let get_response = get(mock_principals::xtc());
         assert!(get_response.is_some());
@@ -476,7 +479,8 @@ mod tests {
             )],
         };
 
-        add(canister_metadata);
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
 
         context.update_caller(mock_principals::bob());
 
@@ -517,7 +521,8 @@ mod tests {
             )],
         };
 
-        add(canister_metadata.clone());
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
 
         let get_all_response = get_all();
 
@@ -544,7 +549,8 @@ mod tests {
             )],
         };
 
-        add(canister_metadata.clone());
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
 
         context.update_caller(mock_principals::bob());
 
