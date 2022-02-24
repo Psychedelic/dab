@@ -1,6 +1,6 @@
 use ic_cdk::export::candid::{CandidType, Principal, Deserialize};
-use ic_cdk::*;
-use ic_cdk_macros::*;
+use ic_kit::*;
+use ic_kit_macros::*;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
 
