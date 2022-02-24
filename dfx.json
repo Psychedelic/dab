@@ -1,9 +1,9 @@
 {
   "canisters": {
-    "address": {
-      "build": "node build.js address",
-      "candid": "candid/address.did",
-      "wasm": "target/wasm32-unknown-unknown/release/address-opt.wasm",
+    "address_book": {
+      "build": "node build.js address_book",
+      "candid": "candid/address_book.did",
+      "wasm": "target/wasm32-unknown-unknown/release/address_book-opt.wasm",
       "type": "custom"
     },
     "profile": {
