@@ -261,4 +261,34 @@ mod tests {
         assert_eq!(bob_addresses.len(), 1);
         assert_eq!(bob_addresses[0].name, String::from("Alice"));
     }
+
+    #[test]
+    fn test_addresses_are_added_alphabetically_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        let bob_address_info = Address {
+            name: String::from("Bob"),
+            description: Some(String::from("Friend")),
+            emoji: Some(String::from("😚")),
+            principal_id: mock_principals::bob(),
+        };
+
+        let andrew_address_info = Address {
+            name: String::from("Andrew"),
+            description: Some(String::from("Friend")),
+            emoji: Some(String::from("😚")),
+            principal_id: mock_principals::alice(),
+        };
+
+        add(bob_address_info);
+        add(andrew_address_info);
+
+        let addresses = get_all();
+
+        assert_eq!(addresses.len(), 2);
+        assert_eq!(addresses[0].name, String::from("Andrew"));
+        assert_eq!(addresses[1].name, String::from("Bob"));
+    }
 }
