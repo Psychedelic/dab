@@ -1,8 +1,11 @@
-use ic_cdk::export::candid::{CandidType, Principal, Deserialize};
+use ic_kit::candid::{CandidType, Principal};
+use ic_kit::macros::*;
 use ic_kit::*;
-use ic_kit_macros::*;
+use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
+use unic::emoji::char::is_emoji;
+use unic::emoji::*;
 
 /**
 Every item in the map looks like this:
@@ -15,7 +18,7 @@ pub struct Address {
     pub name: String,
     pub principal_id: Principal,
     pub description: Option<String>,
-    pub thumbnail: Option<String>,
+    pub emoji: Option<String>,
 }
 
 type Key = (Principal, String);
@@ -38,14 +41,9 @@ impl AddressBook {
 
     pub fn load(&mut self, archive: Vec<(Key, Address)>) {
         self.0 = archive.into_iter().collect();
-        // self.0.reserve(25_000 - self.0.len());
     }
 
-    pub fn add(
-        &mut self,
-        account: Principal,
-        address: Address,
-    ) {
+    pub fn add(&mut self, account: Principal, address: Address) {
         let pointer: Key = (account, address.name.clone());
         self.0.insert(pointer.clone(), address);
     }
@@ -88,21 +86,40 @@ fn add(address: Address) -> Result<(), Failure> {
     if &address.name.len() > &NAME_LIMIT {
         return Err(Failure::BadParameters);
     }
-    
-    let address_book = storage::get_mut::<AddressBook>();
-    address_book.add(caller(), address);
+
+    if address.description.is_some() {
+        let description = address.clone().description.unwrap();
+
+        if &description.len() > &DESCRIPTION_LIMIT {
+            return Err(Failure::BadParameters);
+        }
+    }
+
+    if address.emoji.is_some() {
+        let emojis: Vec<char> = address.clone().emoji.unwrap().chars().take(1).collect();
+
+        if !is_emoji(emojis[0]) {
+            return Err(Failure::BadParameters);
+        }
+    }
+
+    let address_book = ic::get_mut::<AddressBook>();
+    address_book.add(ic::caller(), address);
     return Ok(());
 }
 
 #[update]
 fn remove(address_name: String) -> Result<(), Failure> {
-    let address_book = storage::get_mut::<AddressBook>();
-    return address_book.remove(caller(), address_name);
+    let address_book = ic::get_mut::<AddressBook>();
+    return address_book.remove(ic::caller(), address_name);
 }
 
 #[update]
 fn get_all() -> Vec<&'static Address> {
-    let address_book = storage::get_mut::<AddressBook>();
-    address_book.get_all(caller()).iter().map(|entry| entry.1).collect()
+    let address_book = ic::get_mut::<AddressBook>();
+    address_book
+        .get_all(ic::caller())
+        .iter()
+        .map(|entry| entry.1)
+        .collect()
 }
-

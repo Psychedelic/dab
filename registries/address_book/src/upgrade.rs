@@ -1,4 +1,4 @@
-use crate::address_book::{AddressBook, Address};
+use crate::address_book::{Address, AddressBook};
 
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;

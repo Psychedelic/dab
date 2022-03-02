@@ -14,6 +14,7 @@ ic-types = "0.1.3"
 serde = "1.0.116"
 serde_bytes = "0.11.5"
 ic-kit = "0.4.2"
+unic = "0.9"
 validator = { version = "0.12", features = ["derive"] }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
