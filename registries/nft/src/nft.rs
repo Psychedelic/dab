@@ -242,19 +242,22 @@ mod tests {
     #[test]
     fn test_add_fails_because_of_bad_name_param() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
-            name: std::iter::repeat("X").take(NAME_LIMIT + 1).collect::<String>(),
+            name: std::iter::repeat("X")
+                .take(NAME_LIMIT + 1)
+                .collect::<String>(),
             description: String::from("description"),
             thumbnail: String::from("https://logo_url.com"),
             frontend: Some(String::from("https://frontend_url.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (String::from("standard"), DetailValue::Text(String::from("DIP721")))
-            ]
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("DIP721")),
+            )],
         };
 
         let addition_result = add(canister_info);
@@ -266,19 +269,22 @@ mod tests {
     #[test]
     fn test_add_fails_because_of_bad_descripion_param() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
             name: String::from("name"),
-            description: std::iter::repeat("X").take(DESCRIPTION_LIMIT + 1).collect::<String>(),
+            description: std::iter::repeat("X")
+                .take(DESCRIPTION_LIMIT + 1)
+                .collect::<String>(),
             thumbnail: String::from("https://logo_url.com"),
             frontend: Some(String::from("https://frontend_url.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (String::from("standard"), DetailValue::Text(String::from("DIP721")))
-            ]
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("DIP721")),
+            )],
         };
 
         let addition_result = add(canister_info);
@@ -290,9 +296,9 @@ mod tests {
     #[test]
     fn test_add_fails_because_of_bad_thumbnail_param() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
             name: String::from("name"),
@@ -300,9 +306,10 @@ mod tests {
             thumbnail: String::from("bad thumbnail"),
             frontend: Some(String::from("https://frontend_url.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (String::from("standard"), DetailValue::Text(String::from("DIP721")))
-            ]
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("DIP721")),
+            )],
         };
 
         let addition_result = add(canister_info);
@@ -314,9 +321,9 @@ mod tests {
     #[test]
     fn test_add_fails_because_of_bad_frontend_param() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
             name: String::from("name"),
@@ -324,9 +331,10 @@ mod tests {
             thumbnail: String::from("https://logo_url.com"),
             frontend: Some(String::from("bad frontend")),
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (String::from("standard"), DetailValue::Text(String::from("DIP721")))
-            ]
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("DIP721")),
+            )],
         };
 
         let addition_result = add(canister_info);
@@ -338,9 +346,9 @@ mod tests {
     #[test]
     fn test_add_fails_because_of_bad_standard_param() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
             name: String::from("name"),
@@ -348,9 +356,10 @@ mod tests {
             thumbnail: String::from("https://logo_url.com"),
             frontend: None,
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (String::from("standards"), DetailValue::Text(String::from("bad standard")))
-            ]
+            details: vec![(
+                String::from("standards"),
+                DetailValue::Text(String::from("bad standard")),
+            )],
         };
 
         let addition_result = add(canister_info);
@@ -362,9 +371,9 @@ mod tests {
     #[test]
     fn test_add_fails_because_of_invalid_details_params_amount() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
             name: String::from("name"),
@@ -373,9 +382,15 @@ mod tests {
             frontend: None,
             principal_id: mock_principals::xtc(),
             details: vec![
-                (String::from("standard"), DetailValue::Text(String::from("DIP721"))),
-                (String::from("extra field"), DetailValue::Text(String::from("invalid field")))
-            ]
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("DIP721")),
+                ),
+                (
+                    String::from("extra field"),
+                    DetailValue::Text(String::from("invalid field")),
+                ),
+            ],
         };
 
         let addition_result = add(canister_info);
@@ -411,9 +426,9 @@ mod tests {
     #[test]
     fn test_remove_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let canister_info = NftCanister {
             name: String::from("name"),
@@ -421,9 +436,10 @@ mod tests {
             thumbnail: String::from("https://logo_url.com"),
             frontend: None,
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (String::from("standard"), DetailValue::Text(String::from("DIP721")))
-            ]
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("DIP721")),
+            )],
         };
 
         add(canister_info.clone());
@@ -439,9 +455,9 @@ mod tests {
     #[test]
     fn test_remove_fails_because_of_non_existent_canister() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let remove_result = remove(mock_principals::xtc());
 
@@ -480,9 +496,9 @@ mod tests {
     #[test]
     fn test_get_returns_none_successfully() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let get_result = get(mock_principals::xtc());
         assert!(get_result.is_none());
@@ -514,9 +530,9 @@ mod tests {
     #[test]
     fn test_get_all_returns_no_canisters_successfully() {
         MockContext::new()
-        .with_caller(mock_principals::alice())
-        .with_data(Controller(mock_principals::alice()))
-        .inject();
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
 
         let get_all_result = get_all();
 
