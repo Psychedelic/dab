@@ -1,0 +1,26 @@
+type Address = record {
+    "name": text;
+    "description": opt text;
+    "emoji": opt text;
+    "principal_id": principal;
+};
+
+type operation_error = variant {
+    NotAuthorized;
+    NonExistentItem;
+    BadParameters;
+    Unknown : text;
+};
+
+type operation_response = variant {
+    Ok  : opt text;
+    Err : operation_error;
+};
+
+service : {
+    "name"           :  () -> (text) query;
+    "get_all"        :  () -> (vec Address);
+
+    "add"    :  (address: Address) -> (operation_response);
+    "remove" :  (address_name: text) -> (operation_response);
+}
