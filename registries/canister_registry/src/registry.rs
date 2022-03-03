@@ -219,6 +219,150 @@ mod tests {
     }
 
     #[test]
+    fn test_add_canister_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_some());
+    }
+
+    #[test]
+    fn test_add_canister_with_frontend_field_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: Some(String::from("https://google.com")),
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_some());
+        assert_eq!(
+            added_canister.unwrap().frontend,
+            Some(String::from("https://google.com"))
+        );
+    }
+
+    #[test]
+    fn test_add_canister_fails_because_of_thumbnail_param() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("bad url"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_err());
+        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_none());
+    }
+
+    #[test]
+    fn test_add_canister_fails_because_of_bad_frontend_param() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: Some(String::from("bad url")),
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_err());
+        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_none());
+    }
+
+    #[test]
+    fn test_add_canister_fails_because_of_unauthorized_caller() {
+        let context = MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        context.update_caller(mock_principals::bob());
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_err());
+        assert_eq!(addition_result.unwrap_err(), Failure::NotAuthorized);
+
+        let added_canister = get(mock_principals::xtc());
+        assert!(added_canister.is_none());
+    }
+
+    #[test]
     fn get_information() {
         // Alice is an admin
         let ctx = MockContext::new()
@@ -272,6 +416,218 @@ mod tests {
         let expected_response_nft: Option<&CanisterMetadata> = Some(&nft_info);
         assert_eq!(operation_get_info_xtc, expected_response_xtc);
         assert_eq!(operation_get_info_nft, expected_response_nft);
+    }
+
+    #[test]
+    fn test_remove_canister_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        let remove_result = remove(mock_principals::xtc());
+        assert!(remove_result.is_ok());
+
+        let removed_canister = get(mock_principals::xtc());
+        assert!(removed_canister.is_none());
+    }
+
+    #[test]
+    fn test_remove_canister_fails_because_of_inexistent_canister() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let remove_result = remove(mock_principals::xtc());
+        assert!(remove_result.is_err());
+        assert_eq!(remove_result.unwrap_err(), Failure::NonExistentItem);
+    }
+
+    #[test]
+    fn test_remove_canister_fails_because_of_unauthorized_caller() {
+        let context = MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        context.update_caller(mock_principals::bob());
+
+        let remove_result = remove(mock_principals::xtc());
+        assert!(remove_result.is_err());
+        assert_eq!(remove_result.unwrap_err(), Failure::NotAuthorized);
+    }
+
+    #[test]
+    fn test_get_canister_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        let get_response = get(mock_principals::xtc());
+        assert!(get_response.is_some());
+        assert_eq!(get_response.unwrap().principal_id, mock_principals::xtc());
+    }
+
+    fn test_get_canister_for_unauthorized_caller_successfully() {
+        let context = MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        context.update_caller(mock_principals::bob());
+
+        let get_response = get(mock_principals::xtc());
+        assert!(get_response.is_some());
+        assert_eq!(get_response.unwrap().principal_id, mock_principals::xtc());
+    }
+
+    #[test]
+    fn test_get_canister_returns_none_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let get_response = get(mock_principals::xtc());
+        assert!(get_response.is_none());
+    }
+
+    #[test]
+    fn test_get_all_canisters_succesfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        let get_all_response = get_all();
+
+        assert_eq!(get_all_response.len(), 1);
+    }
+
+    #[test]
+    fn test_get_all_canisters_for_unauthorized_caller_succesfully() {
+        let context = MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let canister_metadata = CanisterMetadata {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![(
+                String::from("standard"),
+                DetailValue::Text(String::from("Dank")),
+            )],
+        };
+
+        let addition_result = add(canister_metadata.clone());
+        assert!(addition_result.is_ok());
+
+        context.update_caller(mock_principals::bob());
+
+        let get_all_response = get_all();
+
+        assert_eq!(get_all_response.len(), 1);
+    }
+
+    #[test]
+    fn test_get_all_canisters_returns_none_succesfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        init();
+
+        let get_all_response = get_all();
+        assert_eq!(get_all_response.len(), 0);
     }
 
     #[test]
