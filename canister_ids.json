@@ -1,14 +1,26 @@
 {
+  "nft": {
+    "ic": "ctqxp-yyaaa-aaaah-abbda-cai"
+  },
+  "registry": {
+    "ic": "curr3-vaaaa-aaaah-abbdq-cai"
+  },
+  "router": {
+    "ic": "bygbm-6aaaa-aaaah-abbjq-cai"
+  },
+  "tokens": {
+    "ic": "b7hhy-tyaaa-aaaah-abbja-cai"
+  },
   "fleek-site": {
     "ic": "334ee-3qaaa-aaaad-qaetq-cai"
   },
-  "nft": {
+  "legacy-nft": {
     "ic": "aipdg-waaaa-aaaah-aaq5q-cai"
   },
-  "tokens": {
+  "legacy-tokens": {
     "ic": "qwt65-nyaaa-aaaah-qcl4q-cai"
   },
-  "registry": {
+  "legacy-registry": {
     "ic": "qxtlu-aiaaa-aaaah-aaupq-cai"
   }
 }
