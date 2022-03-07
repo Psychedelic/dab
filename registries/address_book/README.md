@@ -1,7 +1,7 @@
 # Interaction Guide
 
 Interacting with the address book canister and the methods it offers is a fairly easy and efficient process. Currently the private address book canister offers its users a private address book for storing different principal IDs and the names associated with them. You can find all of the methods and their usage in the
-shell script located [here](https://github.com/Psychedelic/dab/blob/main/scripts/method-tests.sh).
+shell script located [here](https://github.com/Psychedelic/dab/blob/main/scripts/address-tests.sh).
 
 ## Private Address Book Methods
 
