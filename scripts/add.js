@@ -153,7 +153,7 @@ function add_nft(stream) {
                             'call',
                             answers.address,
                             'add',
-                            `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt null; details= vec { record {\\"standard\\"; variant { Text= \\"${standard}\\" } } } })"`,
+                            `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= null; details= vec { record {\\"standard\\"; variant { Text= \\"${standard}\\" } } } })"`,
                         ];
                           try {
                             execSync(command.join(' '));
@@ -267,7 +267,7 @@ function add_tokens_entry(stream) {
 }
 
 function add_canister(stream) {
-    let dataStream = [
+    /** let dataStream = [
       {
         "id": "24pmb-qiaaa-aaaah-aannq-cai",
         "url": "https://2ji5m-raaaa-aaaah-aanoa-cai.raw.ic0.app/",
@@ -1028,18 +1028,17 @@ function add_canister(stream) {
             continue;
         }
         console.log(`added ${item.name}`);
-    }
+    } **/
     
-    /*
     stream
     .on("data", (data) => {
-            if (data.Name != '' && data.Description != '' && data.URL != '' && data.Logo != '' && data.ID != '') {
+            if (data.Category != '' && data.Name != '' && data.Description != '' && data.Thumbnail != '' && data.ID != '') {
                 let item = {
                     name: data.Name,
                     id: data.ID,
                     description: data.Description,
-                    url: data.URL,
-                    logo: data.Logo,
+                    frontend: data.Frontend,
+                    thumbnail: data.Thumbnail,
                     category: data.Category
                 };
                 results.push(item);
@@ -1068,19 +1067,20 @@ function add_canister(stream) {
                             name = canister.name,
                             description = canister.description,
                             id = canister.id,
-                            url = canister.url,
-                            logo = canister.logo,
+                            frontend = canister.frontend,
+                            thumbnail = canister.thumbnail,
                             category = canister.category;
                         
-                        const command = [
+                        if (thumbnail != '') {
+                          const command = [
                             'dfx',
                             'canister',
                             '--network=ic',
                             '--no-wallet',
                             'call',
                             answers.address,
-                            'add_canister',
-                            `"(principal \\"${id}\\", record {name= \\"${name}\\"; url= \\"${url}\\"; description= \\"${description}\\"; category= variant {${category}}; logo_url= \\"${logo}\\"})"`,
+                            'add',
+                            `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"category\\"; variant { Text= \\"${category}\\" } } } })"`,
                         ];
                         try {
                             execSync(command.join(' '));
@@ -1090,11 +1090,31 @@ function add_canister(stream) {
                         }
                         ui.log.write(`ADDED: ${name}`);
                         ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
+                        } else {
+                          const command = [
+                            'dfx',
+                            'canister',
+                            '--network=ic',
+                            '--no-wallet',
+                            'call',
+                            answers.address,
+                            'add',
+                            `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= null; details= vec { record {\\"category\\"; variant { Text= \\"${category}\\" } } } })"`,
+                        ];
+                        try {
+                            execSync(command.join(' '));
+                        } catch (e) {
+                            ui.log.write(`FAILED: ${name}`);
+                            continue;
+                        }
+                        ui.log.write(`ADDED: ${name}`);
+                        ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
+                        }
                     }
                     ui.updateBottomBar('FINISHED');
                 }
             });
-    }); */
+    });
 }
 
 main();
