@@ -117,9 +117,9 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         && !validate_url(&canister_info.frontend.clone().unwrap())
     {
         return Err(OperationError::BadParameters);
-    } else if canister_info.details[0].0 != String::from("standard") {
+    } else if canister_info.details.len() == 0 {
         return Err(OperationError::BadParameters);
-    } else if canister_info.details.len() != 1 {
+    } else if !canister_info.details.clone().into_iter().any(|detail| detail.0 == "standard") {
         return Err(OperationError::BadParameters);
     }
 
@@ -210,6 +210,39 @@ mod tests {
         };
 
         assert!(add(canister_info).is_ok());
+    }
+
+    #[test]
+    fn test_add_with_asset_type_field_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .with_data(Controller(mock_principals::alice()))
+            .inject();
+
+        let canister_info = NftCanister {
+            name: String::from("xtc"),
+            principal_id: mock_principals::xtc(),
+            description: String::from("XTC is your cycles wallet."),
+            thumbnail: String::from("https://google.com"),
+            frontend: None,
+            details: vec![
+                (
+                    String::from("standard"),
+                    DetailValue::Text(String::from("Dank")),
+                ),
+                (
+                    String::from("asset_type"),
+                    DetailValue::Text(String::from("png")),
+                ),
+            ],
+        };
+
+        assert!(add(canister_info).is_ok());
+
+        let added_canister = get(mock_principals::xtc());
+
+        assert_eq!(added_canister.unwrap().details[1].0, String::from("asset_type"));
+        assert_eq!(added_canister.unwrap().details[1].1, DetailValue::Text(String::from("png")));
     }
 
     #[test]
@@ -381,16 +414,7 @@ mod tests {
             thumbnail: String::from("https://logo_url.com"),
             frontend: None,
             principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP721")),
-                ),
-                (
-                    String::from("extra field"),
-                    DetailValue::Text(String::from("invalid field")),
-                ),
-            ],
+            details: vec![],
         };
 
         let addition_result = add(canister_info);
