@@ -40,5 +40,5 @@ service : {
 
     // Canister ethods    
     "get_all"      : () -> (vec nft_canister) query;
-    "set_controller" : (principal) -> (operation_response);
+    "add_admin"    : (principal) -> (operation_response);
 }
