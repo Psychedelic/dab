@@ -121,6 +121,10 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         return Err(OperationError::BadParameters);
     } else if !canister_info.details.clone().into_iter().any(|detail| detail.0 == "standard") {
         return Err(OperationError::BadParameters);
+    } else if canister_info.details.0.0 != String::from("standard") {
+        return Err(OperationError::BadParameters);
+    } else if canister_info.details.1.0 != String::from("asset_type") {
+        return Err(OperationError::BadParameters);
     }
 
     let name = canister_info.name.clone();

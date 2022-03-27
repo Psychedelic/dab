@@ -42,7 +42,7 @@ pub fn post_upgrade() {
                 principal_id: nft_canister.principal_id.clone(),
                 details: vec![
                     nft_canister.details[0].clone(),
-                    (String::from("asset_type"), DetailValue::Text(String::from("ASSET TYPE HERE"))),
+                    (String::from("asset_type"), DetailValue::Text(String::from("unknown"))),
                 ],
             };
 
