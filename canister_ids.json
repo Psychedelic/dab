@@ -1,4 +1,19 @@
 {
+  "address_book": {
+    "ic": "i73cm-daaaa-aaaah-abhea-cai"
+  },
+  "fleek-site": {
+    "ic": "334ee-3qaaa-aaaad-qaetq-cai"
+  },
+  "legacy-nft": {
+    "ic": "aipdg-waaaa-aaaah-aaq5q-cai"
+  },
+  "legacy-registry": {
+    "ic": "qxtlu-aiaaa-aaaah-aaupq-cai"
+  },
+  "legacy-tokens": {
+    "ic": "qwt65-nyaaa-aaaah-qcl4q-cai"
+  },
   "nft": {
     "ic": "ctqxp-yyaaa-aaaah-abbda-cai"
   },
@@ -10,17 +25,5 @@
   },
   "tokens": {
     "ic": "b7hhy-tyaaa-aaaah-abbja-cai"
-  },
-  "fleek-site": {
-    "ic": "334ee-3qaaa-aaaad-qaetq-cai"
-  },
-  "legacy-nft": {
-    "ic": "aipdg-waaaa-aaaah-aaq5q-cai"
-  },
-  "legacy-tokens": {
-    "ic": "qwt65-nyaaa-aaaah-qcl4q-cai"
-  },
-  "legacy-registry": {
-    "ic": "qxtlu-aiaaa-aaaah-aaupq-cai"
   }
 }
