@@ -1,4 +1,4 @@
-use crate::nft::{Admins, DetailValue, NftCanister, Registry};
+use crate::nft::{Admins, NftCanister, Registry};
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
@@ -20,9 +20,9 @@ struct StableStorageV0 {
 #[pre_upgrade]
 pub fn pre_upgrade() {
     let db = ic::get_mut::<Registry>().archive();
-    let admins = ic::get_mut::<Admins>().0;
+    let admins = &ic::get_mut::<Admins>().0;
 
-    let stable = StableStorage { db, admins };
+    let stable = StableStorage { db, admins: admins.to_vec() };
 
     match ic::stable_store((stable,)) {
         Ok(_) => (),

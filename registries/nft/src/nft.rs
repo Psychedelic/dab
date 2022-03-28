@@ -19,16 +19,16 @@ fn init() {
 }
 
 fn is_admin(account: &Principal) -> bool {
-    account == &ic::get::<Admins>().0
+    ic::get::<Admins>().0.contains(account)
 }
 
 #[update]
-fn add_admin(new_admin: Principal) -> Result<(), Failure> {
+fn add_admin(new_admin: Principal) -> Result<(), OperationError> {
     if is_admin(&ic::caller()) {
         ic::get_mut::<Admins>().0.push(new_admin);
         return Ok(());
     }
-    Err(Failure::NotAuthorized)
+    Err(OperationError::NotAuthorized)
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
