@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use validator::validate_url;
 
-pub struct Controller(pub Principal);
+pub struct Admins(pub Vec<Principal>);
 
-impl Default for Controller {
+impl Default for Admins {
     fn default() -> Self {
         panic!()
     }
@@ -15,17 +15,17 @@ impl Default for Controller {
 
 #[init]
 fn init() {
-    ic::store(Controller(ic::caller()));
+    ic::store(Admins(vec![ic::caller()]));
 }
 
-fn is_controller(account: &Principal) -> bool {
-    account == &ic::get::<Controller>().0
+fn is_admin(account: &Principal) -> bool {
+    ic::get::<Admins>().0.contains(account)
 }
 
 #[update]
-fn set_controller(new_controller: Principal) -> Result<(), OperationError> {
-    if is_controller(&ic::caller()) {
-        ic::store(Controller(new_controller));
+fn add_admin(new_admin: Principal) -> Result<(), OperationError> {
+    if is_admin(&ic::caller()) {
+        ic::get_mut::<Admins>().0.push(new_admin);
         return Ok(());
     }
     Err(OperationError::NotAuthorized)
@@ -109,7 +109,7 @@ pub enum OperationError {
 
 #[update]
 fn add(canister_info: NftCanister) -> Result<(), OperationError> {
-    if !is_controller(&ic::caller()) {
+    if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     } else if !validate_url(&canister_info.thumbnail) {
         return Err(OperationError::BadParameters);
@@ -134,7 +134,7 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
 
 #[update]
 fn remove(principal_id: Principal) -> Result<(), OperationError> {
-    if !is_controller(&ic::caller()) {
+    if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
