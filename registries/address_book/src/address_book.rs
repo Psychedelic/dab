@@ -13,10 +13,25 @@ Every item in the map looks like this:
 ( ( UserID,     CanisterName ), CanisterID )
 **/
 
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub enum AddressType {
+    Principal(String),
+    Account(String),
+    Icns(String),
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct AddressInput {
+    pub name: String,
+    pub value: String,
+    pub description: Option<String>,
+    pub emoji: Option<String>,
+}
+
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Address {
     pub name: String,
-    pub principal_id: Principal,
+    pub value: AddressType,
     pub description: Option<String>,
     pub emoji: Option<String>,
 }
@@ -43,9 +58,26 @@ impl AddressBook {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, account: Principal, address: Address) {
-        let pointer: Key = (account, address.name.clone());
+    fn get_address_type(&mut self, address: String) -> Result<AddressType, Failure> {
+        if Principal::from_text(address.clone()).is_ok() {
+            return Ok(AddressType::Principal(address.clone()));
+        } else if address.clone().len() == 64 {
+            return Ok(AddressType::Account(address.clone()));
+        } else {
+            return Err(Failure::BadParameters);
+        }
+    }
+
+    pub fn add(&mut self, account: Principal, addressInput: AddressInput) -> Result<(), Failure> {
+        let pointer: Key = (account, addressInput.name.clone());
+        let address = Address {
+            name: addressInput.name.clone(),
+            description: addressInput.description.clone(),
+            value: self.get_address_type(addressInput.value.clone()).unwrap(),
+            emoji: addressInput.emoji.clone(),
+        };
         self.0.insert(pointer.clone(), address);
+        return Ok(());
     }
 
     pub fn remove(&mut self, account: Principal, canister_name: String) -> Result<(), Failure> {
@@ -82,7 +114,7 @@ fn name() -> String {
 }
 
 #[update]
-fn add(address: Address) -> Result<(), Failure> {
+fn add(address: AddressInput) -> Result<(), Failure> {
     if &address.name.len() > &NAME_LIMIT {
         return Err(Failure::BadParameters);
     }
@@ -134,11 +166,11 @@ mod tests {
             .with_caller(mock_principals::alice())
             .inject();
 
-        let address_info = Address {
+        let address_info = AddressInput {
             name: String::from("Bob"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
         let addition_result = add(address_info.clone());
@@ -146,6 +178,7 @@ mod tests {
 
         let addresses = get_all();
         assert_eq!(addresses.len(), 1);
+        assert_eq!(addresses[0].value, AddressType::Principal(address_info.value));
     }
 
     #[test]
@@ -154,11 +187,11 @@ mod tests {
             .with_caller(mock_principals::alice())
             .inject();
 
-        let address_info = Address {
+        let address_info = AddressInput {
             name: String::from("Bob"),
-            description: Some(std::iter::repeat("X").take(1201).collect::<String>()),
+            description: Some(std::iter::repeat("X").take(DESCRIPTION_LIMIT + 1).collect::<String>()),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
         let addition_result = add(address_info.clone());
@@ -172,11 +205,11 @@ mod tests {
             .with_caller(mock_principals::alice())
             .inject();
 
-        let address_info = Address {
+        let address_info = AddressInput {
             name: std::iter::repeat("X").take(25).collect::<String>(),
             description: Some(String::from("description")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
         let addition_result = add(address_info.clone());
@@ -190,11 +223,11 @@ mod tests {
             .with_caller(mock_principals::alice())
             .inject();
 
-        let address_info = Address {
+        let address_info = AddressInput {
             name: String::from("Bob"),
             description: Some(String::from("description")),
             emoji: Some(String::from("a")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
         let addition_result = add(address_info.clone());
@@ -208,11 +241,11 @@ mod tests {
             .with_caller(mock_principals::alice())
             .inject();
 
-        let address_info = Address {
+        let address_info = AddressInput {
             name: String::from("Bob"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
         let addition_result = add(address_info.clone());
@@ -229,18 +262,18 @@ mod tests {
     fn test_users_get_their_own_addresses() {
         let context = MockContext::new().inject();
 
-        let bob_address_info = Address {
+        let bob_address_info = AddressInput {
             name: String::from("Bob"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
-        let alice_address_info = Address {
+        let alice_address_info = AddressInput {
             name: String::from("Alice"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::alice(),
+            value: mock_principals::alice().to_text(),
         };
 
         //Alice adds Bob as her contact
@@ -268,18 +301,18 @@ mod tests {
             .with_caller(mock_principals::alice())
             .inject();
 
-        let bob_address_info = Address {
+        let bob_address_info = AddressInput {
             name: String::from("Bob"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::bob(),
+            value: mock_principals::bob().to_text(),
         };
 
-        let andrew_address_info = Address {
+        let andrew_address_info = AddressInput {
             name: String::from("Andrew"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            principal_id: mock_principals::alice(),
+            value: mock_principals::alice().to_text(),
         };
 
         add(bob_address_info);
@@ -289,6 +322,8 @@ mod tests {
 
         assert_eq!(addresses.len(), 2);
         assert_eq!(addresses[0].name, String::from("Andrew"));
+        assert_eq!(addresses[0].value, AddressType::Principal(mock_principals::alice().to_text()));
         assert_eq!(addresses[1].name, String::from("Bob"));
+        assert_eq!(addresses[1].value, AddressType::Principal(mock_principals::bob().to_text()));
     }
 }
