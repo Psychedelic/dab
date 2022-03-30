@@ -178,7 +178,10 @@ mod tests {
 
         let addresses = get_all();
         assert_eq!(addresses.len(), 1);
-        assert_eq!(addresses[0].value, AddressType::Principal(address_info.value));
+        assert_eq!(
+            addresses[0].value,
+            AddressType::Principal(address_info.value)
+        );
     }
 
     #[test]
@@ -189,7 +192,11 @@ mod tests {
 
         let address_info = AddressInput {
             name: String::from("Bob"),
-            description: Some(std::iter::repeat("X").take(DESCRIPTION_LIMIT + 1).collect::<String>()),
+            description: Some(
+                std::iter::repeat("X")
+                    .take(DESCRIPTION_LIMIT + 1)
+                    .collect::<String>(),
+            ),
             emoji: Some(String::from("😚")),
             value: mock_principals::bob().to_text(),
         };
@@ -322,8 +329,14 @@ mod tests {
 
         assert_eq!(addresses.len(), 2);
         assert_eq!(addresses[0].name, String::from("Andrew"));
-        assert_eq!(addresses[0].value, AddressType::Principal(mock_principals::alice().to_text()));
+        assert_eq!(
+            addresses[0].value,
+            AddressType::Principal(mock_principals::alice().to_text())
+        );
         assert_eq!(addresses[1].name, String::from("Bob"));
-        assert_eq!(addresses[1].value, AddressType::Principal(mock_principals::bob().to_text()));
+        assert_eq!(
+            addresses[1].value,
+            AddressType::Principal(mock_principals::bob().to_text())
+        );
     }
 }
