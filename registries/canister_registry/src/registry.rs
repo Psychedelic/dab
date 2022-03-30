@@ -149,28 +149,6 @@ fn get_all() -> Vec<&'static CanisterMetadata> {
     canister_db.get_all()
 }
 
-/* #[update]
-async fn update_canister(canister: Principal) -> Result<(), Failure> {
-    let metadata: InputCanisterMetadata =
-        match ic::call(canister, String::from("dab_registry"), ((),)).await {
-            Ok((x,)) => x,
-            Err((_code, msg)) => {
-                return Err(Failure::InterCanisterCall(msg));
-            }
-        };
-
-    if &metadata.name.len() > &NAME_LIMIT
-        || &metadata.description.len() > &DESCRIPTION_LIMIT
-        || !validate_url(&metadata.logo_url)
-        || !validate_url(&metadata.url)
-    {
-        return Err(Failure::BadParameters);
-    }
-
-    let canister_db = ic::get_mut::<CanisterDB>();
-    canister_db.add_canister(canister, metadata)
-} */
-
 #[cfg(test)]
 mod tests {
     use super::*;
