@@ -22,9 +22,9 @@ pub enum DetailValue {
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 24;
 
-pub struct Fleek(pub Vec<Principal>);
+pub struct Admins(pub Vec<Principal>);
 
-impl Default for Fleek {
+impl Default for Admins {
     fn default() -> Self {
         panic!()
     }
@@ -91,17 +91,17 @@ pub enum Failure {
 
 #[init]
 fn init() {
-    ic::store(Fleek(vec![ic::caller()]));
+    ic::store(Admins(vec![ic::caller()]));
 }
 
-fn is_fleek(account: &Principal) -> bool {
-    ic::get::<Fleek>().0.contains(account)
+fn is_admin(account: &Principal) -> bool {
+    ic::get::<Admins>().0.contains(account)
 }
 
 #[update]
-fn set_admin(new_admin: Principal) -> Result<(), Failure> {
-    if is_fleek(&ic::caller()) {
-        ic::get_mut::<Fleek>().0.push(new_admin);
+fn add_admin(new_admin: Principal) -> Result<(), Failure> {
+    if is_admin(&ic::caller()) {
+        ic::get_mut::<Admins>().0.push(new_admin);
         return Ok(());
     }
     Err(Failure::NotAuthorized)
@@ -120,7 +120,7 @@ fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 
 #[update]
 fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
-    if !is_fleek(&ic::caller()) {
+    if !is_admin(&ic::caller()) {
         return Err(Failure::NotAuthorized);
     } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
@@ -136,7 +136,7 @@ fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
 
 #[update]
 fn remove(canister: Principal) -> Result<(), Failure> {
-    if !is_fleek(&ic::caller()) {
+    if !is_admin(&ic::caller()) {
         return Err(Failure::NotAuthorized);
     }
     let canister_db = ic::get_mut::<CanisterDB>();
@@ -210,7 +210,7 @@ mod tests {
 
         // Alice makes Bob an admin and now he can add/remove canisters
         ctx.update_caller(mock_principals::alice());
-        let operation = set_admin(mock_principals::bob());
+        let operation = add_admin(mock_principals::bob());
         assert!(operation.is_ok());
 
         ctx.update_caller(mock_principals::bob());

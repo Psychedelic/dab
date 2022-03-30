@@ -40,5 +40,5 @@ service : {
     
     // Canister methods
     "get_all"  : () -> (vec token) query;
-    "set_controller" : (principal) -> (operation_response);
+    "add_admin" : (principal) -> (operation_response);
 }

@@ -38,4 +38,6 @@ service : {
     "add"     : (canister_metadata) -> (operation_response);
     "remove"  : (principal) -> (operation_response);
     "get_all" : () -> (vec canister_metadata) query;
+
+    "add_admin" : (principal) -> (operation_response);
 }
