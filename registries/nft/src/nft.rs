@@ -125,6 +125,19 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
 
     let name = canister_info.name.clone();
     if name.len() <= NAME_LIMIT && &canister_info.description.len() <= &DESCRIPTION_LIMIT {
+
+        // Add the collection to the canister registry
+        let mut call_arg : NftCanister = canister_info.cloned();
+        call_arg.details = vec![("category", "NFT")];
+
+        let metadata: Option<String> =
+        match ic::call(Principal::from_str("curr3-vaaaa-aaaah-abbdq-cai"), String::from("add"), (call_arg)).await {
+            Ok((x,)) => x,
+            Err((_code, msg)) => {
+                return Err(Failure::Unknown(msg));
+            }
+        };
+
         let db = ic::get_mut::<Registry>();
         return db.add(canister_info);
     }
