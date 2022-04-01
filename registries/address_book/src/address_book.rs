@@ -41,6 +41,8 @@ pub struct AddressBook(BTreeMap<Key, Address>);
 
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 24;
+const ACCOUNT_CHAR_LENGTH: usize =  64;
+const ICNS_SUFFIX: &str = ".icp";
 
 impl Default for AddressBook {
     fn default() -> Self {
@@ -58,11 +60,19 @@ impl AddressBook {
         self.0 = archive.into_iter().collect();
     }
 
+    fn validate_account_id(&mut self, account_id: String) -> bool {
+        let crc = format!("{}{}", String::from("0x"), account_id.slice_unchecked(0, 8));
+
+        return true;
+    }
+
     fn get_address_type(&mut self, address: String) -> Result<AddressType, Failure> {
         if Principal::from_text(address.clone()).is_ok() {
             return Ok(AddressType::Principal(address.clone()));
-        } else if address.clone().len() == 64 {
+        } else if address.clone().len() == ACCOUNT_CHAR_LENGTH && self.validate_account_id(address.clone()){
             return Ok(AddressType::Account(address.clone()));
+        } else if address.ends_with(ICNS_SUFFIX) {
+            return Ok(AddressType::Icns(address.clone()));
         } else {
             return Err(Failure::BadParameters);
         }
@@ -73,7 +83,7 @@ impl AddressBook {
         let address = Address {
             name: addressInput.name.clone(),
             description: addressInput.description.clone(),
-            value: self.get_address_type(addressInput.value.clone()).unwrap(),
+            value: self.get_address_type(addressInput.value.clone())?,
             emoji: addressInput.emoji.clone(),
         };
         self.0.insert(pointer.clone(), address);
