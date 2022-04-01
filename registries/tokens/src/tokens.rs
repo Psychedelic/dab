@@ -143,6 +143,18 @@ fn add(token: Token) -> Result<(), OperationError> {
         return Err(OperationError::BadParameters);
     }
 
+    // Add the collection to the canister registry
+    let mut call_arg : Token = token.cloned();
+    call_arg.details = vec![("category", "Token")];
+    
+    let metadata: Option<String> =
+    match ic::call(Principal::from_str("curr3-vaaaa-aaaah-abbdq-cai"), String::from("add"), (call_arg)).await {
+        Ok((x,)) => x,
+        Err((_code, msg)) => {
+            return Err(Failure::Unknown(msg));
+        }
+    };
+
     let db = ic::get_mut::<TokenRegistry>();
     return db.add(token);
 }
