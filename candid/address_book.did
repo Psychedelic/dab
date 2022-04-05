@@ -1,10 +1,3 @@
-type address_input = record {
-    "name": text;
-    "description": opt text;
-    "emoji": opt text;
-    "value": text;
-};
-
 type address = record {
     "name": text;
     "description": opt text;
@@ -13,8 +6,8 @@ type address = record {
 };
 
 type value_type = variant {
-    Principal : text;
-    Account : text;
+    PrincipalId : principal;
+    AccountId : text;
     Icns : text;
 };
 
@@ -34,6 +27,6 @@ service : {
     "name"           :  () -> (text) query;
     "get_all"        :  () -> (vec address);
 
-    "add"    :  (address: address_input) -> (operation_response);
+    "add"    :  (address: address) -> (operation_response);
     "remove" :  (address_name: text) -> (operation_response);
 }
