@@ -2,7 +2,8 @@ use ic_kit::candid::{CandidType, Principal};
 use ic_kit::macros::*;
 use ic_kit::ic::call;
 use ic_kit::*;
-use ic_cdk::print;
+use crc32fast;
+use hex::FromHex;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
@@ -46,7 +47,7 @@ pub struct AddressBook(BTreeMap<Key, Address>);
 
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 24;
-const ACCOUNT_CHAR_LENGTH: usize =  64;
+const ACCOUNT_ID_LENGTH: usize =  64;
 const ICNS_SUFFIX: &str = ".icp";
 const ICNS_REGISTRY_PRINCIPAL_ID: &str = "e5kvl-zyaaa-aaaan-qabaq-cai";
 
@@ -66,11 +67,20 @@ impl AddressBook {
         self.0 = archive.into_iter().collect();
     }
 
-    // fn validate_account_id(&mut self, account_id: String) -> bool {
-    //     let crc = format!("{}{}", String::from("0x"), account_id.slice_unchecked(0, 8));
+    fn validate_account_id(&mut self, account_id: String) -> bool {
+        if account_id.clone().len() != ACCOUNT_ID_LENGTH {
+            return false;
+        }
 
-    //     return true;
-    // }
+        let crc = u32::from_str_radix(&account_id.clone()[..8], 16).unwrap();
+        let checksum: u32 = crc32fast::hash(&(<[u8; 28]>::from_hex(&account_id.clone()[8..]).unwrap()));
+
+        if crc != checksum {
+            return false;
+        }
+
+        return true;
+    }
 
     async fn validate_icns(&mut self, icns: String) -> bool {
         let result: (Option<GetRecordResponse>,) = call(Principal::from_text(ICNS_REGISTRY_PRINCIPAL_ID).unwrap(), "getRecord", (icns,)).await.unwrap();
@@ -82,10 +92,15 @@ impl AddressBook {
             AddressType::Icns(s) => {
                 match self.validate_icns(s).await {
                     true => return Ok(()),
-                    false => return Err(Failure::BadParameters)
+                    false => return Err(Failure::BadParameters),
                 }
             },
-            AddressType::AccountId(s) => Ok(()),
+            AddressType::AccountId(s) => {
+                match self.validate_account_id(s) {
+                    true => return Ok(()),
+                    false => return Err(Failure::BadParameters),
+                }
+            },
             AddressType::PrincipalId(s) => Ok(()),
             _ => Err(Failure::BadParameters),
         }
