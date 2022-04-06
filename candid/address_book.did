@@ -1,8 +1,14 @@
-type Address = record {
+type address = record {
     "name": text;
     "description": opt text;
     "emoji": opt text;
-    "principal_id": principal;
+    "value" : value_type;
+};
+
+type value_type = variant {
+    PrincipalId : principal;
+    AccountId : text;
+    Icns : text;
 };
 
 type operation_error = variant {
@@ -19,8 +25,8 @@ type operation_response = variant {
 
 service : {
     "name"           :  () -> (text) query;
-    "get_all"        :  () -> (vec Address);
+    "get_all"        :  () -> (vec address);
 
-    "add"    :  (address: Address) -> (operation_response);
+    "add"    :  (address: address) -> (operation_response);
     "remove" :  (address_name: text) -> (operation_response);
 }
