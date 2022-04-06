@@ -1,9 +1,9 @@
-use ic_kit::candid::{CandidType, Principal};
-use ic_kit::macros::*;
-use ic_kit::ic::call;
-use ic_kit::*;
 use crc32fast;
 use hex::FromHex;
+use ic_kit::candid::{CandidType, Principal};
+use ic_kit::ic::call;
+use ic_kit::macros::*;
+use ic_kit::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
@@ -47,7 +47,7 @@ pub struct AddressBook(BTreeMap<Key, Address>);
 
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 24;
-const ACCOUNT_ID_LENGTH: usize =  64;
+const ACCOUNT_ID_LENGTH: usize = 64;
 const ICNS_SUFFIX: &str = ".icp";
 const ICNS_REGISTRY_PRINCIPAL_ID: &str = "e5kvl-zyaaa-aaaan-qabaq-cai";
 
@@ -73,7 +73,8 @@ impl AddressBook {
         }
 
         let crc = u32::from_str_radix(&account_id.clone()[..8], 16).unwrap();
-        let checksum: u32 = crc32fast::hash(&(<[u8; 28]>::from_hex(&account_id.clone()[8..]).unwrap()));
+        let checksum: u32 =
+            crc32fast::hash(&(<[u8; 28]>::from_hex(&account_id.clone()[8..]).unwrap()));
 
         if crc != checksum {
             return false;
@@ -83,23 +84,25 @@ impl AddressBook {
     }
 
     async fn validate_icns(&mut self, icns: String) -> bool {
-        let result: (Option<GetRecordResponse>,) = call(Principal::from_text(ICNS_REGISTRY_PRINCIPAL_ID).unwrap(), "getRecord", (icns,)).await.unwrap();
+        let result: (Option<GetRecordResponse>,) = call(
+            Principal::from_text(ICNS_REGISTRY_PRINCIPAL_ID).unwrap(),
+            "getRecord",
+            (icns,),
+        )
+        .await
+        .unwrap();
         return result.0.is_some();
     }
 
     pub async fn validate_address_type(&mut self, address: AddressType) -> Result<(), Failure> {
         match address {
-            AddressType::Icns(s) => {
-                match self.validate_icns(s).await {
-                    true => return Ok(()),
-                    false => return Err(Failure::BadParameters),
-                }
+            AddressType::Icns(s) => match self.validate_icns(s).await {
+                true => return Ok(()),
+                false => return Err(Failure::BadParameters),
             },
-            AddressType::AccountId(s) => {
-                match self.validate_account_id(s) {
-                    true => return Ok(()),
-                    false => return Err(Failure::BadParameters),
-                }
+            AddressType::AccountId(s) => match self.validate_account_id(s) {
+                true => return Ok(()),
+                false => return Err(Failure::BadParameters),
             },
             AddressType::PrincipalId(s) => Ok(()),
             _ => Err(Failure::BadParameters),
@@ -169,7 +172,9 @@ async fn add(address: Address) -> Result<(), Failure> {
     }
 
     let address_book = ic::get_mut::<AddressBook>();
-    address_book.validate_address_type(address.value.clone()).await?;
+    address_book
+        .validate_address_type(address.value.clone())
+        .await?;
     address_book.add(ic::caller(), address.clone());
     return Ok(());
 }
