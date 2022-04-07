@@ -16,25 +16,57 @@ The address book canister has four methods:
 
 ### How to use them?
 
-First, we add a new address to our private address book with the `add` method:
+First, we add a new address to our private address book with the `add` method. The address book currently supports 3 types of adresses: Principal, Account and ICNS
 
+Storing a contact by its principal id:
 ```bash
-$ dfx canister call address add "(record { name= \"XTC\"; description= opt \"Dank's ledger\"; emoji= opt \"🚀\"; principal_id= principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"}}"
+$ dfx canister call address add "(record { name= \"XTC\"; description= opt \"Dank's ledger\"; emoji= opt \"🚀\"; value= variant { PrincipalId = principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"}}}"
 (variant { Ok = null })
 ```
+
+Storing a contact by its account id:
+```bash
+$ dfx canister call address add "(record { name= \"bob\"; description= opt \"Dank's ledger\"; emoji= opt \"🚀\"; value= variant { AccountId = \"b0159acc9c8b087a06fbcaee4954e010c5edabaf306e30c0578a763a0e14e020\"}}}"
+(variant { Ok = null })
+```
+
+
+Storing a contact by its ICNS name:
+```bash
+$ dfx canister call address add "(record { name= \"nico\"; description= opt \"Dank's ledger\"; emoji= opt \"🚀\"; value= variant { Icns = \"contact.icp\"}}}"
+(variant { Ok = null })
+```
+Saving a contact by its ICNS name also tests if the provided name actually resolves to an ICNS registered record.
 
 Now we can use the `get_all` method and ask the canister to return all of the addresses that are associated with our principal id:
 
 ```bash
 $ dfx canister call address get_all
 (
-  record {
-    principal_id = principal "aanaa-xaaaa-aaaah-aaeiq-cai";
-    name = "XTC";
-    emoji= opt "🚀";
-    description = opt "Dank's ledger";
+  vec {
+    record {
+      value = variant { PrincipalId = principal "aanaa-xaaaa-aaaah-aaeiq-cai" };
+      name = "XTC";
+      description = opt "Dank's ledger";
+      emoji = opt "🚀";
+    };
+    record {
+      value = variant {
+        AccountId = "b0159acc9c8b087a06fbcaee4954e010c5edabaf306e30c0578a763a0e14e020"
+      };
+      name = "bob";
+      description = opt "description";
+      emoji = opt "👍";
+    };
+    record {
+      value = variant { Icns = "nico.icp" };
+      name = "nico";
+      description = opt "description";
+      emoji = opt "👍";
+    };
   },
 )
+
 ```
 
 Okay, but since this canister is not deployed to the mainnet yet, we should remove it from the address book. To remove an address we use the `remove` method:
