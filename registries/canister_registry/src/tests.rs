@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use ic_kit::*;
     use crate::common_types::*;
     use crate::management::add_admin;
-    use crate::registry::{init, add, remove, get, get_all};
+    use crate::registry::{add, get, get_all, init, remove};
+    use ic_kit::*;
 
     pub fn nft_registry() -> Principal {
         Principal::from_text("aipdg-waaaa-aaaah-aaq5q-cai").unwrap()

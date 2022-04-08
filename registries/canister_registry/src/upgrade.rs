@@ -1,6 +1,6 @@
-use crate::registry::CanisterDB;
 use crate::common_types::CanisterMetadata;
 use crate::management::Admins;
+use crate::registry::CanisterDB;
 
 // IC imports
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};

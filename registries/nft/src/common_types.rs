@@ -39,7 +39,7 @@ pub enum OperationError {
 #[derive(Deserialize, CandidType)]
 pub enum RegistryResponse {
     Ok(Option<String>),
-    Err(OperationError)
+    Err(OperationError),
 }
 
-pub const CANISTER_REGISTRY_ID : &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
+pub const CANISTER_REGISTRY_ID: &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";

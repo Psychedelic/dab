@@ -1,8 +1,8 @@
 use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
-use std::collections::HashMap;
 use std::any::Any;
+use std::collections::HashMap;
 use std::str::FromStr;
 use validator::validate_url;
 
@@ -92,7 +92,10 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
 
     // Add the collection to the canister registry
     let mut call_arg: Token = token.clone();
-    call_arg.details = vec![("category".to_string(), DetailValue::Text("Token".to_string()))];
+    call_arg.details = vec![(
+        "category".to_string(),
+        DetailValue::Text("Token".to_string()),
+    )];
 
     let _registry_add_response: RegistryResponse = match ic::call(
         Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),

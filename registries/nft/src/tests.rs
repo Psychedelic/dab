@@ -1,13 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use ic_kit::MockContext;
     use ic_kit::mock_principals;
+    use ic_kit::MockContext;
     use tokio::*;
 
     use crate::common_types::*;
     use crate::management::*;
     use crate::nft::*;
-
 
     #[tokio::test]
     async fn test_controller() {
@@ -45,7 +44,7 @@ mod tests {
     async fn test_add() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -67,7 +66,7 @@ mod tests {
     async fn test_add_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -94,7 +93,7 @@ mod tests {
     async fn test_add_fails_because_of_bad_name_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -121,7 +120,7 @@ mod tests {
     async fn test_add_fails_because_of_bad_descripion_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -148,7 +147,7 @@ mod tests {
     async fn test_add_fails_because_of_bad_thumbnail_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -173,7 +172,7 @@ mod tests {
     async fn test_add_fails_because_of_bad_frontend_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -198,7 +197,7 @@ mod tests {
     async fn test_add_fails_because_of_bad_standard_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -223,7 +222,7 @@ mod tests {
     async fn test_add_fails_because_of_invalid_details_params_amount() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -254,7 +253,7 @@ mod tests {
     async fn test_remove() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -278,7 +277,7 @@ mod tests {
     async fn test_remove_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -307,7 +306,7 @@ mod tests {
     async fn test_remove_fails_because_of_non_existent_canister() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let remove_result = remove(mock_principals::xtc());
@@ -320,7 +319,7 @@ mod tests {
     async fn test_get() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -348,7 +347,7 @@ mod tests {
     async fn test_get_returns_none_successfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let get_result = get(mock_principals::xtc());
@@ -359,7 +358,7 @@ mod tests {
     async fn test_get_all() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let canister_info = NftCanister {
@@ -382,7 +381,7 @@ mod tests {
     async fn test_get_all_returns_no_canisters_successfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
-           .with_data(Admins(vec![mock_principals::alice()]))
+            .with_data(Admins(vec![mock_principals::alice()]))
             .inject();
 
         let get_all_result = get_all();

@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use ic_kit::{MockContext, mock_principals};
+    use ic_kit::{mock_principals, MockContext};
     use tokio::*;
 
     use crate::common_types::*;
     use crate::tokens::*;
-    
+
     #[tokio::test]
     async fn test_add_token_successfuly() {
         MockContext::new()
@@ -29,10 +29,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -63,10 +60,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -97,10 +91,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -133,10 +124,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -169,10 +157,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -207,10 +192,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -258,10 +240,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };

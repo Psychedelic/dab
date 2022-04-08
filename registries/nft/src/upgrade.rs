@@ -1,6 +1,6 @@
-use crate::nft::Registry;
-use crate::management::Admins;
 use crate::common_types::NftCanister;
+use crate::management::Admins;
+use crate::nft::Registry;
 
 use ic_kit::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
@@ -18,7 +18,10 @@ pub fn pre_upgrade() {
     let db = ic::get_mut::<Registry>().archive();
     let admins = &ic::get_mut::<Admins>().0;
 
-    let stable = StableStorage { db, admins: admins.to_vec() };
+    let stable = StableStorage {
+        db,
+        admins: admins.to_vec(),
+    };
 
     match ic::stable_store((stable,)) {
         Ok(_) => (),

@@ -1,5 +1,5 @@
 use ic_kit::{candid::CandidType, Principal};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum DetailValue {

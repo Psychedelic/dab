@@ -71,12 +71,17 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
 
     let name = canister_info.name.clone();
     if name.len() <= NAME_LIMIT && &canister_info.description.len() <= &DESCRIPTION_LIMIT {
-
         // Add the collection to the canister registry
-        let mut call_arg : NftCanister = canister_info.clone();
+        let mut call_arg: NftCanister = canister_info.clone();
         call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
 
-        let _registry_add_response : RegistryResponse = match ic::call(Principal::from_str(CANISTER_REGISTRY_ID).unwrap(), "add", (call_arg,)).await {
+        let _registry_add_response: RegistryResponse = match ic::call(
+            Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
+            "add",
+            (call_arg,),
+        )
+        .await
+        {
             Ok((x,)) => x,
             Err((_code, msg)) => {
                 return Err(OperationError::Unknown(msg));

@@ -1,6 +1,6 @@
-use ic_kit::Principal;
 use ic_kit::ic;
 use ic_kit::macros::*;
+use ic_kit::Principal;
 
 use crate::common_types::OperationError;
 
