@@ -2,18 +2,18 @@ use ic_kit::candid::{CandidType, Principal};
 use ic_kit::macros::*;
 use ic_kit::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::any::Any;
+use std::collections::HashMap;
+use std::str::FromStr;
 use validator::validate_url;
+
+pub const CANISTER_REGISTRY_ID: &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
 
 pub trait Object {
     fn type_name(&self) -> &str;
     fn as_any(&self) -> &dyn Any;
 }
 
-pub fn is_of_type<T: 'static>(x: &dyn Object) -> bool {
-    x.as_any().is::<T>()
-}
 pub struct Admins(pub Vec<Principal>);
 
 impl Default for Admins {
@@ -105,7 +105,7 @@ fn name() -> String {
     String::from("Token Registry Canister")
 }
 
-#[derive(CandidType, Debug)]
+#[derive(CandidType, Debug, Deserialize)]
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
@@ -113,8 +113,14 @@ pub enum OperationError {
     Unknown(String),
 }
 
+#[derive(Deserialize, CandidType)]
+pub enum RegistryResponse {
+    Ok(Option<String>),
+    Err(OperationError),
+}
+
 #[update]
-fn add(token: Token) -> Result<(), OperationError> {
+async fn add(token: Token) -> Result<(), OperationError> {
     // Check authorization
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
@@ -144,14 +150,19 @@ fn add(token: Token) -> Result<(), OperationError> {
     }
 
     // Add the collection to the canister registry
-    let mut call_arg : Token = token.cloned();
-    call_arg.details = vec![("category", "Token")];
-    
-    let metadata: Option<String> =
-    match ic::call(Principal::from_str("curr3-vaaaa-aaaah-abbdq-cai"), String::from("add"), (call_arg)).await {
+    let mut call_arg: Token = token.clone();
+    call_arg.details = vec![("category".to_string(), DetailValue::Text("Token".to_string()))];
+
+    let _registry_add_response: RegistryResponse = match ic::call(
+        Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
+        "add",
+        (call_arg,),
+    )
+    .await
+    {
         Ok((x,)) => x,
         Err((_code, msg)) => {
-            return Err(Failure::Unknown(msg));
+            return Err(OperationError::Unknown(msg));
         }
     };
 
@@ -208,10 +219,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -242,10 +250,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -276,10 +281,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -312,10 +314,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -348,10 +347,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -386,10 +382,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
@@ -437,10 +430,7 @@ mod tests {
                     String::from("standard"),
                     DetailValue::Text(String::from("DIP20")),
                 ),
-                (
-                    String::from("total_supply"),
-                    DetailValue::U64(1000),
-                ),
+                (String::from("total_supply"), DetailValue::U64(1000)),
                 (String::from("verified"), DetailValue::True),
             ],
         };
