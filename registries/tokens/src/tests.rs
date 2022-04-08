@@ -1,12 +1,13 @@
 #[cfg(test)]
 mod tests {
     use ic_kit::{MockContext, mock_principals};
+    use tokio::*;
 
     use crate::common_types::*;
     use crate::tokens::*;
     
-    #[test]
-    fn test_add_token_successfuly() {
+    #[tokio::test]
+    async fn test_add_token_successfuly() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -36,11 +37,11 @@ mod tests {
             ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(token_info).await.is_ok());
     }
 
-    #[test]
-    fn test_add_token_fails_because_of_bad_params() {
+    #[tokio::test]
+    async fn test_add_token_fails_because_of_bad_params() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -70,11 +71,11 @@ mod tests {
             ],
         };
 
-        assert!(add(token_info).is_err());
+        assert!(add(token_info).await.is_err());
     }
 
-    #[test]
-    fn test_add_token_fails_because_of_unauthorized_caller() {
+    #[tokio::test]
+    async fn test_add_token_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -106,11 +107,11 @@ mod tests {
 
         context.update_caller(mock_principals::bob());
 
-        assert!(add(token_info).is_err());
+        assert!(add(token_info).await.is_err());
     }
 
-    #[test]
-    fn test_remove_token_successfuly() {
+    #[tokio::test]
+    async fn test_remove_token_successfuly() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -140,13 +141,13 @@ mod tests {
             ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(token_info).await.is_ok());
 
         assert!(remove(mock_principals::xtc()).is_ok());
     }
 
-    #[test]
-    fn test_remove_token_fails_because_of_unathorized_caller() {
+    #[tokio::test]
+    async fn test_remove_token_fails_because_of_unathorized_caller() {
         let context = MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -176,15 +177,15 @@ mod tests {
             ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(token_info).await.is_ok());
 
         context.update_caller(mock_principals::bob());
 
         assert!(remove(mock_principals::xtc()).is_err());
     }
 
-    #[test]
-    fn test_get_all_successfuly() {
+    #[tokio::test]
+    async fn test_get_all_successfuly() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -214,15 +215,15 @@ mod tests {
             ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(token_info).await.is_ok());
 
         let tokens = get_all();
 
         assert_eq!(tokens.len(), 1);
     }
 
-    #[test]
-    fn test_get_all_returns_none_successfuly() {
+    #[tokio::test]
+    async fn test_get_all_returns_none_successfuly() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -234,8 +235,8 @@ mod tests {
         assert_eq!(tokens.len(), 0);
     }
 
-    #[test]
-    fn test_get_succesfully() {
+    #[tokio::test]
+    async fn test_get_succesfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -265,15 +266,15 @@ mod tests {
             ],
         };
 
-        assert!(add(token_info).is_ok());
+        assert!(add(token_info).await.is_ok());
 
         let token = get(mock_principals::xtc());
 
         assert!(token.is_some());
     }
 
-    #[test]
-    fn test_get_returns_none_succesfully() {
+    #[tokio::test]
+    async fn test_get_returns_none_succesfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();

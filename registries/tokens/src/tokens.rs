@@ -1,14 +1,11 @@
 use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::any::Any;
-use std::collections::HashMap;
 use std::str::FromStr;
 use validator::validate_url;
 
-pub const CANISTER_REGISTRY_ID: &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
 use crate::common_types::*;
 use crate::management::*;
 
@@ -63,22 +60,8 @@ pub fn name() -> String {
     String::from("Token Registry Canister")
 }
 
-#[derive(CandidType, Debug, Deserialize)]
-pub enum OperationError {
-    NotAuthorized,
-    NonExistentItem,
-    BadParameters,
-    Unknown(String),
-}
-
-#[derive(Deserialize, CandidType)]
-pub enum RegistryResponse {
-    Ok(Option<String>),
-    Err(OperationError),
-}
-
 #[update]
-async fn add(token: Token) -> Result<(), OperationError> {
+pub async fn add(token: Token) -> Result<(), OperationError> {
     // Check authorization
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
