@@ -2,14 +2,15 @@
 mod tests {
     use ic_kit::MockContext;
     use ic_kit::mock_principals;
+    use tokio::*;
 
     use crate::common_types::*;
     use crate::management::*;
     use crate::nft::*;
 
 
-    #[test]
-    fn test_controller() {
+    #[tokio::test]
+    async fn test_controller() {
         // alice is the controller
         let ctx = MockContext::new()
             .with_caller(mock_principals::alice())
@@ -30,18 +31,18 @@ mod tests {
         };
 
         let mut addition = add(canister_info.clone());
-        assert!(addition.is_ok());
+        assert!(addition.await.is_ok());
 
         let remove_operation = remove(mock_principals::xtc());
         assert!(remove_operation.is_ok());
 
         ctx.update_caller(mock_principals::bob());
         addition = add(canister_info);
-        assert!(addition.is_err());
+        assert!(addition.await.is_err());
     }
 
-    #[test]
-    fn test_add() {
+    #[tokio::test]
+    async fn test_add() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -59,11 +60,11 @@ mod tests {
             )],
         };
 
-        assert!(add(canister_info).is_ok());
+        assert!(add(canister_info).await.is_ok());
     }
 
-    #[test]
-    fn test_add_fails_because_of_unauthorized_caller() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -83,14 +84,14 @@ mod tests {
 
         context.update_caller(mock_principals::bob());
 
-        let add_result = add(canister_info);
+        let add_result = add(canister_info).await;
 
-        assert!(add_result.is_err());
+        assert!(add_result.clone().is_err());
         assert_eq!(add_result.unwrap_err(), OperationError::NotAuthorized);
     }
 
-    #[test]
-    fn test_add_fails_because_of_bad_name_param() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_bad_name_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -110,14 +111,14 @@ mod tests {
             )],
         };
 
-        let addition_result = add(canister_info);
+        let addition_result = add(canister_info).await;
 
-        assert!(addition_result.is_err());
+        assert!(addition_result.clone().is_err());
         assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
-    #[test]
-    fn test_add_fails_because_of_bad_descripion_param() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_bad_descripion_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -137,14 +138,14 @@ mod tests {
             )],
         };
 
-        let addition_result = add(canister_info);
+        let addition_result = add(canister_info).await;
 
-        assert!(addition_result.is_err());
+        assert!(addition_result.clone().is_err());
         assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
-    #[test]
-    fn test_add_fails_because_of_bad_thumbnail_param() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_bad_thumbnail_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -162,14 +163,14 @@ mod tests {
             )],
         };
 
-        let addition_result = add(canister_info);
+        let addition_result = add(canister_info).await;
 
-        assert!(addition_result.is_err());
+        assert!(addition_result.clone().is_err());
         assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
-    #[test]
-    fn test_add_fails_because_of_bad_frontend_param() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_bad_frontend_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -187,14 +188,14 @@ mod tests {
             )],
         };
 
-        let addition_result = add(canister_info);
+        let addition_result = add(canister_info).await;
 
-        assert!(addition_result.is_err());
+        assert!(addition_result.clone().is_err());
         assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
-    #[test]
-    fn test_add_fails_because_of_bad_standard_param() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_bad_standard_param() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -212,14 +213,14 @@ mod tests {
             )],
         };
 
-        let addition_result = add(canister_info);
+        let addition_result = add(canister_info).await;
 
-        assert!(addition_result.is_err());
+        assert!(addition_result.clone().is_err());
         assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
-    #[test]
-    fn test_add_fails_because_of_invalid_details_params_amount() {
+    #[tokio::test]
+    async fn test_add_fails_because_of_invalid_details_params_amount() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -243,14 +244,14 @@ mod tests {
             ],
         };
 
-        let addition_result = add(canister_info);
+        let addition_result = add(canister_info).await;
 
-        assert!(addition_result.is_err());
+        assert!(addition_result.clone().is_err());
         assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
-    #[test]
-    fn test_remove() {
+    #[tokio::test]
+    async fn test_remove() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -268,13 +269,13 @@ mod tests {
             )],
         };
 
-        assert!(add(canister_info).is_ok());
+        assert!(add(canister_info).await.is_ok());
 
         assert!(remove(mock_principals::xtc()).is_ok());
     }
 
-    #[test]
-    fn test_remove_fails_because_of_unauthorized_caller() {
+    #[tokio::test]
+    async fn test_remove_fails_because_of_unauthorized_caller() {
         let context = MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -302,8 +303,8 @@ mod tests {
         assert_eq!(remove_result.unwrap_err(), OperationError::NotAuthorized);
     }
 
-    #[test]
-    fn test_remove_fails_because_of_non_existent_canister() {
+    #[tokio::test]
+    async fn test_remove_fails_because_of_non_existent_canister() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -315,8 +316,8 @@ mod tests {
         assert_eq!(remove_result.unwrap_err(), OperationError::NonExistentItem);
     }
 
-    #[test]
-    fn test_get() {
+    #[tokio::test]
+    async fn test_get() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -334,7 +335,7 @@ mod tests {
             )],
         };
 
-        assert!(add(canister_info.clone()).is_ok());
+        assert!(add(canister_info.clone()).await.is_ok());
 
         assert_eq!(
             get(mock_principals::xtc()).unwrap().name,
@@ -343,8 +344,8 @@ mod tests {
         assert!(get(mock_principals::alice()).is_none());
     }
 
-    #[test]
-    fn test_get_returns_none_successfully() {
+    #[tokio::test]
+    async fn test_get_returns_none_successfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -354,8 +355,8 @@ mod tests {
         assert!(get_result.is_none());
     }
 
-    #[test]
-    fn test_get_all() {
+    #[tokio::test]
+    async fn test_get_all() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))
@@ -373,12 +374,12 @@ mod tests {
             )],
         };
 
-        assert!(add(canister_info.clone()).is_ok());
+        assert!(add(canister_info.clone()).await.is_ok());
         assert_eq!(get_all()[0].name, canister_info.name);
     }
 
-    #[test]
-    fn test_get_all_returns_no_canisters_successfully() {
+    #[tokio::test]
+    async fn test_get_all_returns_no_canisters_successfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
            .with_data(Admins(vec![mock_principals::alice()]))

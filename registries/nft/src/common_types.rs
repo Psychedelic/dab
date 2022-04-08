@@ -28,10 +28,18 @@ pub struct NftCanister {
     pub details: Vec<(String, DetailValue)>,
 }
 
-#[derive(CandidType, Debug, PartialEq)]
+#[derive(CandidType, Debug, PartialEq, Deserialize, Clone)]
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
     BadParameters,
     Unknown(String),
 }
+
+#[derive(Deserialize, CandidType)]
+pub enum RegistryResponse {
+    Ok(Option<String>),
+    Err(OperationError)
+}
+
+pub const CANISTER_REGISTRY_ID : &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
