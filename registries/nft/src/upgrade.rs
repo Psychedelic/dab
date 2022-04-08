@@ -1,5 +1,8 @@
-use crate::nft::{Admins, NftCanister, Registry};
-use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use crate::nft::Registry;
+use crate::management::Admins;
+use crate::common_types::NftCanister;
+
+use ic_kit::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
@@ -8,13 +11,6 @@ use ic_kit::*;
 struct StableStorage {
     db: Vec<(Principal, NftCanister)>,
     admins: Vec<Principal>,
-}
-
-// This struct should be removed in the next release.
-#[derive(CandidType, Deserialize)]
-struct StableStorageV0 {
-    db: Vec<(Principal, NftCanister)>,
-    controller: Principal,
 }
 
 #[pre_upgrade]
@@ -37,12 +33,8 @@ pub fn pre_upgrade() {
 
 #[post_upgrade]
 pub fn post_upgrade() {
-    // In the line below, StableStorageV0 should be replaced with StableStorage in the next release.
-    if let Ok((stable,)) = ic::stable_restore::<(StableStorageV0,)>() {
+    if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
         ic::get_mut::<Registry>().load(stable.db);
-
-        // The line below should be replace with line 46 in the next release.
-        ic::store(Admins(vec![stable.controller]));
-        //ic::store(Admins(stable.admins));
+        ic::store(Admins(stable.admins));
     }
 }

@@ -1,49 +1,20 @@
-use ic_kit::candid::{CandidType, Principal};
+use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::any::Any;
 use std::collections::HashMap;
 use std::str::FromStr;
 use validator::validate_url;
 
 pub const CANISTER_REGISTRY_ID: &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
+use crate::common_types::*;
+use crate::management::*;
 
 pub trait Object {
     fn type_name(&self) -> &str;
     fn as_any(&self) -> &dyn Any;
-}
-
-pub struct Admins(pub Vec<Principal>);
-
-impl Default for Admins {
-    fn default() -> Self {
-        panic!()
-    }
-}
-
-#[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub enum DetailValue {
-    True,
-    False,
-    U64(u64),
-    I64(i64),
-    Float(f64),
-    Text(String),
-    Principal(Principal),
-    #[serde(with = "serde_bytes")]
-    Slice(Vec<u8>),
-    Vec(Vec<DetailValue>),
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct Token {
-    pub name: String,
-    pub description: String,
-    pub thumbnail: String,
-    pub frontend: Option<String>,
-    pub principal_id: Principal,
-    pub details: Vec<(String, DetailValue)>,
 }
 
 #[derive(Default)]
@@ -83,25 +54,12 @@ impl TokenRegistry {
 }
 
 #[init]
-fn init() {
+pub fn init() {
     ic::store(Admins(vec![ic::caller()]));
 }
 
-fn is_admin(account: &Principal) -> bool {
-    ic::get::<Admins>().0.contains(account)
-}
-
-#[update]
-fn add_admin(new_admin: Principal) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) {
-        ic::get_mut::<Admins>().0.push(new_admin);
-        return Ok(());
-    }
-    Err(OperationError::NotAuthorized)
-}
-
 #[query]
-fn name() -> String {
+pub fn name() -> String {
     String::from("Token Registry Canister")
 }
 
@@ -171,7 +129,7 @@ async fn add(token: Token) -> Result<(), OperationError> {
 }
 
 #[update]
-fn remove(principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -181,277 +139,13 @@ fn remove(principal_id: Principal) -> Result<(), OperationError> {
 }
 
 #[query]
-fn get(principal_id: Principal) -> Option<&'static Token> {
+pub fn get(principal_id: Principal) -> Option<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_info(&principal_id)
 }
 
 #[query]
-fn get_all() -> Vec<&'static Token> {
+pub fn get_all() -> Vec<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_all()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_add_token_successfuly() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("https://logo.com"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        assert!(add(token_info).is_ok());
-    }
-
-    #[test]
-    fn test_add_token_fails_because_of_bad_params() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("bad logo url"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        assert!(add(token_info).is_err());
-    }
-
-    #[test]
-    fn test_add_token_fails_because_of_unauthorized_caller() {
-        let context = MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("https://logo.com"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        context.update_caller(mock_principals::bob());
-
-        assert!(add(token_info).is_err());
-    }
-
-    #[test]
-    fn test_remove_token_successfuly() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("https://logo.com"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        assert!(add(token_info).is_ok());
-
-        assert!(remove(mock_principals::xtc()).is_ok());
-    }
-
-    #[test]
-    fn test_remove_token_fails_because_of_unathorized_caller() {
-        let context = MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("https://logo.com"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        assert!(add(token_info).is_ok());
-
-        context.update_caller(mock_principals::bob());
-
-        assert!(remove(mock_principals::xtc()).is_err());
-    }
-
-    #[test]
-    fn test_get_all_successfuly() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("https://logo.com"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        assert!(add(token_info).is_ok());
-
-        let tokens = get_all();
-
-        assert_eq!(tokens.len(), 1);
-    }
-
-    #[test]
-    fn test_get_all_returns_none_successfuly() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let tokens = get_all();
-
-        assert_eq!(tokens.len(), 0);
-    }
-
-    #[test]
-    fn test_get_succesfully() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token_info = Token {
-            name: String::from("Wrapped ICP"),
-            description: String::from("Wrapped IPC description"),
-            thumbnail: String::from("https://logo.com"),
-            frontend: Some(String::from("https://website.com")),
-            principal_id: mock_principals::xtc(),
-            details: vec![
-                (
-                    String::from("symbol"),
-                    DetailValue::Text(String::from("WICP")),
-                ),
-                (
-                    String::from("standard"),
-                    DetailValue::Text(String::from("DIP20")),
-                ),
-                (String::from("total_supply"), DetailValue::U64(1000)),
-                (String::from("verified"), DetailValue::True),
-            ],
-        };
-
-        assert!(add(token_info).is_ok());
-
-        let token = get(mock_principals::xtc());
-
-        assert!(token.is_some());
-    }
-
-    #[test]
-    fn test_get_returns_none_succesfully() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
-
-        init();
-
-        let token = get(mock_principals::xtc());
-
-        assert!(token.is_none());
-    }
 }
