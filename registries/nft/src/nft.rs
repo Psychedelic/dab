@@ -1,5 +1,5 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_kit::{macros::*, candid::utils::ArgumentEncoder};
+use ic_kit::macros::*;
 use ic_kit::*;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, str::FromStr};
@@ -21,6 +21,8 @@ fn init() {
 fn is_admin(account: &Principal) -> bool {
     ic::get::<Admins>().0.contains(account)
 }
+
+pub const CANISTER_REGISTRY_ID : &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
 
 #[update]
 fn add_admin(new_admin: Principal) -> Result<(), OperationError> {
@@ -48,7 +50,7 @@ pub enum DetailValue {
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 120;
 
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, ArgumentEncoder)]
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct NftCanister {
     pub name: String,
     pub description: String,
@@ -99,12 +101,18 @@ fn name() -> String {
     String::from("NFT Registry Canister")
 }
 
-#[derive(CandidType, Debug, PartialEq)]
+#[derive(CandidType, Debug, PartialEq, Deserialize)]
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
     BadParameters,
     Unknown(String),
+}
+
+#[derive(Deserialize, CandidType)]
+pub enum RegistryResponse {
+    Ok(Option<String>),
+    Err(OperationError)
 }
 
 #[update]
@@ -130,8 +138,7 @@ async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         let mut call_arg : NftCanister = canister_info.clone();
         call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
 
-        let metadata: Option<String> =
-        match ic::call(Principal::from_str("curr3-vaaaa-aaaah-abbdq-cai").unwrap(), String::from("add"), (call_arg)).await {
+        let _registry_add_response : RegistryResponse = match ic::call(Principal::from_str(CANISTER_REGISTRY_ID).unwrap(), "add", (call_arg,)).await {
             Ok((x,)) => x,
             Err((_code, msg)) => {
                 return Err(OperationError::Unknown(msg));
