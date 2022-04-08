@@ -1,7 +1,8 @@
 use ic_cdk::export::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, str::FromStr};
 use validator::validate_url;
 
 use crate::common_types::*;
@@ -11,6 +12,8 @@ use crate::management::*;
 pub fn init() {
     ic::store(Admins(vec![ic::caller()]));
 }
+
+pub const CANISTER_REGISTRY_ID : &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
 
 #[derive(Default)]
 pub struct Registry(HashMap<Principal, NftCanister>);
@@ -53,8 +56,22 @@ fn name() -> String {
     String::from("NFT Registry Canister")
 }
 
+#[derive(CandidType, Debug, PartialEq, Deserialize)]
+pub enum OperationError {
+    NotAuthorized,
+    NonExistentItem,
+    BadParameters,
+    Unknown(String),
+}
+
+#[derive(Deserialize, CandidType)]
+pub enum RegistryResponse {
+    Ok(Option<String>),
+    Err(OperationError)
+}
+
 #[update]
-pub fn add(canister_info: NftCanister) -> Result<(), OperationError> {
+async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     } else if !validate_url(&canister_info.thumbnail) {
@@ -71,6 +88,18 @@ pub fn add(canister_info: NftCanister) -> Result<(), OperationError> {
 
     let name = canister_info.name.clone();
     if name.len() <= NAME_LIMIT && &canister_info.description.len() <= &DESCRIPTION_LIMIT {
+
+        // Add the collection to the canister registry
+        let mut call_arg : NftCanister = canister_info.clone();
+        call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
+
+        let _registry_add_response : RegistryResponse = match ic::call(Principal::from_str(CANISTER_REGISTRY_ID).unwrap(), "add", (call_arg,)).await {
+            Ok((x,)) => x,
+            Err((_code, msg)) => {
+                return Err(OperationError::Unknown(msg));
+            }
+        };
+
         let db = ic::get_mut::<Registry>();
         return db.add(canister_info);
     }
