@@ -1,20 +1,20 @@
 use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::any::Any;
+use std::collections::HashMap;
+use std::str::FromStr;
 use validator::validate_url;
 
+pub const CANISTER_REGISTRY_ID: &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
 use crate::common_types::*;
 use crate::management::*;
 
 pub trait Object {
     fn type_name(&self) -> &str;
     fn as_any(&self) -> &dyn Any;
-}
-
-pub fn is_of_type<T: 'static>(x: &dyn Object) -> bool {
-    x.as_any().is::<T>()
 }
 
 #[derive(Default)]
@@ -63,8 +63,22 @@ pub fn name() -> String {
     String::from("Token Registry Canister")
 }
 
+#[derive(CandidType, Debug, Deserialize)]
+pub enum OperationError {
+    NotAuthorized,
+    NonExistentItem,
+    BadParameters,
+    Unknown(String),
+}
+
+#[derive(Deserialize, CandidType)]
+pub enum RegistryResponse {
+    Ok(Option<String>),
+    Err(OperationError),
+}
+
 #[update]
-pub fn add(token: Token) -> Result<(), OperationError> {
+async fn add(token: Token) -> Result<(), OperationError> {
     // Check authorization
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
@@ -92,6 +106,23 @@ pub fn add(token: Token) -> Result<(), OperationError> {
     {
         return Err(OperationError::BadParameters);
     }
+
+    // Add the collection to the canister registry
+    let mut call_arg: Token = token.clone();
+    call_arg.details = vec![("category".to_string(), DetailValue::Text("Token".to_string()))];
+
+    let _registry_add_response: RegistryResponse = match ic::call(
+        Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
+        "add",
+        (call_arg,),
+    )
+    .await
+    {
+        Ok((x,)) => x,
+        Err((_code, msg)) => {
+            return Err(OperationError::Unknown(msg));
+        }
+    };
 
     let db = ic::get_mut::<TokenRegistry>();
     return db.add(token);
