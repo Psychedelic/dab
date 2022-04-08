@@ -1,4 +1,6 @@
-use crate::tokens::{Admins, Token, TokenRegistry};
+use crate::tokens::TokenRegistry;
+use crate::common_types::*;
+use crate::management::Admins;
 use ic_kit::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
