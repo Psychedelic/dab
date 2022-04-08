@@ -1,8 +1,8 @@
 use ic_cdk::export::candid::{CandidType, Principal};
-use ic_kit::macros::*;
+use ic_kit::{macros::*, candid::utils::ArgumentEncoder};
 use ic_kit::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 use validator::validate_url;
 
 pub struct Admins(pub Vec<Principal>);
@@ -48,7 +48,7 @@ pub enum DetailValue {
 const DESCRIPTION_LIMIT: usize = 1200;
 const NAME_LIMIT: usize = 120;
 
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, ArgumentEncoder)]
 pub struct NftCanister {
     pub name: String,
     pub description: String,
@@ -108,7 +108,7 @@ pub enum OperationError {
 }
 
 #[update]
-fn add(canister_info: NftCanister) -> Result<(), OperationError> {
+async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     } else if !validate_url(&canister_info.thumbnail) {
@@ -127,14 +127,14 @@ fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     if name.len() <= NAME_LIMIT && &canister_info.description.len() <= &DESCRIPTION_LIMIT {
 
         // Add the collection to the canister registry
-        let mut call_arg : NftCanister = canister_info.cloned();
-        call_arg.details = vec![("category", "NFT")];
+        let mut call_arg : NftCanister = canister_info.clone();
+        call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
 
         let metadata: Option<String> =
-        match ic::call(Principal::from_str("curr3-vaaaa-aaaah-abbdq-cai"), String::from("add"), (call_arg)).await {
+        match ic::call(Principal::from_str("curr3-vaaaa-aaaah-abbdq-cai").unwrap(), String::from("add"), (call_arg)).await {
             Ok((x,)) => x,
             Err((_code, msg)) => {
-                return Err(Failure::Unknown(msg));
+                return Err(OperationError::Unknown(msg));
             }
         };
 
