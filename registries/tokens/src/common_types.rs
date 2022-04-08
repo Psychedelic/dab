@@ -39,4 +39,4 @@ pub enum RegistryResponse {
     Err(OperationError),
 }
 
-pub const CANISTER_REGISTRY_ID: &'static str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
+pub const CANISTER_REGISTRY_ID: &'static str = "curr3-vaaaa-aaaah-abbdq-cai";
