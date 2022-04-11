@@ -1,4 +1,4 @@
-use ic_kit::{candid::CandidType, Principal, Int};
+use ic_kit::{candid::CandidType, Principal, candid::Int};
 use serde::Deserialize;
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
