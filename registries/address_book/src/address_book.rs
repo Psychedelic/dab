@@ -49,11 +49,11 @@ impl AddressBook {
         let result: (Option<GetRecordResponse>,) = call(
             Principal::from_text(ICNS_REGISTRY_PRINCIPAL_ID).unwrap(),
             "getRecord",
-            (&icns,),
+            (icns.clone(),),
         )
         .await
         .unwrap();
-        ic_cdk::println!("{:?}", result);
+
         return result.0.is_some();
     }
 
