@@ -1,4 +1,4 @@
-#[cfg(test)]
+/*#[cfg(test)]
 mod tests {
     use tokio::*;
     use ic_kit::{MockContext, mock_principals};
@@ -185,4 +185,4 @@ mod tests {
             AddressType::PrincipalId(mock_principals::bob())
         );
     }
-}
+}*/
