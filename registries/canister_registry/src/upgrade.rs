@@ -1,17 +1,12 @@
-// Project imports
-use crate::registry::{CanisterDB, CanisterMetadata, Admins};
+use crate::common_types::CanisterMetadata;
+use crate::management::Admins;
+use crate::registry::CanisterDB;
 
 // IC imports
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
-
-#[derive(CandidType, Deserialize)]
-struct StableStorageV0 {
-    db: Vec<(Principal, CanisterMetadata)>,
-    fleek: Vec<Principal>,
-}
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
@@ -39,9 +34,8 @@ pub fn pre_upgrade() {
 
 #[post_upgrade]
 pub fn post_upgrade() {
-    if let Ok((stable,)) = ic::stable_restore::<(StableStorageV0,)>() {
+    if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
         ic::get_mut::<CanisterDB>().load(stable.db);
-        ic::store(Admins(stable.fleek));
-        //ic::store(Admins(stable.admins));
+        ic::store(Admins(stable.admins));
     }
 }

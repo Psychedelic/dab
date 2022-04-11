@@ -82,7 +82,10 @@ mod tests {
             thumbnail: String::from("bad thumbnail :("),
             frontend: Some(String::from("https://website.com")),
             principal_id: mock_principals::xtc(),
-            details: vec![(String::from("verified"), DetailValue::Text(String::from("wrong type")))],
+            details: vec![(
+                String::from("verified"),
+                DetailValue::Text(String::from("wrong type")),
+            )],
         };
 
         assert!(add(registry_info).is_err());

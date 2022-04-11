@@ -25,34 +25,28 @@ The registry canister has two public methods. You can find the details of these 
 | Method Name        | Description                                                                                           |
 | -----------        | -----------                                                                                           |
 | name               | This method return the name of the canister for health-check                                          |
-| get_info           | This method returns the metadata associated with the given canister principal IDs                     |
+| get                | This method returns the metadata associated with the given canister principal IDs                     |
+| get_all            | This method returns all of the information stored in the registry                                     |
+
 
 
 ## How to use them?
 
 In this section we take a look at the methods that the registry canister offers. Let's start by learning the structure of the metadata.
 
-Registry canister stores the following information about every canister that has been added to it:
-
-- Name
-- Description
-- Front-end URL
-- Logo URL
-- Version of the metadata
-
 The version of the metadata helps developers identify new updates and changes to the metadata. Version increments by one, every time the metadata receives an update.
 
-The registry canister's principal ID on the mainnet is `qxtlu-aiaaa-aaaah-aaupq-cai`. Let's check if we have the right canister:
+The registry canister's principal ID on the mainnet is `curr3-vaaaa-aaaah-abbdq-cai`. Let's check if we have the right canister:
 
 ```sh
-$ dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai name
+$ dfx canister --network=ic call curr3-vaaaa-aaaah-abbdq-cai name
 ("Canister Registry")
 ```
 
 Now that we are sure of the canister's principal ID, let's ask the registry for XTC canister's metadata:
 
 ```sh
-$ dfx canister --network=ic call qxtlu-aiaaa-aaaah-aaupq-cai get_info "(vec {principal \"aanaa-xaaaa-aaaah-aaeiq-cai\"})"
+$ dfx canister --network=ic call curr3-vaaaa-aaaah-abbdq-cai get "(principal \"aanaa-xaaaa-aaaah-aaeiq-cai\")"
 (
   vec {
     opt record {
