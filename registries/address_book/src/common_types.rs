@@ -1,4 +1,4 @@
-use ic_kit::{candid::CandidType, Principal};
+use ic_kit::{candid::CandidType, Principal, Int};
 use serde::Deserialize;
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
@@ -24,7 +24,7 @@ pub struct GetRecordResponse {
     owner: Principal,
     operator: Principal,
     name: String,
-    expiry: i64,
+    expiry: Int,
 }
 
 pub type Key = (Principal, String);
