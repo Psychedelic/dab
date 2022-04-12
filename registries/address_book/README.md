@@ -16,7 +16,7 @@ The address book canister has four methods:
 
 ### How to use them?
 
-First, we add a new address to our private address book with the `add` method. The address book currently supports 3 types of adresses: Principal, Account and ICNS
+First, we add a new address to our private address book with the `add` method. The address book currently supports three types of addresses: Principal, Account and ICNS
 
 Storing a contact by its principal id:
 ```bash
