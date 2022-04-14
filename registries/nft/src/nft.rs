@@ -63,9 +63,13 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         && !validate_url(&canister_info.frontend.clone().unwrap())
     {
         return Err(OperationError::BadParameters);
-    } else if canister_info.details[0].0 != String::from("standard") {
+    } else if canister_info.details.len() == 0 {
         return Err(OperationError::BadParameters);
-    } else if canister_info.details.len() != 1 {
+    } else if !canister_info.details.clone().into_iter().any(|detail| detail.0 == "standard") {
+        return Err(OperationError::BadParameters);
+    } else if canister_info.details.0.0 != String::from("standard") {
+        return Err(OperationError::BadParameters);
+    } else if canister_info.details.1.0 != String::from("asset_type") {
         return Err(OperationError::BadParameters);
     }
 
