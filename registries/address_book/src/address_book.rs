@@ -1,9 +1,9 @@
 use crc32fast;
 use hex::FromHex;
-use ic_kit::*;
+use ic_kit::candid::Principal;
 use ic_kit::ic::call;
 use ic_kit::macros::*;
-use ic_kit::candid::Principal;
+use ic_kit::*;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
 use unic::emoji::char::is_emoji;
@@ -67,7 +67,7 @@ impl AddressBook {
                 true => return Ok(()),
                 false => return Err(Failure::BadParameters),
             },
-            AddressType::PrincipalId(s) => Ok(()),
+            AddressType::PrincipalId(_s) => Ok(()),
             _ => Err(Failure::BadParameters),
         }
     }
@@ -97,6 +97,32 @@ impl AddressBook {
         });
         self.0.range((Included(start), Included(end))).collect()
     }
+
+    pub fn get_all_paginated(
+        &self,
+        account: Principal,
+        offset: usize,
+        _limit: usize,
+    ) -> Result<Vec<(&Key, &Address)>, Failure> {
+        let mut limit = _limit;
+
+        if offset >= limit {
+            return Err(Failure::BadParameters);
+        }
+
+        let start: Key = (account.clone(), String::new());
+        let end: Key = (account.clone(), unsafe {
+            String::from(std::char::from_u32_unchecked(u32::MAX))
+        });
+        let addresses: Vec<(&(ic_kit::Principal, std::string::String), &Address)> =
+            self.0.range((Included(start), Included(end))).collect();
+
+        if offset + limit > addresses.len() {
+            limit = addresses.len() - offset;
+        }
+
+        return Ok(addresses[offset..limit].to_vec());
+    }
 }
 
 #[query]
@@ -122,11 +148,13 @@ pub async fn add(address: Address) -> Result<(), Failure> {
         }
     }
 
+    let caller = ic::caller();
+
     let address_book = ic::get_mut::<AddressBook>();
     address_book
         .validate_address_type(address.value.clone())
         .await?;
-    address_book.add(ic::caller(), address.clone());
+    address_book.add(caller.clone(), address.clone());
     return Ok(());
 }
 
@@ -144,4 +172,23 @@ pub fn get_all() -> Vec<&'static Address> {
         .iter()
         .map(|entry| entry.1)
         .collect()
+}
+
+#[update]
+pub fn get_all_paginated(
+    offset: Option<usize>,
+    limit: Option<usize>,
+) -> Result<Vec<&'static Address>, Failure> {
+    let address_book = ic::get_mut::<AddressBook>();
+    let addresses = address_book
+        .get_all_paginated(
+            ic::caller(),
+            offset.unwrap_or(0),
+            limit.unwrap_or(DEFAULT_LIMIT),
+        )?
+        .iter()
+        .map(|entry| entry.1)
+        .collect();
+
+    return Ok(addresses);
 }

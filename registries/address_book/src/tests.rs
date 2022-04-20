@@ -1,13 +1,13 @@
-/*#[cfg(test)]
+#[cfg(test)]
 mod tests {
+    use ic_kit::{mock_principals, MockContext};
     use tokio::*;
-    use ic_kit::{MockContext, mock_principals};
 
-    use crate::common_types::*;
     use crate::address_book::*;
+    use crate::common_types::*;
 
     #[tokio::test]
-    async fn test_add_address_successfully() {
+    async fn test_add_principal_id_address_successfully() {
         MockContext::new()
             .with_caller(mock_principals::alice())
             .inject();
@@ -24,10 +24,30 @@ mod tests {
 
         let addresses = get_all();
         assert_eq!(addresses.len(), 1);
-        assert_eq!(
-            addresses[0].value,
-            address_info.value
-        );
+        assert_eq!(addresses[0].value, address_info.value);
+    }
+
+    #[tokio::test]
+    async fn test_add_account_id_address_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        let address_info = Address {
+            name: String::from("Bob"),
+            description: Some(String::from("Friend")),
+            emoji: Some(String::from("😚")),
+            value: AddressType::AccountId(String::from(
+                "b0159acc9c8b087a06fbcaee4954e010c5edabaf306e30c0578a763a0e14e020",
+            )),
+        };
+
+        let addition_result = add(address_info.clone()).await;
+        assert!(addition_result.is_ok());
+
+        let addresses = get_all();
+        assert_eq!(addresses.len(), 1);
+        assert_eq!(addresses[0].value, address_info.value);
     }
 
     #[tokio::test]
@@ -70,23 +90,23 @@ mod tests {
         assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
     }
 
-    #[tokio::test]
-    async fn test_add_address_fails_because_of_bad_emoji_param() {
-        MockContext::new()
-            .with_caller(mock_principals::alice())
-            .inject();
+    // #[tokio::test]
+    // async fn test_add_address_fails_because_of_bad_emoji_param() {
+    //     MockContext::new()
+    //         .with_caller(mock_principals::alice())
+    //         .inject();
 
-        let address_info = Address {
-            name: String::from("Bob"),
-            description: Some(String::from("description")),
-            emoji: Some(String::from("a")),
-            value: AddressType::PrincipalId(mock_principals::bob()),
-        };
+    //     let address_info = Address {
+    //         name: String::from("Bob"),
+    //         description: Some(String::from("description")),
+    //         emoji: Some(String::from("a")),
+    //         value: AddressType::PrincipalId(mock_principals::bob()),
+    //     };
 
-        let addition_result = add(address_info.clone()).await;
-        assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
-    }
+    //     let addition_result = add(address_info.clone()).await;
+    //     assert!(addition_result.is_err());
+    //     assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+    // }
 
     #[tokio::test]
     async fn test_remove_address_successfully() {
@@ -126,12 +146,12 @@ mod tests {
             name: String::from("Alice"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            value: AddressType::PrincipalId(mock_principals::alice())
+            value: AddressType::PrincipalId(mock_principals::alice()),
         };
 
         // Alice adds Bob as her contact
         context.update_caller(mock_principals::alice());
-        add(bob_address_info);
+        add(bob_address_info).await;
 
         let alice_addresses = get_all();
 
@@ -140,7 +160,7 @@ mod tests {
 
         // Bob adds Alice as his contact
         context.update_caller(mock_principals::bob());
-        add(alice_address_info);
+        add(alice_address_info).await;
 
         let bob_addresses = get_all();
 
@@ -165,11 +185,11 @@ mod tests {
             name: String::from("Andrew"),
             description: Some(String::from("Friend")),
             emoji: Some(String::from("😚")),
-            value: AddressType::PrincipalId(mock_principals::alice())
+            value: AddressType::PrincipalId(mock_principals::alice()),
         };
 
-        add(bob_address_info);
-        add(andrew_address_info);
+        add(bob_address_info).await;
+        add(andrew_address_info).await;
 
         let addresses = get_all();
 
@@ -185,4 +205,46 @@ mod tests {
             AddressType::PrincipalId(mock_principals::bob())
         );
     }
-}*/
+
+    #[tokio::test]
+    async fn test_get_all_paginated_successfully() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        let address_info = Address {
+            name: String::from("Bob"),
+            description: Some(String::from("Friend")),
+            emoji: Some(String::from("😚")),
+            value: AddressType::PrincipalId(mock_principals::bob()),
+        };
+
+        let addition_result = add(address_info.clone()).await;
+        assert!(addition_result.is_ok());
+
+        let addresses = get_all_paginated(Some(0), Some(1)).unwrap();
+        assert_eq!(addresses.len(), 1);
+        assert_eq!(addresses[0].value, address_info.value);
+    }
+
+    #[tokio::test]
+    async fn test_get_all_paginated_fails_because_of_out_of_bound_offset() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
+
+        let address_info = Address {
+            name: String::from("Bob"),
+            description: Some(String::from("Friend")),
+            emoji: Some(String::from("😚")),
+            value: AddressType::PrincipalId(mock_principals::bob()),
+        };
+
+        let addition_result = add(address_info.clone()).await;
+        assert!(addition_result.is_ok());
+
+        let addresses = get_all_paginated(Some(2), Some(1));
+
+        assert!(addresses.is_err());
+    }
+}
