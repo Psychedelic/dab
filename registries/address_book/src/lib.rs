@@ -1,4 +1,4 @@
-mod common_types;
 mod address_book;
-mod upgrade;
+mod common_types;
 mod tests;
+mod upgrade;
