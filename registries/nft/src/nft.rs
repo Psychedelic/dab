@@ -46,6 +46,27 @@ impl Registry {
     pub fn get_all(&self) -> Vec<&NftCanister> {
         self.0.values().collect()
     }
+
+    pub fn get_all_paginated(&self, offset: usize, _limit: usize) -> Result<Vec<&NftCanister>, OperationError> {
+
+        let nfts: Vec<&NftCanister> = self.0.values().collect();
+
+        if offset > nfts.len() {
+            return Err(OperationError::BadParameters);
+        }
+
+        let mut limit = _limit;
+
+        if offset + _limit > nfts.len()  {
+            limit = nfts.len() - offset;
+        }
+
+        return Ok(nfts[offset..(offset + limit)].to_vec());
+    }
+
+    pub fn get_amount(&self) -> usize {
+        return self.0.values().len();
+    }
 }
 
 #[query]
@@ -115,4 +136,16 @@ pub fn get(principal_id: Principal) -> Option<&'static NftCanister> {
 pub fn get_all() -> Vec<&'static NftCanister> {
     let db = ic::get_mut::<Registry>();
     db.get_all()
+}
+
+#[query]
+pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse>, OperationError> {
+    let db = ic::get_mut::<Registry>();
+    let nfts = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
+    let amount = db.get_amount();
+
+    return Ok(GetAllPaginatedResponse{
+        nfts,
+        amount,
+    });
 }

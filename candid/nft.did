@@ -40,5 +40,7 @@ service : {
 
     // Canister ethods    
     "get_all"      : () -> (vec nft_canister) query;
+    "get_all_paginated"        :  (offset: opt nat64, limit: opt nat64) -> (variant { Ok: vec nft_canister; Err: operation_error });
+
     "add_admin"    : (principal) -> (operation_response);
 }
