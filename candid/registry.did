@@ -19,6 +19,11 @@ type canister_metadata = record {
     details     : vec record { text; detail_value };
 };
 
+type paginated_canister_metadata = record {
+    canisters: vec canister_metadata;
+    amount: nat64;
+};
+
 type operation_error = variant {
     NotAuthorized;
     BadParameters;
@@ -38,6 +43,7 @@ service : {
     "add"     : (canister_metadata) -> (operation_response);
     "remove"  : (principal) -> (operation_response);
     "get_all" : () -> (vec canister_metadata) query;
+    "get_all_paginated"        :  (offset: opt nat64, limit: opt nat64) -> (variant { Ok: paginated_canister_metadata; Err: operation_error });
 
     "add_admin" : (principal) -> (operation_response);
 }

@@ -25,6 +25,12 @@ pub struct Token {
     pub details: Vec<(String, DetailValue)>,
 }
 
+#[derive(CandidType, Clone, Debug, PartialEq)]
+pub struct GetAllPaginatedResponse {
+    pub amount: usize,
+    pub tokens: Vec<&'static Token>,
+}
+
 #[derive(CandidType, Debug, Deserialize)]
 pub enum OperationError {
     NotAuthorized,
@@ -40,3 +46,4 @@ pub enum RegistryResponse {
 }
 
 pub const CANISTER_REGISTRY_ID: &'static str = "curr3-vaaaa-aaaah-abbdq-cai";
+pub const DEFAULT_LIMIT: usize = 20;

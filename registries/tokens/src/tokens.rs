@@ -48,6 +48,27 @@ impl TokenRegistry {
     pub fn get_all(&self) -> Vec<&Token> {
         self.0.values().collect()
     }
+
+    pub fn get_all_paginated(&self, offset: usize, _limit: usize) -> Result<Vec<&Token>, OperationError> {
+
+        let tokens: Vec<&Token> = self.0.values().collect();
+
+        if offset > tokens.len() {
+            return Err(OperationError::BadParameters);
+        }
+
+        let mut limit = _limit;
+
+        if offset + _limit > tokens.len()  {
+            limit = tokens.len() - offset;
+        }
+
+        return Ok(tokens[offset..(offset + limit)].to_vec());
+    }
+
+    pub fn get_amount(&self) -> usize {
+        return self.0.values().len();
+    }
 }
 
 #[init]
@@ -134,4 +155,16 @@ pub fn get(principal_id: Principal) -> Option<&'static Token> {
 pub fn get_all() -> Vec<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_all()
+}
+
+#[query]
+pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse, Failure> {
+    let db = ic::get_mut::<TokenRegistry>();
+    let tokens = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
+    let amount = db.get_amount();
+
+    return Ok(GetAllPaginatedResponse{
+        tokens,
+        amount,
+    });
 }

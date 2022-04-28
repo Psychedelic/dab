@@ -19,6 +19,12 @@ pub struct CanisterMetadata {
     pub details: Vec<(String, DetailValue)>,
 }
 
+#[derive(CandidType, Clone, Debug, PartialEq)]
+pub struct GetAllPaginatedResponse {
+    pub amount: usize,
+    pub canisters: Vec<&'static CanisterMetadata>,
+}
+
 #[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum DetailValue {
     True,
@@ -35,3 +41,4 @@ pub enum DetailValue {
 
 pub const DESCRIPTION_LIMIT: usize = 1200;
 pub const NAME_LIMIT: usize = 24;
+pub const DEFAULT_LIMIT: usize = 20;

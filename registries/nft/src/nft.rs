@@ -139,7 +139,7 @@ pub fn get_all() -> Vec<&'static NftCanister> {
 }
 
 #[query]
-pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse>, OperationError> {
+pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse, OperationError> {
     let db = ic::get_mut::<Registry>();
     let nfts = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
     let amount = db.get_amount();

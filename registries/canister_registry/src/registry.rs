@@ -46,6 +46,27 @@ impl CanisterDB {
     pub fn get_all(&self) -> Vec<&CanisterMetadata> {
         self.0.values().collect()
     }
+
+    pub fn get_all_paginated(&self, offset: usize, _limit: usize) -> Result<Vec<&CanisterMetadata>, Failure> {
+
+        let canisters: Vec<&CanisterMetadata> = self.0.values().collect();
+
+        if offset > canisters.len() {
+            return Err(Failure::BadParameters);
+        }
+
+        let mut limit = _limit;
+
+        if offset + _limit > canisters.len()  {
+            limit = canisters.len() - offset;
+        }
+
+        return Ok(canisters[offset..(offset + limit)].to_vec());
+    }
+
+    pub fn get_amount(&self) -> usize {
+        return self.0.values().len();
+    }
 }
 
 #[init]
@@ -93,4 +114,16 @@ pub fn remove(canister: Principal) -> Result<(), Failure> {
 pub fn get_all() -> Vec<&'static CanisterMetadata> {
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.get_all()
+}
+
+#[query]
+pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse, Failure> {
+    let db = ic::get_mut::<CanisterDB>();
+    let canisters = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
+    let amount = db.get_amount();
+
+    return Ok(GetAllPaginatedResponse{
+        canisters,
+        amount,
+    });
 }
