@@ -69,10 +69,13 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(format!(
-            "Description field has to be less than {} characters long.",
-            DESCRIPTION_LIMIT
-        )));
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(format!(
+                "Description field has to be less than {} characters long.",
+                DESCRIPTION_LIMIT
+            ))
+        );
     }
 
     #[tokio::test]
@@ -90,10 +93,13 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(format!(
-            "Name field has to be less than {} characters long.",
-            NAME_LIMIT
-        )));
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(format!(
+                "Name field has to be less than {} characters long.",
+                NAME_LIMIT
+            ))
+        );
     }
 
     #[tokio::test]
@@ -111,9 +117,10 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(String::from(
-            "Invalid emoji field.",
-        )));
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("Invalid emoji field.",))
+        );
     }
 
     #[tokio::test]

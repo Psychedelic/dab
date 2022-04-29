@@ -111,16 +111,16 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         )));
     }
 
-    if canister_info.frontend.is_some()
-        && !validate_url(canister_info.clone().frontend.unwrap())
-    {
+    if canister_info.frontend.is_some() && !validate_url(canister_info.clone().frontend.unwrap()) {
         return Err(OperationError::BadParameters(String::from(
             "Frontend field has to be a url.",
         )));
     }
 
     if canister_info.details.len() < 1 {
-        return Err(OperationError::BadParameters(String::from("Details has to have standard field.")));
+        return Err(OperationError::BadParameters(String::from(
+            "Details has to have standard field.",
+        )));
     }
 
     if canister_info.details[0].0 != String::from("standard") {
