@@ -15,6 +15,9 @@ pub enum DetailValue {
     Vec(Vec<DetailValue>),
 }
 
+pub const DESCRIPTION_LIMIT: usize = 1200;
+pub const NAME_LIMIT: usize = 120;
+
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Token {
     pub name: String,
@@ -25,11 +28,17 @@ pub struct Token {
     pub details: Vec<(String, DetailValue)>,
 }
 
+#[derive(CandidType, Clone, Debug, PartialEq)]
+pub struct GetAllPaginatedResponse {
+    pub amount: usize,
+    pub tokens: Vec<&'static Token>,
+}
+
 #[derive(CandidType, Debug, Deserialize)]
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
-    BadParameters,
+    BadParameters(String),
     Unknown(String),
 }
 
@@ -40,3 +49,4 @@ pub enum RegistryResponse {
 }
 
 pub const CANISTER_REGISTRY_ID: &'static str = "curr3-vaaaa-aaaah-abbdq-cai";
+pub const DEFAULT_LIMIT: usize = 20;

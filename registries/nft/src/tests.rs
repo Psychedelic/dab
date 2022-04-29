@@ -113,7 +113,16 @@ mod tests {
         let addition_result = add(canister_info).await;
 
         assert!(addition_result.clone().is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(
+                format!(
+                    "Name field has to be less than {} characters long.",
+                    NAME_LIMIT
+                )
+                .to_string()
+            )
+        );
     }
 
     #[tokio::test]
@@ -140,7 +149,16 @@ mod tests {
         let addition_result = add(canister_info).await;
 
         assert!(addition_result.clone().is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(
+                format!(
+                    "Description field has to be less than {} characters long.",
+                    DESCRIPTION_LIMIT
+                )
+                .to_string()
+            )
+        );
     }
 
     #[tokio::test]
@@ -165,7 +183,10 @@ mod tests {
         let addition_result = add(canister_info).await;
 
         assert!(addition_result.clone().is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("Thumbnail field has to be a url."))
+        );
     }
 
     #[tokio::test]
@@ -190,7 +211,10 @@ mod tests {
         let addition_result = add(canister_info).await;
 
         assert!(addition_result.clone().is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("Frontend field has to be a url."))
+        );
     }
 
     #[tokio::test]
@@ -215,7 +239,10 @@ mod tests {
         let addition_result = add(canister_info).await;
 
         assert!(addition_result.clone().is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("First detail field has to be standard.",))
+        );
     }
 
     #[tokio::test]
@@ -246,7 +273,10 @@ mod tests {
         let addition_result = add(canister_info).await;
 
         assert!(addition_result.clone().is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("Details has to have standard field."))
+        );
     }
 
     #[tokio::test]

@@ -28,11 +28,17 @@ pub struct NftCanister {
     pub details: Vec<(String, DetailValue)>,
 }
 
+#[derive(CandidType, Clone, Debug, PartialEq)]
+pub struct GetAllPaginatedResponse {
+    pub amount: usize,
+    pub nfts: Vec<&'static NftCanister>,
+}
+
 #[derive(CandidType, Debug, PartialEq, Deserialize, Clone)]
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
-    BadParameters,
+    BadParameters(String),
     Unknown(String),
 }
 
@@ -43,3 +49,4 @@ pub enum RegistryResponse {
 }
 
 pub const CANISTER_REGISTRY_ID: &'static str = "curr3-vaaaa-aaaah-abbdq-cai";
+pub const DEFAULT_LIMIT: usize = 20;

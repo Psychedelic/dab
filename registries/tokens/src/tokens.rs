@@ -48,6 +48,32 @@ impl TokenRegistry {
     pub fn get_all(&self) -> Vec<&Token> {
         self.0.values().collect()
     }
+
+    pub fn get_all_paginated(
+        &self,
+        offset: usize,
+        _limit: usize,
+    ) -> Result<Vec<&Token>, OperationError> {
+        let tokens: Vec<&Token> = self.0.values().collect();
+
+        if offset > tokens.len() {
+            return Err(OperationError::BadParameters(String::from(
+                "Offset out of bound.",
+            )));
+        }
+
+        let mut limit = _limit;
+
+        if offset + _limit > tokens.len() {
+            limit = tokens.len() - offset;
+        }
+
+        return Ok(tokens[offset..(offset + limit)].to_vec());
+    }
+
+    pub fn get_amount(&self) -> usize {
+        return self.0.values().len();
+    }
 }
 
 #[init]
@@ -67,27 +93,63 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
         return Err(OperationError::NotAuthorized);
     }
 
-    // Check URLs
-    if !validate_url(&token.thumbnail) || !token.clone().frontend.map(validate_url).unwrap_or(true)
-    {
-        return Err(OperationError::BadParameters);
+    if token.name.len() > NAME_LIMIT {
+        return Err(OperationError::BadParameters(format!(
+            "Name field has to be less than {} characters long.",
+            NAME_LIMIT
+        )));
     }
 
-    // Check Character Limits
-    let name = token.name.clone();
-    if name.len() > 120 && &token.description.len() > &1200 {
-        return Err(OperationError::BadParameters);
+    if token.description.len() > DESCRIPTION_LIMIT {
+        return Err(OperationError::BadParameters(format!(
+            "Description field has to be less than {} characters long.",
+            DESCRIPTION_LIMIT
+        )));
     }
 
-    // Check details
-    if token.details.len() != 4
-        || token.details[0].0 != String::from("symbol")
-        || token.details[1].0 != String::from("standard")
-        || token.details[2].0 != String::from("total_supply")
-        || token.details[3].0 != String::from("verified")
-        || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
+    if !validate_url(&token.thumbnail) {
+        return Err(OperationError::BadParameters(String::from(
+            "Thumbnail field has to be a url.",
+        )));
+    }
+
+    if token.frontend.is_some() && !validate_url(token.clone().frontend.unwrap()) {
+        return Err(OperationError::BadParameters(String::from(
+            "Frontend field has to be a url.",
+        )));
+    }
+
+    if token.details.len() < 4 {
+        return Err(OperationError::BadParameters(String::from(
+            "Details field has to specifiy: symbol, standard, total_supply and verified fields.",
+        )));
+    }
+
+    if token.details[0].0 != String::from("symbol") {
+        return Err(OperationError::BadParameters(String::from(
+            "First detail field has to be symbol.",
+        )));
+    }
+
+    if token.details[1].0 != String::from("standard") {
+        return Err(OperationError::BadParameters(String::from(
+            "Second detail field has to be standard.",
+        )));
+    }
+
+    if token.details[2].0 != String::from("total_supply") {
+        return Err(OperationError::BadParameters(String::from(
+            "Third detail field has to be total_supply.",
+        )));
+    }
+
+    if token.details[0].0 != String::from("verified")
+        && token.details[3].1 != DetailValue::True
+        && token.details[3].1 != DetailValue::False
     {
-        return Err(OperationError::BadParameters);
+        return Err(OperationError::BadParameters(String::from(
+            "Fourth detail field has to be verified (boolean).",
+        )));
     }
 
     // Add the collection to the canister registry
@@ -134,4 +196,16 @@ pub fn get(principal_id: Principal) -> Option<&'static Token> {
 pub fn get_all() -> Vec<&'static Token> {
     let db = ic::get_mut::<TokenRegistry>();
     db.get_all()
+}
+
+#[query]
+pub fn get_all_paginated(
+    offset: Option<usize>,
+    limit: Option<usize>,
+) -> Result<GetAllPaginatedResponse, OperationError> {
+    let db = ic::get_mut::<TokenRegistry>();
+    let tokens = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
+    let amount = db.get_amount();
+
+    return Ok(GetAllPaginatedResponse { tokens, amount });
 }

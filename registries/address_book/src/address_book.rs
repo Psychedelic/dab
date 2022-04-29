@@ -57,33 +57,46 @@ impl AddressBook {
         return result.0.is_some();
     }
 
-    pub async fn validate_address_type(&mut self, address: AddressType) -> Result<(), Failure> {
+    pub async fn validate_address_type(
+        &mut self,
+        address: AddressType,
+    ) -> Result<(), OperationError> {
         match address {
             AddressType::Icns(s) => match self.validate_icns(s).await {
                 true => return Ok(()),
-                false => return Err(Failure::BadParameters),
+                false => return Err(OperationError::BadParameters(String::from("Invalid ICNS."))),
             },
             AddressType::AccountId(s) => match self.validate_account_id(s) {
                 true => return Ok(()),
-                false => return Err(Failure::BadParameters),
+                false => {
+                    return Err(OperationError::BadParameters(String::from(
+                        "Invalid Account.",
+                    )))
+                }
             },
             AddressType::PrincipalId(_s) => Ok(()),
-            _ => Err(Failure::BadParameters),
+            _ => Err(OperationError::BadParameters(String::from(
+                "Invalid Principal.",
+            ))),
         }
     }
 
-    pub fn add(&mut self, account: Principal, address: Address) -> Result<(), Failure> {
+    pub fn add(&mut self, account: Principal, address: Address) -> Result<(), OperationError> {
         let pointer: Key = (account, address.name.clone());
 
         self.0.insert(pointer.clone(), address);
         return Ok(());
     }
 
-    pub fn remove(&mut self, account: Principal, canister_name: String) -> Result<(), Failure> {
+    pub fn remove(
+        &mut self,
+        account: Principal,
+        canister_name: String,
+    ) -> Result<(), OperationError> {
         let pointer: Key = (account, canister_name);
 
         if !self.0.contains_key(&pointer) {
-            return Err(Failure::NonExistentItem);
+            return Err(OperationError::NonExistentItem);
         }
 
         self.0.remove(&pointer);
@@ -103,12 +116,8 @@ impl AddressBook {
         account: Principal,
         offset: usize,
         _limit: usize,
-    ) -> Result<Vec<(&Key, &Address)>, Failure> {
+    ) -> Result<Vec<(&Key, &Address)>, OperationError> {
         let mut limit = _limit;
-
-        if offset >= limit {
-            return Err(Failure::BadParameters);
-        }
 
         let start: Key = (account.clone(), String::new());
         let end: Key = (account.clone(), unsafe {
@@ -116,6 +125,12 @@ impl AddressBook {
         });
         let addresses: Vec<(&(ic_kit::Principal, std::string::String), &Address)> =
             self.0.range((Included(start), Included(end))).collect();
+
+        if offset >= addresses.len() {
+            return Err(OperationError::BadParameters(String::from(
+                "Offset out of bound.",
+            )));
+        }
 
         if offset + limit > addresses.len() {
             limit = addresses.len() - offset;
@@ -131,20 +146,32 @@ fn name() -> String {
 }
 
 #[update]
-pub async fn add(address: Address) -> Result<(), Failure> {
-    if &address.name.len() > &NAME_LIMIT {
-        return Err(Failure::BadParameters);
-    } else if address.description.is_some() {
+pub async fn add(address: Address) -> Result<(), OperationError> {
+    if address.name.len() > NAME_LIMIT {
+        return Err(OperationError::BadParameters(format!(
+            "Name field has to be less than {} characters long.",
+            NAME_LIMIT
+        )));
+    }
+
+    if address.description.is_some() {
         let description = address.clone().description.unwrap();
 
-        if &description.len() > &DESCRIPTION_LIMIT {
-            return Err(Failure::BadParameters);
+        if description.len() > DESCRIPTION_LIMIT {
+            return Err(OperationError::BadParameters(format!(
+                "Description field has to be less than {} characters long.",
+                DESCRIPTION_LIMIT
+            )));
         }
-    } else if address.emoji.is_some() {
+    }
+
+    if address.emoji.is_some() {
         let emojis: Vec<char> = address.clone().emoji.unwrap().chars().take(1).collect();
 
         if !is_emoji(emojis[0]) {
-            return Err(Failure::BadParameters);
+            return Err(OperationError::BadParameters(String::from(
+                "Invalid emoji field.",
+            )));
         }
     }
 
@@ -159,7 +186,7 @@ pub async fn add(address: Address) -> Result<(), Failure> {
 }
 
 #[update]
-pub fn remove(address_name: String) -> Result<(), Failure> {
+pub fn remove(address_name: String) -> Result<(), OperationError> {
     let address_book = ic::get_mut::<AddressBook>();
     return address_book.remove(ic::caller(), address_name);
 }
@@ -178,7 +205,7 @@ pub fn get_all() -> Vec<&'static Address> {
 pub fn get_all_paginated(
     offset: Option<usize>,
     limit: Option<usize>,
-) -> Result<Vec<&'static Address>, Failure> {
+) -> Result<Vec<&'static Address>, OperationError> {
     let address_book = ic::get_mut::<AddressBook>();
     let addresses = address_book
         .get_all_paginated(

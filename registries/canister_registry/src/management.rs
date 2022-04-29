@@ -2,7 +2,7 @@ use ic_kit::ic;
 use ic_kit::macros::*;
 use ic_kit::Principal;
 
-use crate::common_types::Failure;
+use crate::common_types::OperationError;
 
 pub struct Admins(pub Vec<Principal>);
 
@@ -17,19 +17,19 @@ pub fn is_admin(account: &Principal) -> bool {
 }
 
 #[update]
-pub fn add_admin(new_admin: Principal) -> Result<(), Failure> {
+pub fn add_admin(new_admin: Principal) -> Result<(), OperationError> {
     if is_admin(&ic::caller()) {
         ic::get_mut::<Admins>().0.push(new_admin);
         return Ok(());
     }
-    Err(Failure::NotAuthorized)
+    Err(OperationError::NotAuthorized)
 }
 
 #[update]
-pub fn remove_admin(admin: Principal) -> Result<(), Failure> {
+pub fn remove_admin(admin: Principal) -> Result<(), OperationError> {
     if is_admin(&ic::caller()) {
         ic::get_mut::<Admins>().0.retain(|x| *x != admin);
         return Ok(());
     }
-    Err(Failure::NotAuthorized)
+    Err(OperationError::NotAuthorized)
 }

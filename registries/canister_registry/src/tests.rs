@@ -128,7 +128,10 @@ mod tests {
 
         let addition_result = add(canister_metadata.clone());
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("Thumbnail field has to be a url."))
+        );
 
         let added_canister = get(mock_principals::xtc());
         assert!(added_canister.is_none());
@@ -156,7 +159,10 @@ mod tests {
 
         let addition_result = add(canister_metadata.clone());
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+        assert_eq!(
+            addition_result.unwrap_err(),
+            OperationError::BadParameters(String::from("Frontend field has to be a url.",))
+        );
 
         let added_canister = get(mock_principals::xtc());
         assert!(added_canister.is_none());
@@ -186,7 +192,7 @@ mod tests {
 
         let addition_result = add(canister_metadata.clone());
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), Failure::NotAuthorized);
+        assert_eq!(addition_result.unwrap_err(), OperationError::NotAuthorized);
 
         let added_canister = get(mock_principals::xtc());
         assert!(added_canister.is_none());
@@ -288,7 +294,7 @@ mod tests {
 
         let remove_result = remove(mock_principals::xtc());
         assert!(remove_result.is_err());
-        assert_eq!(remove_result.unwrap_err(), Failure::NonExistentItem);
+        assert_eq!(remove_result.unwrap_err(), OperationError::NonExistentItem);
     }
 
     #[test]
@@ -318,7 +324,7 @@ mod tests {
 
         let remove_result = remove(mock_principals::xtc());
         assert!(remove_result.is_err());
-        assert_eq!(remove_result.unwrap_err(), Failure::NotAuthorized);
+        assert_eq!(remove_result.unwrap_err(), OperationError::NotAuthorized);
     }
 
     #[test]
@@ -486,11 +492,17 @@ mod tests {
 
         // the canister should return an error if we try to remove a non-existent canister
         let remove_operation = remove(mock_principals::xtc());
-        assert_eq!(remove_operation.err().unwrap(), Failure::NonExistentItem);
+        assert_eq!(
+            remove_operation.err().unwrap(),
+            OperationError::NonExistentItem
+        );
 
         // Bob should not be able to remove a canister because he is not an admin
         ctx.update_caller(mock_principals::bob());
         let remove_operation = remove(mock_principals::xtc());
-        assert_eq!(remove_operation.err().unwrap(), Failure::NotAuthorized);
+        assert_eq!(
+            remove_operation.err().unwrap(),
+            OperationError::NotAuthorized
+        );
     }
 }

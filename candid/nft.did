@@ -19,10 +19,15 @@ type nft_canister = record {
     details      : vec record { text; detail_value };
 };
 
+type paginated_nft_canisters = record {
+    nfts: vec nft_canister;
+    amount: nat64;
+};
+
 type operation_error = variant {
     NotAuthorized;
     NonExistentItem;
-    BadParameters;
+    BadParameters: text;
     Unknown : text;
 };
 
@@ -40,5 +45,7 @@ service : {
 
     // Canister ethods    
     "get_all"      : () -> (vec nft_canister) query;
+    "get_all_paginated"        :  (offset: opt nat64, limit: opt nat64) -> (variant { Ok: paginated_nft_canisters; Err: operation_error });
+
     "add_admin"    : (principal) -> (operation_response);
 }

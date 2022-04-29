@@ -19,10 +19,15 @@ type token = record {
     details     : vec record { text; detail_value }
 };
 
+type paginated_tokens = record {
+    tokens: vec token;
+    amount: nat64;
+};
+
 type operation_error = variant {
     NotAuthorized;
     NonExistentItem;
-    BadParameters;
+    BadParameters: text;
     Unknown : text;
 };
 
@@ -40,5 +45,6 @@ service : {
     
     // Canister methods
     "get_all"  : () -> (vec token) query;
+    "get_all_paginated"        :  (offset: opt nat64, limit: opt nat64) -> (variant { Ok: paginated_tokens; Err: operation_error });
     "add_admin" : (principal) -> (operation_response);
 }
