@@ -15,6 +15,9 @@ pub enum DetailValue {
     Vec(Vec<DetailValue>),
 }
 
+pub const DESCRIPTION_LIMIT: usize = 1200;
+pub const NAME_LIMIT: usize = 120;
+
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Token {
     pub name: String,
@@ -35,7 +38,7 @@ pub struct GetAllPaginatedResponse {
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
-    BadParameters,
+    BadParameters(String),
     Unknown(String),
 }
 

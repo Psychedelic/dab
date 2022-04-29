@@ -57,7 +57,10 @@ impl AddressBook {
         return result.0.is_some();
     }
 
-    pub async fn validate_address_type(&mut self, address: AddressType) -> Result<(), OperationError> {
+    pub async fn validate_address_type(
+        &mut self,
+        address: AddressType,
+    ) -> Result<(), OperationError> {
         match address {
             AddressType::Icns(s) => match self.validate_icns(s).await {
                 true => return Ok(()),
@@ -79,7 +82,11 @@ impl AddressBook {
         return Ok(());
     }
 
-    pub fn remove(&mut self, account: Principal, canister_name: String) -> Result<(), OperationError> {
+    pub fn remove(
+        &mut self,
+        account: Principal,
+        canister_name: String,
+    ) -> Result<(), OperationError> {
         let pointer: Key = (account, canister_name);
 
         if !self.0.contains_key(&pointer) {

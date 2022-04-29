@@ -486,11 +486,17 @@ mod tests {
 
         // the canister should return an error if we try to remove a non-existent canister
         let remove_operation = remove(mock_principals::xtc());
-        assert_eq!(remove_operation.err().unwrap(), OperationError::NonExistentItem);
+        assert_eq!(
+            remove_operation.err().unwrap(),
+            OperationError::NonExistentItem
+        );
 
         // Bob should not be able to remove a canister because he is not an admin
         ctx.update_caller(mock_principals::bob());
         let remove_operation = remove(mock_principals::xtc());
-        assert_eq!(remove_operation.err().unwrap(), OperationError::NotAuthorized);
+        assert_eq!(
+            remove_operation.err().unwrap(),
+            OperationError::NotAuthorized
+        );
     }
 }

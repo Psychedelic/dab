@@ -38,7 +38,7 @@ pub struct GetAllPaginatedResponse {
 pub enum OperationError {
     NotAuthorized,
     NonExistentItem,
-    BadParameters,
+    BadParameters(String),
     Unknown(String),
 }
 

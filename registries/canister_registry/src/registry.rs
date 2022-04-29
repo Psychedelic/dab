@@ -47,17 +47,22 @@ impl CanisterDB {
         self.0.values().collect()
     }
 
-    pub fn get_all_paginated(&self, offset: usize, _limit: usize) -> Result<Vec<&CanisterMetadata>, OperationError> {
-
+    pub fn get_all_paginated(
+        &self,
+        offset: usize,
+        _limit: usize,
+    ) -> Result<Vec<&CanisterMetadata>, OperationError> {
         let canisters: Vec<&CanisterMetadata> = self.0.values().collect();
 
         if offset > canisters.len() {
-            return Err(OperationError::BadParameters(String::from("Offset out of bound.")));
+            return Err(OperationError::BadParameters(String::from(
+                "Offset out of bound.",
+            )));
         }
 
         let mut limit = _limit;
 
-        if offset + _limit > canisters.len()  {
+        if offset + _limit > canisters.len() {
             limit = canisters.len() - offset;
         }
 
@@ -92,19 +97,29 @@ pub fn add(metadata: CanisterMetadata) -> Result<(), OperationError> {
     }
 
     if &metadata.name.len() > &NAME_LIMIT {
-        return Err(OperationError::BadParameters(format!("Name field has to be less than {} characters long.", NAME_LIMIT)));
+        return Err(OperationError::BadParameters(format!(
+            "Name field has to be less than {} characters long.",
+            NAME_LIMIT
+        )));
     }
 
     if &metadata.description.len() > &DESCRIPTION_LIMIT {
-        return Err(OperationError::BadParameters(format!("Description field has to be less than {} characters long.", DESCRIPTION_LIMIT)));
+        return Err(OperationError::BadParameters(format!(
+            "Description field has to be less than {} characters long.",
+            DESCRIPTION_LIMIT
+        )));
     }
 
     if !validate_url(&metadata.thumbnail) {
-        return Err(OperationError::BadParameters(String::from("Thumbnail field has to be a url.")));
+        return Err(OperationError::BadParameters(String::from(
+            "Thumbnail field has to be a url.",
+        )));
     }
 
-    if metadata.clone().frontend.is_some() && !validate_url(&metadata.frontend.unwrap()) {
-        return Err(OperationError::BadParameters(String::from("Frontend field has to be a url.")));
+    if metadata.clone().frontend.is_some() && !validate_url(metadata.clone().frontend.unwrap()) {
+        return Err(OperationError::BadParameters(String::from(
+            "Frontend field has to be a url.",
+        )));
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
@@ -127,13 +142,13 @@ pub fn get_all() -> Vec<&'static CanisterMetadata> {
 }
 
 #[query]
-pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse, OperationError> {
+pub fn get_all_paginated(
+    offset: Option<usize>,
+    limit: Option<usize>,
+) -> Result<GetAllPaginatedResponse, OperationError> {
     let db = ic::get_mut::<CanisterDB>();
     let canisters = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
     let amount = db.get_amount();
 
-    return Ok(GetAllPaginatedResponse{
-        canisters,
-        amount,
-    });
+    return Ok(GetAllPaginatedResponse { canisters, amount });
 }

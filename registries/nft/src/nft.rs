@@ -55,7 +55,9 @@ impl Registry {
         let nfts: Vec<&NftCanister> = self.0.values().collect();
 
         if offset > nfts.len() {
-            return Err(OperationError::BadParameters(String::from("Offset out of bound.")));
+            return Err(OperationError::BadParameters(String::from(
+                "Offset out of bound.",
+            )));
         }
 
         let mut limit = _limit;
@@ -84,32 +86,40 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     }
 
     if &canister_info.name.len() > &NAME_LIMIT {
-        return Err(OperationError::BadParameters(format!(
-            "Name field has to be less than {} characters long.",
-            NAME_LIMIT
-        )));
+        return Err(OperationError::BadParameters(
+            format!(
+                "Name field has to be less than {} characters long.",
+                NAME_LIMIT
+            )
+            .to_string(),
+        ));
     }
 
     if &canister_info.description.len() > &DESCRIPTION_LIMIT {
-        return Err(OperationError::BadParameters(format!(
-            "Description field has to be less than {} characters long.",
-            DESCRIPTION_LIMIT
-        )));
+        return Err(OperationError::BadParameters(
+            format!(
+                "Description field has to be less than {} characters long.",
+                DESCRIPTION_LIMIT
+            )
+            .to_string(),
+        ));
     }
 
-    if !validate_url(&metadata.thumbnail) {
+    if !validate_url(&canister_info.thumbnail) {
         return Err(OperationError::BadParameters(String::from(
             "Thumbnail field has to be a url.",
         )));
     }
 
-    if canister_info.clone().frontend.is_some() && !validate_url(&canister_info.frontend.unwrap()) {
+    if canister_info.clone().frontend.is_some()
+        && !validate_url(canister_info.clone().frontend.unwrap())
+    {
         return Err(OperationError::BadParameters(String::from(
             "Frontend field has to be a url.",
         )));
     }
 
-    if &canister_info.details[0].0 != String::from("standard") {
+    if &canister_info.details[0].0 != &String::from("standard") {
         return Err(OperationError::BadParameters(String::from(
             "First detail field has to be standard.",
         )));
