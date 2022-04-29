@@ -85,7 +85,7 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         return Err(OperationError::NotAuthorized);
     }
 
-    if canister_info.clone().name.len() > NAME_LIMIT {
+    if canister_info.name.len() > NAME_LIMIT {
         return Err(OperationError::BadParameters(
             format!(
                 "Name field has to be less than {} characters long.",
@@ -95,7 +95,7 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         ));
     }
 
-    if canister_info.clone().description.len() > DESCRIPTION_LIMIT {
+    if canister_info.description.len() > DESCRIPTION_LIMIT {
         return Err(OperationError::BadParameters(
             format!(
                 "Description field has to be less than {} characters long.",
@@ -111,7 +111,7 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         )));
     }
 
-    if canister_info.clone().frontend.is_some()
+    if canister_info.frontend.is_some()
         && !validate_url(canister_info.clone().frontend.unwrap())
     {
         return Err(OperationError::BadParameters(String::from(
@@ -119,11 +119,11 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         )));
     }
 
-    if canister_info.clone().details.len() < 1 {
+    if canister_info.details.len() < 1 {
         return Err(OperationError::BadParameters(String::from("Details has to have standard field.")));
     }
 
-    if canister_info.clone().details[0].0 != String::from("standard") {
+    if canister_info.details[0].0 != String::from("standard") {
         return Err(OperationError::BadParameters(String::from(
             "First detail field has to be standard.",
         )));

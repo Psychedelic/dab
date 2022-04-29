@@ -93,14 +93,14 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
         return Err(OperationError::NotAuthorized);
     }
 
-    if &token.name.len() > &NAME_LIMIT {
+    if token.name.len() > NAME_LIMIT {
         return Err(OperationError::BadParameters(format!(
             "Name field has to be less than {} characters long.",
             NAME_LIMIT
         )));
     }
 
-    if &token.description.len() > &DESCRIPTION_LIMIT {
+    if token.description.len() > DESCRIPTION_LIMIT {
         return Err(OperationError::BadParameters(format!(
             "Description field has to be less than {} characters long.",
             DESCRIPTION_LIMIT
@@ -113,39 +113,39 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
         )));
     }
 
-    if token.clone().frontend.is_some() && !validate_url(token.clone().frontend.unwrap()) {
+    if token.frontend.is_some() && !validate_url(token.clone().frontend.unwrap()) {
         return Err(OperationError::BadParameters(String::from(
             "Frontend field has to be a url.",
         )));
     }
 
-    if &token.details.len() < &4 {
+    if token.details.len() < 4 {
         return Err(OperationError::BadParameters(String::from(
             "Details field has to specifiy: symbol, standard, total_supply and verified fields.",
         )));
     }
 
-    if &token.details[0].0 != &String::from("symbol") {
+    if token.details[0].0 != String::from("symbol") {
         return Err(OperationError::BadParameters(String::from(
             "First detail field has to be symbol.",
         )));
     }
 
-    if &token.details[1].0 != &String::from("standard") {
+    if token.details[1].0 != String::from("standard") {
         return Err(OperationError::BadParameters(String::from(
             "Second detail field has to be standard.",
         )));
     }
 
-    if &token.details[2].0 != &String::from("total_supply") {
+    if token.details[2].0 != String::from("total_supply") {
         return Err(OperationError::BadParameters(String::from(
             "Third detail field has to be total_supply.",
         )));
     }
 
-    if &token.details[0].0 != &String::from("verified")
-        && &token.details[3].1 != &DetailValue::True
-        && &token.details[3].1 != &DetailValue::False
+    if token.details[0].0 != String::from("verified")
+        && token.details[3].1 != DetailValue::True
+        && token.details[3].1 != DetailValue::False
     {
         return Err(OperationError::BadParameters(String::from(
             "Fourth detail field has to be verified (boolean).",

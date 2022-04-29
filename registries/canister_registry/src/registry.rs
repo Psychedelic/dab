@@ -96,14 +96,14 @@ pub fn add(metadata: CanisterMetadata) -> Result<(), OperationError> {
         return Err(OperationError::NotAuthorized);
     }
 
-    if &metadata.name.len() > &NAME_LIMIT {
+    if metadata.name.len() > NAME_LIMIT {
         return Err(OperationError::BadParameters(format!(
             "Name field has to be less than {} characters long.",
             NAME_LIMIT
         )));
     }
 
-    if &metadata.description.len() > &DESCRIPTION_LIMIT {
+    if metadata.description.len() > DESCRIPTION_LIMIT {
         return Err(OperationError::BadParameters(format!(
             "Description field has to be less than {} characters long.",
             DESCRIPTION_LIMIT
@@ -116,7 +116,7 @@ pub fn add(metadata: CanisterMetadata) -> Result<(), OperationError> {
         )));
     }
 
-    if metadata.clone().frontend.is_some() && !validate_url(metadata.clone().frontend.unwrap()) {
+    if metadata.frontend.is_some() && !validate_url(metadata.clone().frontend.unwrap()) {
         return Err(OperationError::BadParameters(String::from(
             "Frontend field has to be a url.",
         )));

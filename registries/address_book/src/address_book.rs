@@ -147,7 +147,7 @@ fn name() -> String {
 
 #[update]
 pub async fn add(address: Address) -> Result<(), OperationError> {
-    if &address.name.len() > &NAME_LIMIT {
+    if address.name.len() > NAME_LIMIT {
         return Err(OperationError::BadParameters(format!(
             "Name field has to be less than {} characters long.",
             NAME_LIMIT
@@ -157,7 +157,7 @@ pub async fn add(address: Address) -> Result<(), OperationError> {
     if address.description.is_some() {
         let description = address.clone().description.unwrap();
 
-        if &description.len() > &DESCRIPTION_LIMIT {
+        if description.len() > DESCRIPTION_LIMIT {
             return Err(OperationError::BadParameters(format!(
                 "Description field has to be less than {} characters long.",
                 DESCRIPTION_LIMIT
