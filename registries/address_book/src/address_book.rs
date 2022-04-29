@@ -68,10 +68,16 @@ impl AddressBook {
             },
             AddressType::AccountId(s) => match self.validate_account_id(s) {
                 true => return Ok(()),
-                false => return Err(OperationError::BadParameters(String::from("Invalid Account."))),
+                false => {
+                    return Err(OperationError::BadParameters(String::from(
+                        "Invalid Account.",
+                    )))
+                }
             },
             AddressType::PrincipalId(_s) => Ok(()),
-            _ => Err(OperationError::BadParameters(String::from("Invalid Principal."))),
+            _ => Err(OperationError::BadParameters(String::from(
+                "Invalid Principal.",
+            ))),
         }
     }
 
@@ -121,7 +127,9 @@ impl AddressBook {
             self.0.range((Included(start), Included(end))).collect();
 
         if offset >= addresses.len() {
-            return Err(OperationError::BadParameters(String::from("Offset out of bound.")));
+            return Err(OperationError::BadParameters(String::from(
+                "Offset out of bound.",
+            )));
         }
 
         if offset + limit > addresses.len() {
@@ -144,8 +152,8 @@ pub async fn add(address: Address) -> Result<(), OperationError> {
             "Name field has to be less than {} characters long.",
             NAME_LIMIT
         )));
-    } 
-    
+    }
+
     if address.description.is_some() {
         let description = address.clone().description.unwrap();
 
@@ -155,13 +163,15 @@ pub async fn add(address: Address) -> Result<(), OperationError> {
                 DESCRIPTION_LIMIT
             )));
         }
-    } 
-    
+    }
+
     if address.emoji.is_some() {
         let emojis: Vec<char> = address.clone().emoji.unwrap().chars().take(1).collect();
 
         if !is_emoji(emojis[0]) {
-            return Err(OperationError::BadParameters(String::from("Invalid emoji field.")));
+            return Err(OperationError::BadParameters(String::from(
+                "Invalid emoji field.",
+            )));
         }
     }
 
