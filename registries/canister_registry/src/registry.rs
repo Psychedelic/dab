@@ -92,19 +92,19 @@ pub fn add(metadata: CanisterMetadata) -> Result<(), OperationError> {
     }
 
     if &metadata.name.len() > &NAME_LIMIT {
-        return Err(OperationError::BadParameters(format!("Name field has to be less than {} characters long", NAME_LIMIT)));
+        return Err(OperationError::BadParameters(format!("Name field has to be less than {} characters long.", NAME_LIMIT)));
     }
 
     if &metadata.description.len() > &DESCRIPTION_LIMIT {
-        return Err(OperationError::BadParameters(format!("Description field has to be less than {} characters long", DESCRIPTION_LIMIT)));
+        return Err(OperationError::BadParameters(format!("Description field has to be less than {} characters long.", DESCRIPTION_LIMIT)));
     }
 
     if !validate_url(&metadata.thumbnail) {
-        return Err(OperationError::BadParameters(String::from("Thumbnail field has to be a url")));
+        return Err(OperationError::BadParameters(String::from("Thumbnail field has to be a url.")));
     }
 
     if metadata.clone().frontend.is_some() && !validate_url(&metadata.frontend.unwrap()) {
-        return Err(OperationError::BadParameters(String::from("Frontend field has to be a url")));
+        return Err(OperationError::BadParameters(String::from("Frontend field has to be a url.")));
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
