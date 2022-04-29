@@ -128,7 +128,7 @@ mod tests {
 
         let addition_result = add(canister_metadata.clone());
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(String::from("Thumbnail field has to be a url.")));
 
         let added_canister = get(mock_principals::xtc());
         assert!(added_canister.is_none());
@@ -156,7 +156,9 @@ mod tests {
 
         let addition_result = add(canister_metadata.clone());
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(String::from(
+            "Frontend field has to be a url.",
+        )));
 
         let added_canister = get(mock_principals::xtc());
         assert!(added_canister.is_none());
