@@ -69,7 +69,7 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
     #[tokio::test]
@@ -87,7 +87,7 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     }
 
     // #[tokio::test]
@@ -105,7 +105,7 @@ mod tests {
 
     //     let addition_result = add(address_info.clone()).await;
     //     assert!(addition_result.is_err());
-    //     assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
+    //     assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
     // }
 
     #[tokio::test]

@@ -36,7 +36,7 @@ pub const ICNS_REGISTRY_PRINCIPAL_ID: &str = "e5kvl-zyaaa-aaaan-qabaq-cai";
 pub const DEFAULT_LIMIT: usize = 20;
 
 #[derive(CandidType, Debug, PartialEq)]
-pub enum Failure {
+pub enum OperationError {
     NotAuthorized,
     BadParameters,
     NonExistentItem,

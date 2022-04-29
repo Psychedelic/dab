@@ -24,20 +24,20 @@ impl CanisterDB {
         self.0.get(&canister)
     }
 
-    pub fn add_canister(&mut self, metadata: CanisterMetadata) -> Result<(), Failure> {
+    pub fn add_canister(&mut self, metadata: CanisterMetadata) -> Result<(), OperationError> {
         let id: Principal = metadata.principal_id;
         self.0.insert(metadata.principal_id, metadata);
         if !self.0.contains_key(&id) {
-            return Err(Failure::Unknown(String::from(
+            return Err(OperationError::Unknown(String::from(
                 "Something unexpected happend. Try again.",
             )));
         }
         Ok(())
     }
 
-    pub fn remove_canister(&mut self, canister: &Principal) -> Result<(), Failure> {
+    pub fn remove_canister(&mut self, canister: &Principal) -> Result<(), OperationError> {
         if !self.0.contains_key(canister) {
-            return Err(Failure::NonExistentItem);
+            return Err(OperationError::NonExistentItem);
         }
         self.0.remove(canister);
         Ok(())
@@ -47,12 +47,12 @@ impl CanisterDB {
         self.0.values().collect()
     }
 
-    pub fn get_all_paginated(&self, offset: usize, _limit: usize) -> Result<Vec<&CanisterMetadata>, Failure> {
+    pub fn get_all_paginated(&self, offset: usize, _limit: usize) -> Result<Vec<&CanisterMetadata>, OperationError> {
 
         let canisters: Vec<&CanisterMetadata> = self.0.values().collect();
 
         if offset > canisters.len() {
-            return Err(Failure::BadParameters);
+            return Err(OperationError::BadParameters);
         }
 
         let mut limit = _limit;
@@ -86,15 +86,15 @@ pub fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 }
 
 #[update]
-pub fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
+pub fn add(metadata: CanisterMetadata) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
-        return Err(Failure::NotAuthorized);
+        return Err(OperationError::NotAuthorized);
     } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || !validate_url(&metadata.thumbnail)
         || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
     {
-        return Err(Failure::BadParameters);
+        return Err(OperationError::BadParameters);
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
@@ -102,9 +102,9 @@ pub fn add(metadata: CanisterMetadata) -> Result<(), Failure> {
 }
 
 #[update]
-pub fn remove(canister: Principal) -> Result<(), Failure> {
+pub fn remove(canister: Principal) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
-        return Err(Failure::NotAuthorized);
+        return Err(OperationError::NotAuthorized);
     }
     let canister_db = ic::get_mut::<CanisterDB>();
     canister_db.remove_canister(&canister)
@@ -117,7 +117,7 @@ pub fn get_all() -> Vec<&'static CanisterMetadata> {
 }
 
 #[query]
-pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse, Failure> {
+pub fn get_all_paginated(offset: Option<usize>, limit: Option<usize>) -> Result<GetAllPaginatedResponse, OperationError> {
     let db = ic::get_mut::<CanisterDB>();
     let canisters = db.get_all_paginated(offset.unwrap_or(0), limit.unwrap_or(DEFAULT_LIMIT))?;
     let amount = db.get_amount();

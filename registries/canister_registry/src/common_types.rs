@@ -2,7 +2,7 @@ use ic_kit::{candid::CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
 #[derive(CandidType, Debug, PartialEq)]
-pub enum Failure {
+pub enum OperationError {
     NotAuthorized,
     BadParameters,
     NonExistentItem,
