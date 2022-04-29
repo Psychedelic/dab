@@ -27,7 +27,7 @@ type paginated_tokens = record {
 type operation_error = variant {
     NotAuthorized;
     NonExistentItem;
-    BadParameters;
+    BadParameters: text;
     Unknown : text;
 };
 

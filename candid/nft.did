@@ -27,7 +27,7 @@ type paginated_nft_canisters = record {
 type operation_error = variant {
     NotAuthorized;
     NonExistentItem;
-    BadParameters;
+    BadParameters: text;
     Unknown : text;
 };
 

@@ -26,7 +26,7 @@ type paginated_canister_metadata = record {
 
 type operation_error = variant {
     NotAuthorized;
-    BadParameters;
+    BadParameters: text;
     NonExistentItem;
     Unknown: text;
 };
