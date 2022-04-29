@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(CandidType, Debug, PartialEq)]
 pub enum OperationError {
     NotAuthorized,
-    BadParameters,
+    BadParameters(String),
     NonExistentItem,
     Unknown(String),
 }

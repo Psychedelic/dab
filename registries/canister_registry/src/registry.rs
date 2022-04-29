@@ -52,7 +52,7 @@ impl CanisterDB {
         let canisters: Vec<&CanisterMetadata> = self.0.values().collect();
 
         if offset > canisters.len() {
-            return Err(OperationError::BadParameters);
+            return Err(OperationError::BadParameters(String::from("Offset out of bound.")));
         }
 
         let mut limit = _limit;
@@ -89,12 +89,22 @@ pub fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 pub fn add(metadata: CanisterMetadata) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
-    } else if &metadata.name.len() > &NAME_LIMIT
-        || &metadata.description.len() > &DESCRIPTION_LIMIT
-        || !validate_url(&metadata.thumbnail)
-        || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
-    {
-        return Err(OperationError::BadParameters);
+    }
+
+    if &metadata.name.len() > &NAME_LIMIT {
+        return Err(OperationError::BadParameters(format!("Name field has to be less than {} characters long", NAME_LIMIT)));
+    }
+
+    if &metadata.description.len() > &DESCRIPTION_LIMIT {
+        return Err(OperationError::BadParameters(format!("Description field has to be less than {} characters long", DESCRIPTION_LIMIT)));
+    }
+
+    if !validate_url(&metadata.thumbnail) {
+        return Err(OperationError::BadParameters(String::from("Thumbnail field has to be a url")));
+    }
+
+    if metadata.clone().frontend.is_some() && !validate_url(&metadata.frontend.unwrap()) {
+        return Err(OperationError::BadParameters(String::from("Frontend field has to be a url")));
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
