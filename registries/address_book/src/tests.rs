@@ -69,7 +69,10 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(format!(
+            "Description field has to be less than {} characters long.",
+            DESCRIPTION_LIMIT
+        )));
     }
 
     #[tokio::test]
@@ -87,26 +90,31 @@ mod tests {
 
         let addition_result = add(address_info.clone()).await;
         assert!(addition_result.is_err());
-        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(format!(
+            "Name field has to be less than {} characters long.",
+            NAME_LIMIT
+        )));
     }
 
-    // #[tokio::test]
-    // async fn test_add_address_fails_because_of_bad_emoji_param() {
-    //     MockContext::new()
-    //         .with_caller(mock_principals::alice())
-    //         .inject();
+    #[tokio::test]
+    async fn test_add_address_fails_because_of_bad_emoji_param() {
+        MockContext::new()
+            .with_caller(mock_principals::alice())
+            .inject();
 
-    //     let address_info = Address {
-    //         name: String::from("Bob"),
-    //         description: Some(String::from("description")),
-    //         emoji: Some(String::from("a")),
-    //         value: AddressType::PrincipalId(mock_principals::bob()),
-    //     };
+        let address_info = Address {
+            name: String::from("Bob"),
+            description: Some(String::from("description")),
+            emoji: Some(String::from("a")),
+            value: AddressType::PrincipalId(mock_principals::bob()),
+        };
 
-    //     let addition_result = add(address_info.clone()).await;
-    //     assert!(addition_result.is_err());
-    //     assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters);
-    // }
+        let addition_result = add(address_info.clone()).await;
+        assert!(addition_result.is_err());
+        assert_eq!(addition_result.unwrap_err(), OperationError::BadParameters(String::from(
+            "Invalid emoji field.",
+        )));
+    }
 
     #[tokio::test]
     async fn test_remove_address_successfully() {
