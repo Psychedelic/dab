@@ -64,14 +64,14 @@ impl AddressBook {
         match address {
             AddressType::Icns(s) => match self.validate_icns(s).await {
                 true => return Ok(()),
-                false => return Err(OperationError::BadParameters),
+                false => return Err(OperationError::BadParameters(String::from("Invalid ICNS."))),
             },
             AddressType::AccountId(s) => match self.validate_account_id(s) {
                 true => return Ok(()),
-                false => return Err(OperationError::BadParameters),
+                false => return Err(OperationError::BadParameters(String::from("Invalid Account."))),
             },
             AddressType::PrincipalId(_s) => Ok(()),
-            _ => Err(OperationError::BadParameters),
+            _ => Err(OperationError::BadParameters(String::from("Invalid Principal."))),
         }
     }
 
@@ -113,16 +113,16 @@ impl AddressBook {
     ) -> Result<Vec<(&Key, &Address)>, OperationError> {
         let mut limit = _limit;
 
-        if offset >= limit {
-            return Err(OperationError::BadParameters);
-        }
-
         let start: Key = (account.clone(), String::new());
         let end: Key = (account.clone(), unsafe {
             String::from(std::char::from_u32_unchecked(u32::MAX))
         });
         let addresses: Vec<(&(ic_kit::Principal, std::string::String), &Address)> =
             self.0.range((Included(start), Included(end))).collect();
+
+        if offset >= addresses.len() {
+            return Err(OperationError::BadParameters(String::from("Offset out of bound.")));
+        }
 
         if offset + limit > addresses.len() {
             limit = addresses.len() - offset;
@@ -140,18 +140,28 @@ fn name() -> String {
 #[update]
 pub async fn add(address: Address) -> Result<(), OperationError> {
     if &address.name.len() > &NAME_LIMIT {
-        return Err(OperationError::BadParameters);
-    } else if address.description.is_some() {
+        return Err(OperationError::BadParameters(format!(
+            "Name field has to be less than {} characters long.",
+            NAME_LIMIT
+        )));
+    } 
+    
+    if address.description.is_some() {
         let description = address.clone().description.unwrap();
 
         if &description.len() > &DESCRIPTION_LIMIT {
-            return Err(OperationError::BadParameters);
+            return Err(OperationError::BadParameters(format!(
+                "Description field has to be less than {} characters long.",
+                DESCRIPTION_LIMIT
+            )));
         }
-    } else if address.emoji.is_some() {
+    } 
+    
+    if address.emoji.is_some() {
         let emojis: Vec<char> = address.clone().emoji.unwrap().chars().take(1).collect();
 
         if !is_emoji(emojis[0]) {
-            return Err(OperationError::BadParameters);
+            return Err(OperationError::BadParameters(String::from("Invalid emoji field.")));
         }
     }
 

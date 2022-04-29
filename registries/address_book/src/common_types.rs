@@ -38,7 +38,7 @@ pub const DEFAULT_LIMIT: usize = 20;
 #[derive(CandidType, Debug, PartialEq)]
 pub enum OperationError {
     NotAuthorized,
-    BadParameters,
+    BadParameters(String),
     NonExistentItem,
     Unknown(String),
 }
