@@ -80,12 +80,14 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
     }
 
     // Check details
-    if token.details.len() != 4
+    if token.details.len() != 6
         || token.details[0].0 != String::from("symbol")
         || token.details[1].0 != String::from("standard")
         || token.details[2].0 != String::from("total_supply")
         || token.details[3].0 != String::from("verified")
         || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
+        || token.details[4].0 != String::from("decimals")
+        || token.details[5].0 != String::from("fee")
     {
         return Err(OperationError::BadParameters);
     }
