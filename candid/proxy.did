@@ -1,0 +1,26 @@
+type trusted_source = record {
+    added_by              : principal;
+    principal_id          : principal;
+    last_call             : nat64;
+    accessible_registries : vec principal;
+};
+
+type error = variant {
+    NotAuthorized;
+    NonExistentItem;
+    BadParameters : text;
+    Unknown : text;
+};
+
+type response = variant {
+    Ok  : opt text;
+    Err : error;
+};
+
+service : {
+    "name"   : () -> (text) query;
+    
+    "add"    : (trusted_source) -> (response);
+    "get"    : (principal) -> (opt trusted_source);
+    "remove" : (principal) -> (response);
+}
