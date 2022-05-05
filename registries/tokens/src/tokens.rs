@@ -75,7 +75,7 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
 
     // Check Character Limits
     let name = token.name.clone();
-    if name.len() > 120 && &token.description.len() > &1200 {
+    if name.len() > 120 && token.description.len() > 1200 {
         return Err(OperationError::BadParameters);
     }
 
@@ -93,7 +93,7 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
     }
 
     // Add the collection to the canister registry
-    let mut call_arg: Token = token.clone();
+    let mut call_arg = token.clone();
     call_arg.details = vec![(
         "category".to_string(),
         DetailValue::Text("Token".to_string()),

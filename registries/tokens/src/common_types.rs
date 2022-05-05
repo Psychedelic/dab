@@ -16,12 +16,25 @@ pub enum DetailValue {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct AddTokenInput {
+    pub name: String,
+    pub description: String,
+    pub thumbnail: String,
+    pub frontend: Option<String>,
+    pub principal_id: Principal,
+    pub details: Vec<(String, DetailValue)>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Token {
     pub name: String,
     pub description: String,
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub principal_id: Principal,
+    pub submitter: Principal,
+    pub last_updated_by: Principal,
+    pub last_updated_at: u64,
     pub details: Vec<(String, DetailValue)>,
 }
 
