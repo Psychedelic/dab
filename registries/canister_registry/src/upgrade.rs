@@ -70,7 +70,7 @@ pub fn post_upgrade() {
         let mut updated_canisters: Vec<(Principal, CanisterMetadata)> = vec![];
         for entry in stable.db {
             let updated_canister: CanisterMetadata = CanisterMetadata::from(entry.1);
-            updated_canisters.push((entry.0, updated_canister)); 
+            updated_canisters.push((entry.0, updated_canister));
         }
         ic::get_mut::<CanisterDB>().load(updated_canisters);
         ic::store(Admins(stable.admins));

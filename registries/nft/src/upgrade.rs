@@ -1,4 +1,4 @@
-use crate::common_types::{NftCanister, DetailValue};
+use crate::common_types::{DetailValue, NftCanister};
 use crate::management::Admins;
 use crate::nft::Registry;
 
