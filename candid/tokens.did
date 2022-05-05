@@ -10,15 +10,6 @@ type detail_value = variant {
   Principal : principal;
 };
 
-type add_token_input = record {
-    name         : text;
-    description  : text;
-    thumbnail    : text;
-    frontend     : opt text;
-    principal_id : principal;
-    details      : vec record { text; detail_value };
-};
-
 type token = record {
     name        : text;
     description : text;
@@ -47,7 +38,7 @@ service : {
     // DRS Methods
     "name"   : () -> (text) query;
     "get"    : (principal) -> (opt token) query;
-    "add"    : (add_token_input) -> (operation_response);
+    "add"    : (token) -> (operation_response);
     "remove" : (principal) -> (operation_response);
     
     // Canister methods

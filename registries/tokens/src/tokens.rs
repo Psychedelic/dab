@@ -61,15 +61,15 @@ pub fn name() -> String {
 }
 
 #[update]
-pub async fn add(add_token_input: AddTokenInput) -> Result<(), OperationError> {
+pub async fn add(token: Token) -> Result<(), OperationError> {
     // Check authorization
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     // Check URLs
-    if !validate_url(&add_token_input.thumbnail)
-        || !add_token_input
+    if !validate_url(&token.thumbnail)
+        || !token
             .clone()
             .frontend
             .map(validate_url)
@@ -79,27 +79,27 @@ pub async fn add(add_token_input: AddTokenInput) -> Result<(), OperationError> {
     }
 
     // Check Character Limits
-    let name = add_token_input.name.clone();
-    if name.len() > 120 && add_token_input.description.len() > 1200 {
+    let name = token.name.clone();
+    if name.len() > 120 && token.description.len() > 1200 {
         return Err(OperationError::BadParameters);
     }
 
     // Check details
-    if add_token_input.details.len() != 6
-        || add_token_input.details[0].0 != String::from("symbol")
-        || add_token_input.details[1].0 != String::from("standard")
-        || add_token_input.details[2].0 != String::from("total_supply")
-        || add_token_input.details[3].0 != String::from("verified")
-        || (add_token_input.details[3].1 != DetailValue::True
-            && add_token_input.details[3].1 != DetailValue::False)
-        || add_token_input.details[4].0 != String::from("decimals")
-        || add_token_input.details[5].0 != String::from("fee")
+    if token.details.len() != 6
+        || token.details[0].0 != String::from("symbol")
+        || token.details[1].0 != String::from("standard")
+        || token.details[2].0 != String::from("total_supply")
+        || token.details[3].0 != String::from("verified")
+        || (token.details[3].1 != DetailValue::True
+            && token.details[3].1 != DetailValue::False)
+        || token.details[4].0 != String::from("decimals")
+        || token.details[5].0 != String::from("fee")
     {
         return Err(OperationError::BadParameters);
     }
 
     // Add the collection to the canister registry
-    let mut call_arg = add_token_input.clone();
+    let mut call_arg = token.clone();
     call_arg.details = vec![(
         "category".to_string(),
         DetailValue::Text("Token".to_string()),
@@ -119,7 +119,7 @@ pub async fn add(add_token_input: AddTokenInput) -> Result<(), OperationError> {
     };
 
     let db = ic::get_mut::<TokenRegistry>();
-    return db.add(Token::from(add_token_input));
+    return db.add(token);
 }
 
 #[update]
