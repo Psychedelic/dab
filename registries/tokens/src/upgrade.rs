@@ -37,9 +37,9 @@ impl From<TokenV0> for Token {
             frontend: wrapper.frontend,
             principal_id: wrapper.principal_id,
             details: wrapper.details,
-            submitter: ic::caller(),
-            last_updated_by: ic::caller(),
-            last_modification: ic::time(),
+            submitter: ic::id(),
+            last_updated_by: ic::id(),
+            last_updated_at: ic::time(),
         };
     }
 }

@@ -18,7 +18,7 @@ type token = record {
     principal_id : principal;
     submitter   : principal;
     last_updated_by: principal;
-    last_modification: nat64;
+    last_updated_at: nat64;
     details     : vec record { text; detail_value }
 };
 
