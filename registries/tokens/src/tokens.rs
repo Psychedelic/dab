@@ -68,12 +68,7 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
     }
 
     // Check URLs
-    if !validate_url(&token.thumbnail)
-        || !token
-            .clone()
-            .frontend
-            .map(validate_url)
-            .unwrap_or(true)
+    if !validate_url(&token.thumbnail) || !token.clone().frontend.map(validate_url).unwrap_or(true)
     {
         return Err(OperationError::BadParameters);
     }
@@ -90,8 +85,7 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
         || token.details[1].0 != String::from("standard")
         || token.details[2].0 != String::from("total_supply")
         || token.details[3].0 != String::from("verified")
-        || (token.details[3].1 != DetailValue::True
-            && token.details[3].1 != DetailValue::False)
+        || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
         || token.details[4].0 != String::from("decimals")
         || token.details[5].0 != String::from("fee")
     {
