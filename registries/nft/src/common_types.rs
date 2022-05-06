@@ -25,6 +25,9 @@ pub struct NftCanister {
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub principal_id: Principal,
+    pub submitter: Principal,
+    pub last_updated_by: Principal,
+    pub last_updated_at: u64,
     pub details: Vec<(String, DetailValue)>,
 }
 
