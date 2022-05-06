@@ -11,21 +11,21 @@ type detail_value = variant {
 };
 
 type metadata = record {
-    name         : text;
-    description  : text;
-    thumbnail    : text;
-    frontend     : opt text;
-    principal_id : principal;
-    submitter   : principal;
-    last_updated_by: principal;
-    last_updated_at: nat64;
-    details      : vec record { text; detail_value }
+    name             : text;
+    description      : text;
+    thumbnail        : text;
+    frontend         : opt text;
+    principal_id     : principal;
+    submitter        : principal;
+    last_updated_by  : principal;
+    last_updated_at  : nat64;
+    details          : vec record { text; detail_value }
 };
 
 type error = variant {
     NotAuthorized;
     NonExistentItem;
-    BadParameters;
+    BadParameters : text;
     Unknown : text;
 };
 
