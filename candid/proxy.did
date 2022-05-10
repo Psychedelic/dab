@@ -1,3 +1,8 @@
+type add_trusted_source_input = record {
+    principal_id: principal;
+    accessible_registries: vec principal;
+};
+
 type trusted_source = record {
     added_by              : principal;
     principal_id          : principal;
@@ -20,7 +25,8 @@ type response = variant {
 service : {
     "name"   : () -> (text) query;
     
-    "add"    : (trusted_source) -> (response);
+    "add"    : (add_trusted_source_input) -> (response);
     "get"    : (principal) -> (opt trusted_source);
+    "get_all": () -> (vec trusted_source);
     "remove" : (principal) -> (response);
 }
