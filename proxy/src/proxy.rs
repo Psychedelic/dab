@@ -1,10 +1,24 @@
-use ic_kit::candid::Principal;
+use ic_kit::candid::{CandidType, Deserialize, Principal};
 use ic_kit::macros::*;
 use ic_kit::*;
 use std::collections::HashMap;
 
 use crate::common_types::*;
 use crate::management::*;
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct AddTrustedSourceInput {
+    pub principal_id: Principal,
+    pub accessible_registries: Vec<Principal>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct TrustedSource {
+    pub added_by: Principal,
+    pub principal_id: Principal,
+    pub last_call: u64,
+    pub accessible_registries: Vec<Principal>,
+}
 
 #[derive(Default)]
 pub struct TrustedSources(HashMap<Principal, TrustedSource>);
@@ -17,6 +31,10 @@ impl TrustedSources {
 
     pub fn load(&mut self, archive: Vec<(Principal, TrustedSource)>) {
         self.0 = archive.into_iter().collect();
+    }
+
+    pub fn is_trusted_source(&self, principal_id: &Principal) -> bool {
+        self.0.contains_key(principal_id)
     }
 
     pub fn add(&mut self, trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
@@ -63,8 +81,12 @@ pub fn name() -> String {
 
 #[update]
 pub fn add(trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
-    let db = ic::get_mut::<TrustedSources>();
-    return db.add(trusted_source);
+    if is_admin(&ic::caller()) || ic::get::<TrustedSources>().is_trusted_source(&ic::caller()) {
+        let db = ic::get_mut::<TrustedSources>();
+        return db.add(trusted_source);
+    }
+
+    return Err(OperationError::NotAuthorized);
 }
 
 #[query]
@@ -81,6 +103,10 @@ pub fn get_all() -> Vec<&'static TrustedSource> {
 
 #[update]
 pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
-    let db = ic::get_mut::<TrustedSources>();
-    db.remove(&principal_id)
+    if is_admin(&ic::caller()) || ic::get::<TrustedSources>().is_trusted_source(&ic::caller()) {
+        let db = ic::get_mut::<TrustedSources>();
+        db.remove(&principal_id)?
+    }
+
+    return Err(OperationError::NotAuthorized);
 }

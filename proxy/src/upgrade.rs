@@ -1,6 +1,5 @@
-use crate::common_types::*;
 use crate::management::Admins;
-use crate::proxy::TrustedSources;
+use crate::proxy::*;
 use ic_kit::candid::{CandidType, Deserialize};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
