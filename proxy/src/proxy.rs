@@ -19,10 +19,6 @@ impl TrustedSources {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn is_trusted_source(&self, principal_id: &Principal) -> bool {
-        self.0.contains_key(principal_id)
-    }
-
     pub fn add(&mut self, trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
         let new_trusted_source = TrustedSource {
             added_by: ic::caller(),
@@ -67,32 +63,32 @@ pub fn name() -> String {
 
 #[update]
 pub fn add(trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) || ic::get::<TrustedSources>().is_trusted_source(&ic::caller()) {
-        let db = ic::get_mut::<TrustedSources>();
-        return db.add(trusted_source);
+    if !is_admin(&ic::caller()) {
+        return Err(OperationError::NotAuthorized);
     }
 
-    return Err(OperationError::NotAuthorized);
+    let db = ic::get_mut::<TrustedSources>();
+    return db.add(trusted_source);
 }
 
 #[query]
 pub fn get(principal_id: Principal) -> Option<&'static TrustedSource> {
     let db = ic::get_mut::<TrustedSources>();
-    db.get(&principal_id)
+    return db.get(&principal_id);
 }
 
 #[query]
 pub fn get_all() -> Vec<&'static TrustedSource> {
     let db = ic::get_mut::<TrustedSources>();
-    db.get_all()
+    return db.get_all();
 }
 
 #[update]
 pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) || ic::get::<TrustedSources>().is_trusted_source(&ic::caller()) {
-        let db = ic::get_mut::<TrustedSources>();
-        db.remove(&principal_id)?
+    if is_admin(&ic::caller()) {
+        return Err(OperationError::NotAuthorized);
     }
 
-    return Err(OperationError::NotAuthorized);
+    let db = ic::get_mut::<TrustedSources>();
+    return db.remove(&principal_id);
 }
