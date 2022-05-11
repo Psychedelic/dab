@@ -1,24 +1,10 @@
-use ic_kit::candid::{CandidType, Deserialize, Principal};
+use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
 use std::collections::HashMap;
 
 use crate::common_types::*;
 use crate::management::*;
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct AddTrustedSourceInput {
-    pub principal_id: Principal,
-    pub accessible_registries: Vec<Principal>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub struct TrustedSource {
-    pub added_by: Principal,
-    pub principal_id: Principal,
-    pub last_call: u64,
-    pub accessible_registries: Vec<Principal>,
-}
 
 #[derive(Default)]
 pub struct TrustedSources(HashMap<Principal, TrustedSource>);

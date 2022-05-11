@@ -1,3 +1,4 @@
+use crate::common_types::TrustedSource;
 use crate::management::Admins;
 use crate::proxy::*;
 use ic_kit::candid::{CandidType, Deserialize};
