@@ -63,54 +63,54 @@ pub fn name() -> String {
 #[update]
 pub async fn add(token: Token) -> Result<(), OperationError> {
     // Check authorization
-    if !is_admin(&ic::caller()) {
-        return Err(OperationError::NotAuthorized);
-    }
+    // if !is_admin(&ic::caller()) {
+    //     return Err(OperationError::NotAuthorized);
+    // }
 
     // Check URLs
-    if !validate_url(&token.thumbnail) || !token.clone().frontend.map(validate_url).unwrap_or(true)
-    {
-        return Err(OperationError::BadParameters);
-    }
+    // if !validate_url(&token.thumbnail) || !token.clone().frontend.map(validate_url).unwrap_or(true)
+    // {
+    //     return Err(OperationError::BadParameters);
+    // }
 
-    // Check Character Limits
-    let name = token.name.clone();
-    if name.len() > 120 && token.description.len() > 1200 {
-        return Err(OperationError::BadParameters);
-    }
+    // // Check Character Limits
+    // let name = token.name.clone();
+    // if name.len() > 120 && token.description.len() > 1200 {
+    //     return Err(OperationError::BadParameters);
+    // }
 
-    // Check details
-    if token.details.len() != 6
-        || token.details[0].0 != String::from("symbol")
-        || token.details[1].0 != String::from("standard")
-        || token.details[2].0 != String::from("total_supply")
-        || token.details[3].0 != String::from("verified")
-        || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
-        || token.details[4].0 != String::from("decimals")
-        || token.details[5].0 != String::from("fee")
-    {
-        return Err(OperationError::BadParameters);
-    }
+    // // Check details
+    // if token.details.len() != 6
+    //     || token.details[0].0 != String::from("symbol")
+    //     || token.details[1].0 != String::from("standard")
+    //     || token.details[2].0 != String::from("total_supply")
+    //     || token.details[3].0 != String::from("verified")
+    //     || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
+    //     || token.details[4].0 != String::from("decimals")
+    //     || token.details[5].0 != String::from("fee")
+    // {
+    //     return Err(OperationError::BadParameters);
+    // }
 
-    // Add the collection to the canister registry
-    let mut call_arg = token.clone();
-    call_arg.details = vec![(
-        "category".to_string(),
-        DetailValue::Text("Token".to_string()),
-    )];
+    // // Add the collection to the canister registry
+    // let mut call_arg = token.clone();
+    // call_arg.details = vec![(
+    //     "category".to_string(),
+    //     DetailValue::Text("Token".to_string()),
+    // )];
 
-    let _registry_add_response: RegistryResponse = match ic::call(
-        Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
-        "add",
-        (call_arg,),
-    )
-    .await
-    {
-        Ok((x,)) => x,
-        Err((_code, msg)) => {
-            return Err(OperationError::Unknown(msg));
-        }
-    };
+    // let _registry_add_response: RegistryResponse = match ic::call(
+    //     Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
+    //     "add",
+    //     (call_arg,),
+    // )
+    // .await
+    // {
+    //     Ok((x,)) => x,
+    //     Err((_code, msg)) => {
+    //         return Err(OperationError::Unknown(msg));
+    //     }
+    // };
 
     let db = ic::get_mut::<TokenRegistry>();
     return db.add(token);

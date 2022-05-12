@@ -25,6 +25,7 @@ type response = variant {
 service : {
     "name"   : () -> (text) query;
     
+    "add_registry": () -> (response);
     "add"    : (add_trusted_source_input) -> (response);
     "get"    : (principal) -> (opt trusted_source);
     "get_all": () -> (vec trusted_source);
