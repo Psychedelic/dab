@@ -83,7 +83,7 @@ pub struct AddRegistryInput {
 
 #[update]
 pub async fn add_registry() -> Result<(), OperationError> {
-    if ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &principal_id) {
+    if ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &Principal::from_text("ryjl3-tyaaa-aaaaa-aaaba-cai").unwrap()) {
         return Err(OperationError::NotAuthorized);
     }
 
