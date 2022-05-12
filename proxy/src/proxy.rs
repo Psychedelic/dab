@@ -5,51 +5,7 @@ use std::collections::HashMap;
 
 use crate::common_types::*;
 use crate::management::*;
-
-#[derive(Default)]
-pub struct TrustedSources(HashMap<Principal, TrustedSource>);
-
-impl TrustedSources {
-    pub fn archive(&mut self) -> Vec<(Principal, TrustedSource)> {
-        let map = std::mem::replace(&mut self.0, HashMap::new());
-        map.into_iter().collect()
-    }
-
-    pub fn load(&mut self, archive: Vec<(Principal, TrustedSource)>) {
-        self.0 = archive.into_iter().collect();
-    }
-
-    pub fn add(&mut self, trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
-        let new_trusted_source = TrustedSource {
-            added_by: ic::caller(),
-            principal_id: trusted_source.principal_id,
-            accessible_registries: trusted_source.accessible_registries,
-            last_call: 0,
-        };
-
-        self.0
-            .insert(trusted_source.principal_id, new_trusted_source);
-
-        return Ok(());
-    }
-
-    pub fn get(&self, principal_id: &Principal) -> Option<&TrustedSource> {
-        self.0.get(principal_id)
-    }
-
-    pub fn get_all(&self) -> Vec<&TrustedSource> {
-        self.0.values().collect()
-    }
-
-    pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if !self.0.contains_key(principal_id) {
-            return Err(OperationError::NonExistentItem);
-        }
-
-        self.0.remove(principal_id);
-        return Ok(());
-    }
-}
+use crate::trusted_sources::*;
 
 #[init]
 pub fn init() {
@@ -62,7 +18,7 @@ pub fn name() -> String {
 }
 
 #[update]
-pub fn add(trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
+pub fn add_trusted_source(trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
@@ -72,23 +28,67 @@ pub fn add(trusted_source: AddTrustedSourceInput) -> Result<(), OperationError> 
 }
 
 #[query]
-pub fn get(principal_id: Principal) -> Option<&'static TrustedSource> {
+pub fn get_trusted_source(principal_id: Principal) -> Option<&'static TrustedSource> {
     let db = ic::get_mut::<TrustedSources>();
     return db.get(&principal_id);
 }
 
 #[query]
-pub fn get_all() -> Vec<&'static TrustedSource> {
+pub fn get_trusted_sources() -> Vec<&'static TrustedSource> {
     let db = ic::get_mut::<TrustedSources>();
     return db.get_all();
 }
 
 #[update]
-pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove_trusted_source(principal_id: Principal) -> Result<(), OperationError> {
     if is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<TrustedSources>();
     return db.remove(&principal_id);
+}
+
+#[update]
+pub async fn add(canister_id: Principal, metadata: AddCanisterMetadataInput) -> Result<(), OperationError> {
+    if !ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &canister_id) {
+        return Err(OperationError::NotAuthorized);
+    }
+
+    let add_registry_input = AddRegistryInput {
+        name: metadata.name,
+        description: metadata.description,
+        thumbnail: metadata.thumbnail,
+        frontend: metadata.frontend,
+        principal_id: metadata.principal_id,
+        details: metadata.details.clone(),
+        submitter: ic::caller(),
+        last_updated_by: ic::caller(),
+        last_updated_at: ic::time(),
+    };
+
+    let add_response: (Option<String>,) = ic::call(canister_id, "add", (add_registry_input,)).await.unwrap();
+    return Ok(());
+}
+
+#[update]
+pub async fn remove(canister_id: Principal, registry_id: Principal) -> Result<(), OperationError> {
+    if !ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &canister_id) {
+        return Err(OperationError::NotAuthorized);
+    }
+
+    let remove_response: (Option<String>,) = ic::call(canister_id, "remove", (registry_id,)).await.unwrap();
+    return Ok(());
+}
+
+#[update]
+pub async fn get_all(canister_id: Principal) -> Vec<CanisterMetadata> {
+    let get_all_response: (Vec<CanisterMetadata>,) = ic::call(canister_id, "get_all", ()).await.unwrap();
+    return get_all_response.0;
+}
+
+#[update]
+pub async fn get(canister_id: Principal,  registry_id: Principal) -> CanisterMetadata {
+    let get_response: (CanisterMetadata,) = ic::call(canister_id, "get", (registry_id,)).await.unwrap();
+    return get_response.0;
 }
