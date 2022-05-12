@@ -50,10 +50,14 @@ impl TrustedSources {
         return Ok(());
     }
 
-    pub fn has_access_to_registry(&self, principal_id: &Principal, registry_principal_id: &Principal) -> bool {
+    pub fn has_access_to_registry(
+        &self,
+        principal_id: &Principal,
+        registry_principal_id: &Principal,
+    ) -> bool {
         match self.0.get(principal_id) {
             Some(v) if v.accessible_registries.contains(registry_principal_id) => true,
-            _ => false
+            _ => false,
         }
     }
 }

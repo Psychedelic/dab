@@ -1,6 +1,6 @@
 mod common_types;
+mod history;
 mod management;
 mod proxy;
-mod upgrade;
 mod trusted_sources;
-mod history;
+mod upgrade;
