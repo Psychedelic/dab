@@ -28,7 +28,7 @@ type add_canister_metadata_input = record {
     thumbnail   : text;
     frontend    : opt text;
     principal_id : principal;
-    details     : vec record { text; detail_value }
+    details     : vec record { text; detail_value };
 };
 
 type canister_metadata = record {
@@ -40,7 +40,41 @@ type canister_metadata = record {
     submitter   : principal;
     last_updated_by: principal;
     last_updated_at: nat64;
-    details     : vec record { text; detail_value }
+    details     : vec record { text; detail_value };
+};
+
+type addition = record {
+        time: nat64;
+        by: principal;
+        registry: principal;
+        metadata: canister_metadata;
+};
+
+type deletion = record {
+        time: nat64;
+        by: principal;
+        registry: principal;
+        canister: principal;
+};
+
+type trusted_source_addition = record {
+    time: nat64;
+    by: principal;
+    trusted_source: principal;
+    accessible_registries: vec principal;
+};
+
+type trusted_source_deletion= record {
+    time: nat64;
+    by: principal;
+    trusted_source: principal;
+};
+
+type event = variant {
+    Addition: addition;
+    Deletion: deletion;
+    TrustedSourceAddition: trusted_source_addition;
+    TrustedSourceDeletion: trusted_source_deletion;
 };
 
 type error = variant {
@@ -59,12 +93,14 @@ service : {
     "name"   : () -> (text) query;
     
     "add_trusted_source"    : (add_trusted_source_input) -> (response);
-    "get_trusted_source"    : (principal) -> (opt trusted_source);
-    "get_trusted_sources": () -> (vec trusted_source);
+    "get_trusted_source"    : (principal) -> (opt trusted_source) query;
+    "get_trusted_sources": () -> (vec trusted_source) query;
     "remove_trusted_source" : (principal) -> (response);
 
     "add": (principal, add_canister_metadata_input) -> (response);
     "remove": (principal, principal) -> (response);
-    "get_all": (principal) -> (vec canister_metadata);
-    "get": (principal, principal) -> (canister_metadata);
+    "get_all": (principal) -> (vec canister_metadata) query;
+    "get": (principal, principal) -> (canister_metadata) query;
+
+    "get_history": () -> (vec trusted_source_addition) query;
 }

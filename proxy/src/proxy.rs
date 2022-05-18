@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use crate::common_types::*;
 use crate::management::*;
 use crate::trusted_sources::*;
+use crate::history::*;
 
 #[init]
 pub fn init() {
@@ -23,8 +24,14 @@ pub fn add_trusted_source(trusted_source: AddTrustedSourceInput) -> Result<(), O
         return Err(OperationError::NotAuthorized);
     }
 
+    let aux = trusted_source.clone();
+
     let db = ic::get_mut::<TrustedSources>();
-    return db.add(trusted_source);
+    db.add(trusted_source)?;
+
+    ic::get_mut::<History>().store_trusted_source_addition(aux);
+
+    return Ok(());
 }
 
 #[query]
@@ -46,14 +53,16 @@ pub fn remove_trusted_source(principal_id: Principal) -> Result<(), OperationErr
     }
 
     let db = ic::get_mut::<TrustedSources>();
-    return db.remove(&principal_id);
+
+    db.remove(&principal_id)?;
+
+    ic::get_mut::<History>().store_trusted_source_deletion(principal_id);
+
+    return Ok(());
 }
 
 #[update]
-pub async fn add(
-    canister_id: Principal,
-    metadata: AddCanisterMetadataInput,
-) -> Result<(), OperationError> {
+pub async fn add(canister_id: Principal, metadata: AddCanisterMetadataInput) -> Result<(), OperationError> {
     if !ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &canister_id) {
         return Err(OperationError::NotAuthorized);
     }
@@ -70,9 +79,7 @@ pub async fn add(
         last_updated_at: ic::time(),
     };
 
-    let add_response: (Option<String>,) = ic::call(canister_id, "add", (add_registry_input,))
-        .await
-        .unwrap();
+    let add_response: (Option<String>,) = ic::call(canister_id, "add", (add_registry_input,)).await.unwrap();
     return Ok(());
 }
 
@@ -82,22 +89,23 @@ pub async fn remove(canister_id: Principal, registry_id: Principal) -> Result<()
         return Err(OperationError::NotAuthorized);
     }
 
-    let remove_response: (Option<String>,) = ic::call(canister_id, "remove", (registry_id,))
-        .await
-        .unwrap();
+    let remove_response: (Option<String>,) = ic::call(canister_id, "remove", (registry_id,)).await.unwrap();
     return Ok(());
 }
 
 #[update]
 pub async fn get_all(canister_id: Principal) -> Vec<CanisterMetadata> {
-    let get_all_response: (Vec<CanisterMetadata>,) =
-        ic::call(canister_id, "get_all", ()).await.unwrap();
+    let get_all_response: (Vec<CanisterMetadata>,) = ic::call(canister_id, "get_all", ()).await.unwrap();
     return get_all_response.0;
 }
 
 #[update]
-pub async fn get(canister_id: Principal, registry_id: Principal) -> CanisterMetadata {
-    let get_response: (CanisterMetadata,) =
-        ic::call(canister_id, "get", (registry_id,)).await.unwrap();
+pub async fn get(canister_id: Principal,  registry_id: Principal) -> CanisterMetadata {
+    let get_response: (CanisterMetadata,) = ic::call(canister_id, "get", (registry_id,)).await.unwrap();
     return get_response.0;
+}
+
+#[query]
+pub fn get_history() -> Vec<Event> {
+    ic::get::<History>().get_all()
 }

@@ -29,7 +29,7 @@ pub struct TrustedSource {
     pub accessible_registries: Vec<Principal>,
 }
 
-#[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, CandidType, Clone, PartialEq, Debug)]
 pub struct CanisterMetadata {
     pub name: String,
     pub description: String,
@@ -79,13 +79,12 @@ pub enum DetailValue {
     Vec(Vec<DetailValue>),
 }
 
-#[derive(Deserialize, CandidType)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum Event {
     Addition {
         time: u64,
         by: Principal,              // The trusted source who has committed this action
         registry: Principal,        // The PID of the contacted registry
-        canister: Principal,        // The PID of the deleted canister
         metadata: CanisterMetadata, // The metadata of the canister
     },
     Deletion {
@@ -103,7 +102,7 @@ pub enum Event {
     TrustedSourceDeletion {
         time: u64,
         by: Principal, // The admin who has deleted the trusted source from the proxy canister
-        trusted_sourced: Principal, // The PID of the deleted trusted source
+        trusted_source: Principal, // The PID of the deleted trusted source
     },
     AccessChange {
         time: u64,
@@ -112,5 +111,3 @@ pub enum Event {
         new_accessible_registries: Vec<Principal>, // The new vector of all registries that the trusted source can access
     },
 }
-
-pub struct History(Vec<Event>);
