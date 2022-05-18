@@ -1,8 +1,7 @@
-
-use ic_kit::{candid::CandidType, Principal};
-use ic_kit::*;
-use serde::{Deserialize, Serialize};
 use crate::common_types::*;
+use ic_kit::*;
+use ic_kit::{candid::CandidType, Principal};
+use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
 pub struct History(pub Vec<Event>);
@@ -50,12 +49,12 @@ impl History {
             trusted_source: trusted_source.principal_id,
             accessible_registries: trusted_source.accessible_registries.clone(),
         };
-        
+
         self.store_event(event);
     }
 
     pub fn store_trusted_source_deletion(&mut self, trusted_source: Principal) {
-        let event = Event::TrustedSourceDeletion { 
+        let event = Event::TrustedSourceDeletion {
             time: ic::time(),
             by: ic::caller(),
             trusted_source,
