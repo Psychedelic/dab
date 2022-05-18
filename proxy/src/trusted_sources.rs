@@ -1,10 +1,8 @@
 use ic_kit::candid::Principal;
-use ic_kit::macros::*;
 use ic_kit::*;
 use std::collections::HashMap;
 
 use crate::common_types::*;
-use crate::management::*;
 
 #[derive(Default)]
 pub struct TrustedSources(HashMap<Principal, TrustedSource>);

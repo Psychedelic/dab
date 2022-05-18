@@ -1,7 +1,6 @@
 use crate::common_types::*;
+use ic_kit::Principal;
 use ic_kit::*;
-use ic_kit::{candid::CandidType, Principal};
-use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
 pub struct History(pub Vec<Event>);
@@ -42,7 +41,7 @@ impl History {
         self.store_event(event);
     }
 
-    pub fn store_trusted_source_addition(&mut self, trusted_source: AddTrustedSourceInput) {
+    pub fn store_trusted_source_addition_event(&mut self, trusted_source: AddTrustedSourceInput) {
         let event = Event::TrustedSourceAddition {
             time: ic::time(),
             by: ic::caller(),
@@ -53,7 +52,7 @@ impl History {
         self.store_event(event);
     }
 
-    pub fn store_trusted_source_deletion(&mut self, trusted_source: Principal) {
+    pub fn store_trusted_source_deletion_event(&mut self, trusted_source: Principal) {
         let event = Event::TrustedSourceDeletion {
             time: ic::time(),
             by: ic::caller(),

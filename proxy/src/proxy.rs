@@ -1,7 +1,6 @@
 use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
-use std::collections::HashMap;
 
 use crate::common_types::*;
 use crate::history::*;
@@ -29,7 +28,7 @@ pub fn add_trusted_source(trusted_source: AddTrustedSourceInput) -> Result<(), O
     let db = ic::get_mut::<TrustedSources>();
     db.add(trusted_source)?;
 
-    ic::get_mut::<History>().store_trusted_source_addition(aux);
+    ic::get_mut::<History>().store_trusted_source_addition_event(aux);
 
     return Ok(());
 }
@@ -56,7 +55,7 @@ pub fn remove_trusted_source(principal_id: Principal) -> Result<(), OperationErr
 
     db.remove(&principal_id)?;
 
-    ic::get_mut::<History>().store_trusted_source_deletion(principal_id);
+    ic::get_mut::<History>().store_trusted_source_deletion_event(principal_id);
 
     return Ok(());
 }
@@ -70,7 +69,7 @@ pub async fn add(
         return Err(OperationError::NotAuthorized);
     }
 
-    let add_registry_input = AddRegistryInput {
+    let add_registry_input = CanisterMetadata {
         name: metadata.name,
         description: metadata.description,
         thumbnail: metadata.thumbnail,
@@ -82,9 +81,13 @@ pub async fn add(
         last_updated_at: ic::time(),
     };
 
-    let add_response: (Option<String>,) = ic::call(canister_id, "add", (add_registry_input,))
-        .await
-        .unwrap();
+    let _add_response: (Option<String>,) =
+        ic::call(canister_id, "add", (add_registry_input.clone(),))
+            .await
+            .unwrap();
+
+    ic::get_mut::<History>().store_addition_event(canister_id, &add_registry_input);
+
     return Ok(());
 }
 
@@ -94,9 +97,11 @@ pub async fn remove(canister_id: Principal, registry_id: Principal) -> Result<()
         return Err(OperationError::NotAuthorized);
     }
 
-    let remove_response: (Option<String>,) = ic::call(canister_id, "remove", (registry_id,))
+    let _remove_response: (Option<String>,) = ic::call(canister_id, "remove", (registry_id,))
         .await
         .unwrap();
+
+    ic::get_mut::<History>().store_deletion_event(canister_id, registry_id);
     return Ok(());
 }
 

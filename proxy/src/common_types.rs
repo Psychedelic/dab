@@ -52,19 +52,6 @@ pub struct AddCanisterMetadataInput {
     pub details: Vec<(String, DetailValue)>,
 }
 
-#[derive(CandidType)]
-pub struct AddRegistryInput {
-    pub name: String,
-    pub description: String,
-    pub thumbnail: String,
-    pub frontend: Option<String>,
-    pub principal_id: Principal,
-    pub submitter: Principal,
-    pub last_updated_by: Principal,
-    pub last_updated_at: u64,
-    pub details: Vec<(String, DetailValue)>,
-}
-
 #[derive(CandidType, Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum DetailValue {
     True,

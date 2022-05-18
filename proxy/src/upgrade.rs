@@ -1,6 +1,6 @@
 use crate::common_types::{Event, TrustedSource};
+use crate::history::*;
 use crate::management::Admins;
-use crate::proxy::*;
 use crate::trusted_sources::*;
 use ic_kit::candid::{CandidType, Deserialize};
 use ic_kit::ic::*;
