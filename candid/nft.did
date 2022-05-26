@@ -10,6 +10,15 @@ type detail_value = variant {
   Principal : principal;
 };
 
+type add_nft_input = record {
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    principal_id : principal;
+    details     : vec record { text; detail_value }
+};
+
 type nft_canister = record {
     name         : text;
     description  : text;
@@ -38,8 +47,8 @@ service : {
     // DRS methods
     "name"   : () -> (text) query;
     "get"    : (principal) -> (opt nft_canister) query;
-    "add"    : (nft_canister) -> (operation_response);
-    "remove" : (principal) -> (operation_response);
+    "add"    : (principal, add_nft_input) -> (operation_response);
+    "remove" : (principal, principal) -> (operation_response);
 
     // Canister ethods    
     "get_all"      : () -> (vec nft_canister) query;

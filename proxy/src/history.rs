@@ -19,32 +19,46 @@ impl History {
         self.0.push(event);
     }
 
-    pub fn store_addition_event(&mut self, registry: Principal, metadata: &CanisterMetadata) {
+    pub fn store_addition_event(
+        &mut self,
+        caller: &Principal,
+        registry: &Principal,
+        metadata: &CanisterMetadata,
+    ) {
         let event = Event::Addition {
             time: ic::time(),
-            by: ic::caller(),
-            registry: registry,
+            by: *caller,
+            registry: *registry,
             metadata: metadata.clone(),
         };
 
         self.store_event(event);
     }
 
-    pub fn store_deletion_event(&mut self, registry: Principal, canister: Principal) {
+    pub fn store_deletion_event(
+        &mut self,
+        caller: &Principal,
+        registry: &Principal,
+        canister: Principal,
+    ) {
         let event = Event::Deletion {
             time: ic::time(),
-            by: ic::caller(),
-            registry,
+            by: *caller,
+            registry: *registry,
             canister,
         };
 
         self.store_event(event);
     }
 
-    pub fn store_trusted_source_addition_event(&mut self, trusted_source: AddTrustedSourceInput) {
+    pub fn store_trusted_source_addition_event(
+        &mut self,
+        caller: &Principal,
+        trusted_source: AddTrustedSourceInput,
+    ) {
         let event = Event::TrustedSourceAddition {
             time: ic::time(),
-            by: ic::caller(),
+            by: *caller,
             trusted_source: trusted_source.principal_id,
             accessible_registries: trusted_source.accessible_registries.clone(),
         };
@@ -52,10 +66,14 @@ impl History {
         self.store_event(event);
     }
 
-    pub fn store_trusted_source_deletion_event(&mut self, trusted_source: Principal) {
+    pub fn store_trusted_source_deletion_event(
+        &mut self,
+        caller: &Principal,
+        trusted_source: Principal,
+    ) {
         let event = Event::TrustedSourceDeletion {
             time: ic::time(),
-            by: ic::caller(),
+            by: *caller,
             trusted_source,
         };
 

@@ -27,18 +27,53 @@ impl TokenRegistry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, token_info: Token) -> Result<(), OperationError> {
-        self.0.insert(token_info.principal_id, token_info);
+    pub fn add(
+        &mut self,
+        caller: &Principal,
+        token_info: AddTokenInput,
+    ) -> Result<(), OperationError> {
+        let token = self.0.get(&token_info.principal_id);
+
+        // If its an update, check if the caller matches the submitter
+        if token.is_some() && token.unwrap().submitter != *caller {
+            return Err(OperationError::NotAuthorized);
+        } else {
+            let new_token = Token {
+                name: token_info.name,
+                description: token_info.description,
+                thumbnail: token_info.thumbnail,
+                frontend: token_info.frontend,
+                principal_id: token_info.principal_id,
+                submitter: *caller,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: token_info.details.clone(),
+            };
+
+            self.0.insert(token_info.principal_id, new_token);
+        }
+
         Ok(())
     }
 
-    pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if self.0.contains_key(principal_id) {
-            self.0.remove(principal_id);
-            return Ok(());
+    pub fn remove(
+        &mut self,
+        caller: &Principal,
+        principal_id: &Principal,
+    ) -> Result<(), OperationError> {
+        if !self.0.contains_key(principal_id) {
+            return Err(OperationError::NonExistentItem);
         }
 
-        Err(OperationError::NonExistentItem)
+        let token = self.0.get(principal_id).unwrap();
+
+        if token.submitter != *caller {
+            return Err(OperationError::NotAuthorized);
+        }
+
+        self.0.remove(principal_id);
+
+        return Ok(());
     }
 
     pub fn get_info(&self, principal_id: &Principal) -> Option<&Token> {
@@ -61,7 +96,7 @@ pub fn name() -> String {
 }
 
 #[update]
-pub async fn add(token: Token) -> Result<(), OperationError> {
+pub async fn add(caller: Principal, token: AddTokenInput) -> Result<(), OperationError> {
     // Check authorization
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
@@ -113,17 +148,17 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
     };
 
     let db = ic::get_mut::<TokenRegistry>();
-    return db.add(token);
+    return db.add(&caller, token);
 }
 
 #[update]
-pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove(caller: Principal, principal_id: Principal) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<TokenRegistry>();
-    db.remove(&principal_id)
+    return db.remove(&caller, &principal_id);
 }
 
 #[query]

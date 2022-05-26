@@ -1,4 +1,4 @@
-use ic_cdk::export::candid::Principal;
+use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
 use std::{collections::HashMap, str::FromStr};
@@ -26,17 +26,52 @@ impl Registry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, canister_info: NftCanister) -> Result<(), OperationError> {
-        self.0.insert(canister_info.principal_id, canister_info);
+    pub fn add(
+        &mut self,
+        caller: &Principal,
+        canister_info: AddNftInput,
+    ) -> Result<(), OperationError> {
+        let nft = self.0.get(&canister_info.principal_id);
+
+        if nft.is_some() && nft.unwrap().submitter != *caller {
+            return Err(OperationError::NotAuthorized);
+        } else {
+            let new_nft = NftCanister {
+                name: canister_info.name,
+                description: canister_info.description,
+                thumbnail: canister_info.thumbnail,
+                frontend: canister_info.frontend,
+                principal_id: canister_info.principal_id,
+                submitter: *caller,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: canister_info.details.clone(),
+            };
+
+            self.0.insert(canister_info.principal_id, new_nft);
+        }
+
         Ok(())
     }
 
-    pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if self.0.remove(&principal_id).is_some() {
-            return Ok(());
+    pub fn remove(
+        &mut self,
+        caller: &Principal,
+        principal_id: &Principal,
+    ) -> Result<(), OperationError> {
+        if !self.0.contains_key(principal_id) {
+            return Err(OperationError::NonExistentItem);
         }
 
-        Err(OperationError::NonExistentItem)
+        let nft = self.0.get(principal_id).unwrap();
+
+        if nft.submitter != *caller {
+            return Err(OperationError::NotAuthorized);
+        }
+
+        self.0.remove(principal_id);
+
+        return Ok(());
     }
 
     pub fn get(&self, principal_id: &Principal) -> Option<&NftCanister> {
@@ -54,7 +89,7 @@ fn name() -> String {
 }
 
 #[update]
-pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
+pub async fn add(caller: Principal, canister_info: AddNftInput) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     } else if !validate_url(&canister_info.thumbnail) {
@@ -72,7 +107,7 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     let name = canister_info.name.clone();
     if name.len() <= NAME_LIMIT && &canister_info.description.len() <= &DESCRIPTION_LIMIT {
         // Add the collection to the canister registry
-        let mut call_arg: NftCanister = canister_info.clone();
+        let mut call_arg = canister_info.clone();
         call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
 
         let _registry_add_response: RegistryResponse = match ic::call(
@@ -89,20 +124,20 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         };
 
         let db = ic::get_mut::<Registry>();
-        return db.add(canister_info);
+        return db.add(&caller, canister_info);
     }
 
     Err(OperationError::BadParameters)
 }
 
 #[update]
-pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove(caller: Principal, principal_id: Principal) -> Result<(), OperationError> {
     if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<Registry>();
-    db.remove(&principal_id)
+    db.remove(&caller, &principal_id)
 }
 
 #[query]

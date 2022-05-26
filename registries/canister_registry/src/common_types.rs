@@ -2,11 +2,21 @@ use ic_kit::{candid::CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
 #[derive(CandidType, Debug, PartialEq)]
-pub enum Failure {
+pub enum OperationError {
     NotAuthorized,
     BadParameters,
     NonExistentItem,
     Unknown(String),
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct AddCanisterInput {
+    pub name: String,
+    pub description: String,
+    pub thumbnail: String,
+    pub frontend: Option<String>,
+    pub principal_id: Principal,
+    pub details: Vec<(String, DetailValue)>,
 }
 
 #[derive(Deserialize, CandidType, Clone, PartialEq, Debug)]

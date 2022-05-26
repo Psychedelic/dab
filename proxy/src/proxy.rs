@@ -28,7 +28,7 @@ pub fn add_trusted_source(trusted_source: AddTrustedSourceInput) -> Result<(), O
     let db = ic::get_mut::<TrustedSources>();
     db.add(trusted_source)?;
 
-    ic::get_mut::<History>().store_trusted_source_addition_event(aux);
+    ic::get_mut::<History>().store_trusted_source_addition_event(&ic::caller(), aux);
 
     return Ok(());
 }
@@ -47,7 +47,7 @@ pub fn get_trusted_sources() -> Vec<&'static TrustedSource> {
 
 #[update]
 pub fn remove_trusted_source(principal_id: Principal) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) {
+    if !is_admin(&ic::caller()) {
         return Err(OperationError::NotAuthorized);
     }
 
@@ -55,7 +55,7 @@ pub fn remove_trusted_source(principal_id: Principal) -> Result<(), OperationErr
 
     db.remove(&principal_id)?;
 
-    ic::get_mut::<History>().store_trusted_source_deletion_event(principal_id);
+    ic::get_mut::<History>().store_trusted_source_deletion_event(&ic::caller(), principal_id);
 
     return Ok(());
 }
@@ -65,7 +65,9 @@ pub async fn add(
     canister_id: Principal,
     metadata: AddCanisterMetadataInput,
 ) -> Result<(), OperationError> {
-    if !ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &canister_id) {
+    let caller = ic::caller();
+
+    if !ic::get::<TrustedSources>().has_access_to_registry(&caller, &canister_id) {
         return Err(OperationError::NotAuthorized);
     }
 
@@ -76,32 +78,32 @@ pub async fn add(
         frontend: metadata.frontend,
         principal_id: metadata.principal_id,
         details: metadata.details.clone(),
-        submitter: ic::caller(),
-        last_updated_by: ic::caller(),
-        last_updated_at: ic::time(),
     };
 
     let _add_response: (Option<String>,) =
-        ic::call(canister_id, "add", (add_registry_input.clone(),))
+        ic::call(canister_id, "add", (caller, add_registry_input.clone()))
             .await
             .unwrap();
 
-    ic::get_mut::<History>().store_addition_event(canister_id, &add_registry_input);
+    ic::get_mut::<History>().store_addition_event(&caller, &canister_id, &add_registry_input);
 
     return Ok(());
 }
 
 #[update]
 pub async fn remove(canister_id: Principal, registry_id: Principal) -> Result<(), OperationError> {
-    if !ic::get::<TrustedSources>().has_access_to_registry(&ic::caller(), &canister_id) {
+    let caller = ic::caller();
+
+    if !ic::get::<TrustedSources>().has_access_to_registry(&caller, &canister_id) {
         return Err(OperationError::NotAuthorized);
     }
 
-    let _remove_response: (Option<String>,) = ic::call(canister_id, "remove", (registry_id,))
-        .await
-        .unwrap();
+    let _remove_response: (Option<String>,) =
+        ic::call(canister_id, "remove", (caller, registry_id))
+            .await
+            .unwrap();
 
-    ic::get_mut::<History>().store_deletion_event(canister_id, registry_id);
+    ic::get_mut::<History>().store_deletion_event(&caller, &canister_id, registry_id);
     return Ok(());
 }
 
