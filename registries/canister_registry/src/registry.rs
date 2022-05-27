@@ -31,9 +31,28 @@ impl CanisterDB {
     ) -> Result<(), OperationError> {
         let canister = self.0.get(&metadata.principal_id);
 
-        if canister.is_some() && canister.unwrap().submitter != *caller {
+        // If its an update, check if the caller matches the submitter or if its an admin
+        if canister.is_some() && !is_admin(caller) && canister.unwrap().submitter != *caller {
             return Err(OperationError::NotAuthorized);
-        } else {
+        }
+        // An admin can update any entry
+        else if canister.is_some() && is_admin(caller) {
+            let updated_canister = CanisterMetadata {
+                name: metadata.name,
+                description: metadata.description,
+                thumbnail: metadata.thumbnail,
+                frontend: metadata.frontend,
+                principal_id: metadata.principal_id,
+                submitter: canister.unwrap().submitter,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: metadata.details.clone(),
+            };
+
+            self.0.insert(metadata.principal_id, updated_canister);
+        }
+        // Its a new entry
+        else {
             let new_canister = CanisterMetadata {
                 name: metadata.name,
                 description: metadata.description,
@@ -63,7 +82,7 @@ impl CanisterDB {
 
         let canister = self.0.get(principal_id).unwrap();
 
-        if canister.submitter != *caller {
+        if canister.submitter != *caller && !is_admin(caller) {
             return Err(OperationError::NotAuthorized);
         }
 
@@ -94,28 +113,38 @@ pub fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 }
 
 #[update]
-pub fn add(caller: Principal, metadata: AddCanisterInput) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
+pub fn add(
+    trusted_source: Option<Principal>,
+    metadata: AddCanisterInput,
+) -> Result<(), OperationError> {
+    let caller = ic::caller();
+
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     } else if &metadata.name.len() > &NAME_LIMIT
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || !validate_url(&metadata.thumbnail)
         || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
+        || (metadata.details.len() != 1 && metadata.details[0].0 != String::from("category"))
     {
         return Err(OperationError::BadParameters);
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
-    return canister_db.add_canister(&caller, metadata);
+    canister_db.add_canister(&trusted_source.unwrap_or(caller), metadata)
 }
 
 #[update]
-pub fn remove(caller: Principal, canister: Principal) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
+pub fn remove(
+    trusted_source: Option<Principal>,
+    canister: Principal,
+) -> Result<(), OperationError> {
+    let caller = ic::caller();
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     }
     let canister_db = ic::get_mut::<CanisterDB>();
-    return canister_db.remove_canister(&caller, &canister);
+    canister_db.remove_canister(&trusted_source.unwrap_or(caller), &canister)
 }
 
 #[query]

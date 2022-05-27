@@ -46,11 +46,11 @@ type operation_response = variant {
 service : {
     // DRS Methods
     "name"   : () -> (text) query;
-    "get"    : (principal) -> (opt token) query;
-    "add"    : (principal, add_token_input) -> (operation_response);
-    "remove" : (principal, principal) -> (operation_response);
+    "get"    : (token_id: principal) -> (opt token) query;
+    "add"    : (trusted_source: opt principal, token: add_token_input) -> (operation_response);
+    "remove" : (trusted_source: opt principal, token_id: principal) -> (operation_response);
     
     // Canister methods
     "get_all"  : () -> (vec token) query;
-    "add_admin" : (principal) -> (operation_response);
+    "add_admin" : (admin: principal) -> (operation_response);
 }

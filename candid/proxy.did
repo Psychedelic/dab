@@ -94,10 +94,10 @@ service : {
     "get_trusted_sources": () -> (vec trusted_source) query;
     "remove_trusted_source" : (principal) -> (response);
 
-    "add": (principal, add_canister_metadata_input) -> (response);
-    "remove": (principal, principal) -> (response);
-    "get_all": (principal) -> (vec canister_metadata);
-    "get": (principal, principal) -> (canister_metadata) query;
+    "add": (canister_id: principal, add_canister_metadata_input) -> (response);
+    "remove": (canister_id: principal, registry_id: principal) -> (response);
+    "get_all": (canister_id: principal) -> (vec canister_metadata);
+    "get": (canister_id: principal, registry_id: principal) -> (canister_metadata) query;
 
     "get_history": () -> (vec trusted_source_addition) query;
 }
