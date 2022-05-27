@@ -12,5 +12,12 @@
     "standard": "DIP20",
     "description": "Wrapped version of the Internet Computer’s native ICP token that can be held by Principal IDs.",
     "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/wicp-logo.png"
-  }  
+  },
+  {
+    "name": "OGY",
+    "id": "jwcfb-hyaaa-aaaaj-aac4q-cai",
+    "standard": "ICP",
+    "description": "ORIGYN is a Swiss Nonprofit Foundation. At ORIGYN Foundation, we combine intelligent technologies and decentralized computing to identify, authenticate and unlock the powers of ownership for the world’s most valuable objects. ORIGYN brings NFTs to life with biometric data and unique ownership experiences to power brands, creators, artists, marketplaces, consumers and industries with guaranteed certificates of authenticity.",
+    "icon": "https://storageapi.fleek.co/fleek-team-bucket/logos/ogy.png"
+  }    
 ]
