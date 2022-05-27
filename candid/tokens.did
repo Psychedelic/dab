@@ -47,8 +47,8 @@ service : {
     // DRS Methods
     "name"   : () -> (text) query;
     "get"    : (token_id: principal) -> (opt token) query;
-    "add"    : (trusted_source: principal, token: add_token_input) -> (operation_response);
-    "remove" : (trusted_source: principal, token_id: principal) -> (operation_response);
+    "add"    : (trusted_source: opt principal, token: add_token_input) -> (operation_response);
+    "remove" : (trusted_source: opt principal, token_id: principal) -> (operation_response);
     
     // Canister methods
     "get_all"  : () -> (vec token) query;
