@@ -101,6 +101,7 @@ pub fn add(caller: Principal, metadata: AddCanisterInput) -> Result<(), Operatio
         || &metadata.description.len() > &DESCRIPTION_LIMIT
         || !validate_url(&metadata.thumbnail)
         || !metadata.clone().frontend.map(validate_url).unwrap_or(true)
+        || (metadata.details.len() != 1 && metadata.details[0].0 != String::from("category"))
     {
         return Err(OperationError::BadParameters);
     }
