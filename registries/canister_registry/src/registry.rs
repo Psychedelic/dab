@@ -106,7 +106,7 @@ pub fn add(caller: Principal, metadata: AddCanisterInput) -> Result<(), Operatio
     }
 
     let canister_db = ic::get_mut::<CanisterDB>();
-    return canister_db.add_canister(&caller, metadata);
+    canister_db.add_canister(&caller, metadata)
 }
 
 #[update]
@@ -115,7 +115,7 @@ pub fn remove(caller: Principal, canister: Principal) -> Result<(), OperationErr
         return Err(OperationError::NotAuthorized);
     }
     let canister_db = ic::get_mut::<CanisterDB>();
-    return canister_db.remove_canister(&caller, &canister);
+    canister_db.remove_canister(&caller, &canister)
 }
 
 #[query]
