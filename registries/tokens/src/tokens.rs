@@ -34,8 +34,10 @@ impl TokenRegistry {
     ) -> Result<(), OperationError> {
         let token = self.0.get(&token_info.principal_id);
 
+
+        // An admin can update all registries
         // If its an update, check if the caller matches the submitter
-        if token.is_some() && token.unwrap().submitter != *caller {
+        if !is_admin(caller) || token.is_some() && token.unwrap().submitter != *caller {
             return Err(OperationError::NotAuthorized);
         } else {
             let new_token = Token {
@@ -67,7 +69,7 @@ impl TokenRegistry {
 
         let token = self.0.get(principal_id).unwrap();
 
-        if token.submitter != *caller {
+        if !is_admin(caller) || token.submitter != *caller {
             return Err(OperationError::NotAuthorized);
         }
 
@@ -96,9 +98,11 @@ pub fn name() -> String {
 }
 
 #[update]
-pub async fn add(caller: Principal, token: AddTokenInput) -> Result<(), OperationError> {
+pub async fn add(trusted_source: Option<Principal>, token: AddTokenInput) -> Result<(), OperationError> {
     // Check authorization
-    if !is_admin(&ic::caller()) {
+    let caller = ic::caller();
+
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     }
 
@@ -148,17 +152,19 @@ pub async fn add(caller: Principal, token: AddTokenInput) -> Result<(), Operatio
     };
 
     let db = ic::get_mut::<TokenRegistry>();
-    return db.add(&caller, token);
+    return db.add(&trusted_source.unwrap_or(caller), token);
 }
 
 #[update]
-pub fn remove(caller: Principal, principal_id: Principal) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
+pub fn remove(trusted_source: Option<Principal>, principal_id: Principal) -> Result<(), OperationError> {
+    let caller = ic::caller();
+
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<TokenRegistry>();
-    return db.remove(&caller, &principal_id);
+    return db.remove(&trusted_source.unwrap_or(caller), &principal_id);
 }
 
 #[query]
