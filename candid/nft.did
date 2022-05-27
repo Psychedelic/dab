@@ -47,8 +47,8 @@ service : {
     // DRS methods
     "name"   : () -> (text) query;
     "get"    : (nft_id: principal) -> (opt nft_canister) query;
-    "add"    : (trusted_source: principal, nft: add_nft_input) -> (operation_response);
-    "remove" : (trusted_source: principal, nft_id: principal) -> (operation_response);
+    "add"    : (trusted_source: opt principal, nft: add_nft_input) -> (operation_response);
+    "remove" : (trusted_source: opt principal, nft_id: principal) -> (operation_response);
 
     // Canister ethods    
     "get_all"      : () -> (vec nft_canister) query;
