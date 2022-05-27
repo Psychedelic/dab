@@ -37,7 +37,7 @@ impl Registry {
         if nft.is_some() && !is_admin(caller) && nft.unwrap().submitter != *caller {
             return Err(OperationError::NotAuthorized);
         }
- 
+
         // An admin can update any entry
         if nft.is_some() && is_admin(caller) {
             let updated_nft = NftCanister {
@@ -54,7 +54,6 @@ impl Registry {
 
             self.0.insert(canister_info.principal_id, updated_nft);
         }
-
         // Its a new entry
         else {
             let new_nft = NftCanister {
@@ -110,7 +109,10 @@ fn name() -> String {
 }
 
 #[update]
-pub async fn add(trusted_source: Option<Principal>, canister_info: AddNftInput) -> Result<(), OperationError> {
+pub async fn add(
+    trusted_source: Option<Principal>,
+    canister_info: AddNftInput,
+) -> Result<(), OperationError> {
     let caller = ic::caller();
     if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
@@ -153,7 +155,10 @@ pub async fn add(trusted_source: Option<Principal>, canister_info: AddNftInput) 
 }
 
 #[update]
-pub fn remove(trusted_source: Option<Principal>, principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove(
+    trusted_source: Option<Principal>,
+    principal_id: Principal,
+) -> Result<(), OperationError> {
     let caller = ic::caller();
     if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);

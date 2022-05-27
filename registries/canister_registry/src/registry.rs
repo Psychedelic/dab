@@ -35,7 +35,6 @@ impl CanisterDB {
         if canister.is_some() && !is_admin(caller) && canister.unwrap().submitter != *caller {
             return Err(OperationError::NotAuthorized);
         }
-
         // An admin can update any entry
         else if canister.is_some() && is_admin(caller) {
             let updated_canister = CanisterMetadata {
@@ -52,8 +51,7 @@ impl CanisterDB {
 
             self.0.insert(metadata.principal_id, updated_canister);
         }
-
-        // Its a new entry 
+        // Its a new entry
         else {
             let new_canister = CanisterMetadata {
                 name: metadata.name,
@@ -115,9 +113,12 @@ pub fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 }
 
 #[update]
-pub fn add(trusted_source: Option<Principal>, metadata: AddCanisterInput) -> Result<(), OperationError> {
+pub fn add(
+    trusted_source: Option<Principal>,
+    metadata: AddCanisterInput,
+) -> Result<(), OperationError> {
     let caller = ic::caller();
-    
+
     if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     } else if &metadata.name.len() > &NAME_LIMIT
@@ -134,7 +135,10 @@ pub fn add(trusted_source: Option<Principal>, metadata: AddCanisterInput) -> Res
 }
 
 #[update]
-pub fn remove(trusted_source: Option<Principal>, canister: Principal) -> Result<(), OperationError> {
+pub fn remove(
+    trusted_source: Option<Principal>,
+    canister: Principal,
+) -> Result<(), OperationError> {
     let caller = ic::caller();
     if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);

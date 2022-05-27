@@ -32,16 +32,14 @@ impl TokenRegistry {
         caller: &Principal,
         token_info: AddTokenInput,
     ) -> Result<(), OperationError> {
-
         let token = self.0.get(&token_info.principal_id);
 
         // If its an update, check if the caller matches the submitter or if its an admin
         if token.is_some() && !is_admin(caller) && token.unwrap().submitter != *caller {
             return Err(OperationError::NotAuthorized);
         }
-
         // An admin can update any entry
-         else if token.is_some() && is_admin(caller) {
+        else if token.is_some() && is_admin(caller) {
             let updated_token = Token {
                 name: token_info.name,
                 description: token_info.description,
@@ -55,10 +53,8 @@ impl TokenRegistry {
             };
 
             self.0.insert(token_info.principal_id, updated_token);
-
         }
-
-        // Its a new entry 
+        // Its a new entry
         else {
             let new_token = Token {
                 name: token_info.name,
@@ -118,7 +114,10 @@ pub fn name() -> String {
 }
 
 #[update]
-pub async fn add(trusted_source: Option<Principal>, token: AddTokenInput) -> Result<(), OperationError> {
+pub async fn add(
+    trusted_source: Option<Principal>,
+    token: AddTokenInput,
+) -> Result<(), OperationError> {
     // Check authorization
     let caller = ic::caller();
 
@@ -176,7 +175,10 @@ pub async fn add(trusted_source: Option<Principal>, token: AddTokenInput) -> Res
 }
 
 #[update]
-pub fn remove(trusted_source: Option<Principal>, principal_id: Principal) -> Result<(), OperationError> {
+pub fn remove(
+    trusted_source: Option<Principal>,
+    principal_id: Principal,
+) -> Result<(), OperationError> {
     let caller = ic::caller();
 
     if !is_admin(&caller) {
