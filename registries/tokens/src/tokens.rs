@@ -160,7 +160,7 @@ pub async fn add(
     let _registry_add_response: RegistryResponse = match ic::call(
         Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
         "add",
-        (trusted_source.unwrap_or(id::id()), call_arg),
+        (trusted_source.unwrap_or(ic::id()), call_arg),
     )
     .await
     {
