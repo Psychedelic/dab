@@ -41,6 +41,12 @@
       "candid": "candid/standard.did",
       "wasm": "target/wasm32-unknown-unknown/release/template_registry-opt.wasm",
       "type": "custom"
+    },
+    "proxy": {
+      "build": "node build.js proxy",
+      "candid": "candid/proxy.did",
+      "wasm": "target/wasm32-unknown-unknown/release/proxy-opt.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.9.3",

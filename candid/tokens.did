@@ -10,12 +10,24 @@ type detail_value = variant {
   Principal : principal;
 };
 
+type add_token_input = record {
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    principal_id : principal;
+    details     : vec record { text; detail_value }
+};
+
 type token = record {
     name        : text;
     description : text;
     thumbnail   : text;
     frontend    : opt text;
     principal_id : principal;
+    submitter: principal;
+    last_updated_by: principal;
+    last_updated_at: nat64;
     details     : vec record { text; detail_value }
 };
 
@@ -34,11 +46,11 @@ type operation_response = variant {
 service : {
     // DRS Methods
     "name"   : () -> (text) query;
-    "get"    : (principal) -> (opt token) query;
-    "add"    : (token) -> (operation_response);
-    "remove" : (principal) -> (operation_response);
+    "get"    : (token_id: principal) -> (opt token) query;
+    "add"    : (trusted_source: opt principal, token: add_token_input) -> (operation_response);
+    "remove" : (trusted_source: opt principal, token_id: principal) -> (operation_response);
     
     // Canister methods
     "get_all"  : () -> (vec token) query;
-    "add_admin" : (principal) -> (operation_response);
+    "add_admin" : (admin: principal) -> (operation_response);
 }
