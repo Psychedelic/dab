@@ -4,5 +4,9 @@
     "csv-writer": "^1.6.0",
     "inquirer": "^8.1.5",
     "rxjs": "^7.3.0"
+  },
+  "scripts": {
+    "docker-init": "sudo docker build -t cover .",
+    "docker": "sudo docker run -it --mount type=bind,source=\"$(pwd)/\",target=/canister --workdir=/canister $(sudo docker build -q .)"
   }
 }
