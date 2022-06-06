@@ -4,5 +4,10 @@
     "csv-writer": "^1.6.0",
     "inquirer": "^8.1.5",
     "rxjs": "^7.3.0"
+  },
+  "scripts": {
+    "reset": "rm .dfx -rf; rm target -rf",
+    "docker": "sudo docker run -it --mount type=bind,source=\"$(pwd)/\",target=/canister --workdir=/canister $(sudo docker build -t cover -q .)",
+    "docker-build": "yarn docker dfx build"
   }
 }
