@@ -22,5 +22,6 @@ RUN cargo install ic-cdk-optimizer
 # Replace your dfx version here
 ENV DFX_VERSION=0.9.3
 RUN sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+RUN dfx cache install
 
 WORKDIR /canister
