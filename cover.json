@@ -1,0 +1,13 @@
+{
+  "ownerId": "ffuck-kxghi-gyvia-r5htr-246cy-acq5u-2tdgd-avtvf-jyqbt-xtmf7-cae",
+  "canisterId": "bygbm-6aaaa-aaaah-abbjq-cai",
+  "canisterName": "router",
+  "repoUrl": "psychedelic/dab",
+  "commitHash": "57c3e6f7bb7fcfde8c9718fd32f5af4bacb8f7e4",
+  "rustVersion": "1.61.0",
+  "dfxVersion": "0.9.3",
+  "optimizeCount": 1,
+  "publicKey": "0488bb751d43a89a22e41e6966d1bd6d9d018d0dcec76d4d553436b2928be46426385cf69446eb02b3248686ed116cfa06d76323577224b042076bf53af9f3b67a",
+  "signature": "1f47c91800580f6d8fe4fdbf49c856587d74288e9f477a5748aed058cf25681822f87c47fd418b654819c52d60e7b2dc3e026215fdd9d0bd23d7092425c4515e",
+  "timestamp": 1655147338912
+}

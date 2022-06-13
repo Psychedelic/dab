@@ -35,7 +35,7 @@ pub fn pre_upgrade() {
 #[post_upgrade]
 pub fn post_upgrade() {
     if let Ok((stable,)) = ic::stable_restore::<(StableStorage,)>() {
-        ic::get_mut::<CanisterDB>().load(updated_canisters);
+        ic::get_mut::<CanisterDB>().load(stable.db);
         ic::store(Admins(stable.admins));
     }
 }
