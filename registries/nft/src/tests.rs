@@ -1,4 +1,4 @@
-#[cfg(test)]
+/*#[cfg(test)]
 mod tests {
     use ic_kit::mock_principals;
     use ic_kit::MockContext;
@@ -389,3 +389,4 @@ mod tests {
         assert_eq!(get_all_result.len(), 0);
     }
 }
+*/

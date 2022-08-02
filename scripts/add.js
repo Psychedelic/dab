@@ -191,8 +191,9 @@ function add_token(stream) {
                 'call',
                 answers.address,
                 'add',
-                `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"standard\\"; variant { Text= \\"${standard}\\" } }; record {\\"symbol\\"; variant { Text= \\"${symbol}\\" } }; record {\\"total_supply\\"; variant { U64= ${total_supply} } }; record {\\"verified\\"; variant { ${verified} } } } })"`,
+                `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"symbol\\"; variant { Text= \\"${symbol}\\" } }; record {\\"standard\\"; variant { Text= \\"${standard}\\" } }; record {\\"total_supply\\"; variant { U64= ${total_supply} } }; record {\\"verified\\"; variant { ${verified} } } } })"`,
               ];
+              console.log(command.join(' '));
               try {
                 execSync(command.join(' '));
               } catch (e) {
