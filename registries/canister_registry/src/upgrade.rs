@@ -1,4 +1,4 @@
-use crate::common_types::CanisterMetadata;
+use crate::common_types::{CanisterMetadata, DetailValue};
 use crate::management::Admins;
 use crate::registry::CanisterDB;
 

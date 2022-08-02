@@ -7,5 +7,6 @@ members = [
     "registries/tokens",
     "registries/address_book",
     "router",
-    "template_registry"
+    "template_registry",
+    "proxy"
 ]

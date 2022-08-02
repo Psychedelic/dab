@@ -7,7 +7,7 @@ use ic_kit::macros::*;
 use ic_kit::*;
 
 #[derive(CandidType, Deserialize)]
-struct StableStorage {
+pub struct StableStorage {
     db: Vec<(Principal, Token)>,
     admins: Vec<Principal>,
 }

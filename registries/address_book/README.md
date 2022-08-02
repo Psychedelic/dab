@@ -12,11 +12,11 @@ The address book canister has four methods:
 | name             | Returns the name of the cansiter.                                                                            |
 | get_all          | Returns all of the addresses from the address book.                             |
 | remove_address   | Removes the address associated with the canister name from the address book. Returns `Ok(())` if successful. |
-| add              | Adds a new address to the registry and returns `Ok(())` if the call is successful.                           |
+| add              | Adds a new address to the canister and returns `Ok(())` if the call is successful.                           |
 
 ### How to use them?
 
-First, we add a new address to our private address book with the `add` method. The address book currently supports 3 types of adresses: Principal, Account and ICNS
+First, we add a new address to our private address book with the `add` method. The address book currently supports three types of addresses: Principal, Account and ICNS
 
 Storing a contact by its principal id:
 ```bash

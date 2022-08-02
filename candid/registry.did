@@ -10,12 +10,24 @@ type detail_value = variant {
   Principal : principal;
 };
 
+type add_canister_input = record {
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    principal_id : principal;
+    details     : vec record { text; detail_value }
+};
+
 type canister_metadata = record {
     name        : text;
     description : text;
     thumbnail   : text;
     frontend    : opt text;
     principal_id : principal;
+    submitter   : principal;
+    last_updated_by: principal;
+    last_updated_at: nat64;
     details     : vec record { text; detail_value };
 };
 
@@ -34,10 +46,10 @@ type operation_response = variant {
 service : {
     "name"    : () -> (text) query;
 
-    "get"     : (principal) -> (opt canister_metadata) query;
-    "add"     : (canister_metadata) -> (operation_response);
-    "remove"  : (principal) -> (operation_response);
+    "get"     : (canister_id: principal) -> (opt canister_metadata) query;
+    "add"     : (trusted_source: opt principal, canister: add_canister_input) -> (operation_response);
+    "remove"  : (trusted_source: opt principal, canister: principal) -> (operation_response);
     "get_all" : () -> (vec canister_metadata) query;
 
-    "add_admin" : (principal) -> (operation_response);
+    "add_admin" : (admin: principal) -> (operation_response);
 }

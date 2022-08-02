@@ -34,6 +34,11 @@
       "package": "template_registry",
       "candid": "candid/standard.did",
       "type": "rust"
+    },
+    "proxy": {
+      "package": "proxy",
+      "candid": "candid/proxy.did",
+      "type": "rust"
     }
   },
   "dfx": "0.11.0",

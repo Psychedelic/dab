@@ -1,4 +1,4 @@
-use ic_cdk::export::candid::Principal;
+use ic_kit::candid::Principal;
 use ic_kit::macros::*;
 use ic_kit::*;
 use std::{collections::HashMap, str::FromStr};
@@ -26,17 +26,72 @@ impl Registry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, canister_info: NftCanister) -> Result<(), OperationError> {
-        self.0.insert(canister_info.principal_id, canister_info);
+    pub fn add(
+        &mut self,
+        caller: &Principal,
+        canister_info: AddNftInput,
+    ) -> Result<(), OperationError> {
+        let nft = self.0.get(&canister_info.principal_id);
+
+        // If its an update, check if the caller matches the submitter or if its an admin
+        if nft.is_some() && !is_admin(caller) && nft.unwrap().submitter != *caller {
+            return Err(OperationError::NotAuthorized);
+        }
+
+        // An admin can update any entry
+        if nft.is_some() && is_admin(caller) {
+            let updated_nft = NftCanister {
+                name: canister_info.name,
+                description: canister_info.description,
+                thumbnail: canister_info.thumbnail,
+                frontend: canister_info.frontend,
+                principal_id: canister_info.principal_id,
+                submitter: nft.unwrap().submitter,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: canister_info.details.clone(),
+            };
+
+            self.0.insert(canister_info.principal_id, updated_nft);
+        }
+        // Its a new entry
+        else {
+            let new_nft = NftCanister {
+                name: canister_info.name,
+                description: canister_info.description,
+                thumbnail: canister_info.thumbnail,
+                frontend: canister_info.frontend,
+                principal_id: canister_info.principal_id,
+                submitter: *caller,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: canister_info.details.clone(),
+            };
+
+            self.0.insert(canister_info.principal_id, new_nft);
+        }
+
         Ok(())
     }
 
-    pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if self.0.remove(&principal_id).is_some() {
-            return Ok(());
+    pub fn remove(
+        &mut self,
+        caller: &Principal,
+        principal_id: &Principal,
+    ) -> Result<(), OperationError> {
+        if !self.0.contains_key(principal_id) {
+            return Err(OperationError::NonExistentItem);
         }
 
-        Err(OperationError::NonExistentItem)
+        let nft = self.0.get(principal_id).unwrap();
+
+        if nft.submitter != *caller && !is_admin(caller) {
+            return Err(OperationError::NotAuthorized);
+        }
+
+        self.0.remove(principal_id);
+
+        return Ok(());
     }
 
     pub fn get(&self, principal_id: &Principal) -> Option<&NftCanister> {
@@ -54,8 +109,12 @@ fn name() -> String {
 }
 
 #[update]
-pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
+pub async fn add(
+    trusted_source: Option<Principal>,
+    canister_info: AddNftInput,
+) -> Result<(), OperationError> {
+    let caller = ic::caller();
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     } else if !validate_url(&canister_info.thumbnail) {
         return Err(OperationError::BadParameters);
@@ -72,13 +131,13 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
     let name = canister_info.name.clone();
     if name.len() <= NAME_LIMIT && &canister_info.description.len() <= &DESCRIPTION_LIMIT {
         // Add the collection to the canister registry
-        let mut call_arg: NftCanister = canister_info.clone();
+        let mut call_arg = canister_info.clone();
         call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
 
         let _registry_add_response: RegistryResponse = match ic::call(
             Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
             "add",
-            (call_arg,),
+            (trusted_source.unwrap_or(ic::id()), call_arg),
         )
         .await
         {
@@ -89,20 +148,24 @@ pub async fn add(canister_info: NftCanister) -> Result<(), OperationError> {
         };
 
         let db = ic::get_mut::<Registry>();
-        return db.add(canister_info);
+        return db.add(&trusted_source.unwrap_or(caller), canister_info);
     }
 
     Err(OperationError::BadParameters)
 }
 
 #[update]
-pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
+pub fn remove(
+    trusted_source: Option<Principal>,
+    principal_id: Principal,
+) -> Result<(), OperationError> {
+    let caller = ic::caller();
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<Registry>();
-    db.remove(&principal_id)
+    db.remove(&trusted_source.unwrap_or(caller), &principal_id)
 }
 
 #[query]

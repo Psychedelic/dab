@@ -1,55 +1,17 @@
 use crc32fast;
 use hex::FromHex;
-use ic_kit::candid::{CandidType, Principal};
+use ic_kit::candid::Principal;
 use ic_kit::ic::call;
 use ic_kit::macros::*;
 use ic_kit::*;
-use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::ops::Bound::Included;
 use unic::emoji::char::is_emoji;
 use unic::emoji::*;
 
-/**
-Every item in the map looks like this:
-( ( Principal,  String       ), Principal  )
-( ( UserID,     CanisterName ), CanisterID )
-**/
+use crate::common_types::*;
 
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub enum AddressType {
-    PrincipalId(Principal),
-    AccountId(String),
-    Icns(String),
-}
-
-#[derive(CandidType, Deserialize, Clone)]
-pub struct Address {
-    pub name: String,
-    pub value: AddressType,
-    pub description: Option<String>,
-    pub emoji: Option<String>,
-}
-
-#[derive(Deserialize, CandidType, Debug)]
-pub struct GetRecordResponse {
-    pub ttl: u64,
-    controller: Principal,
-    resolver: Principal,
-    owner: Principal,
-    operator: Principal,
-    name: String,
-    expiry: i64,
-}
-
-type Key = (Principal, String);
 pub struct AddressBook(BTreeMap<Key, Address>);
-
-const DESCRIPTION_LIMIT: usize = 1200;
-const NAME_LIMIT: usize = 24;
-const ACCOUNT_ID_LENGTH: usize = 64;
-const ICNS_SUFFIX: &str = ".icp";
-const ICNS_REGISTRY_PRINCIPAL_ID: &str = "e5kvl-zyaaa-aaaan-qabaq-cai";
 
 impl Default for AddressBook {
     fn default() -> Self {
@@ -87,11 +49,11 @@ impl AddressBook {
         let result: (Option<GetRecordResponse>,) = call(
             Principal::from_text(ICNS_REGISTRY_PRINCIPAL_ID).unwrap(),
             "getRecord",
-            (&icns,),
+            (icns.clone(),),
         )
         .await
         .unwrap();
-        ic_cdk::println!("{:?}", result);
+
         return result.0.is_some();
     }
 
@@ -105,7 +67,7 @@ impl AddressBook {
                 true => return Ok(()),
                 false => return Err(Failure::BadParameters),
             },
-            AddressType::PrincipalId(s) => Ok(()),
+            AddressType::PrincipalId(_s) => Ok(()),
             _ => Err(Failure::BadParameters),
         }
     }
@@ -135,14 +97,32 @@ impl AddressBook {
         });
         self.0.range((Included(start), Included(end))).collect()
     }
-}
 
-#[derive(CandidType, Debug, PartialEq)]
-pub enum Failure {
-    NotAuthorized,
-    BadParameters,
-    NonExistentItem,
-    Unknown(String),
+    pub fn get_all_paginated(
+        &self,
+        account: Principal,
+        offset: usize,
+        _limit: usize,
+    ) -> Result<Vec<(&Key, &Address)>, Failure> {
+        let mut limit = _limit;
+
+        if offset >= limit {
+            return Err(Failure::BadParameters);
+        }
+
+        let start: Key = (account.clone(), String::new());
+        let end: Key = (account.clone(), unsafe {
+            String::from(std::char::from_u32_unchecked(u32::MAX))
+        });
+        let addresses: Vec<(&(ic_kit::Principal, std::string::String), &Address)> =
+            self.0.range((Included(start), Included(end))).collect();
+
+        if offset + limit > addresses.len() {
+            limit = addresses.len() - offset;
+        }
+
+        return Ok(addresses[offset..limit].to_vec());
+    }
 }
 
 #[query]
@@ -151,20 +131,16 @@ fn name() -> String {
 }
 
 #[update]
-async fn add(address: Address) -> Result<(), Failure> {
+pub async fn add(address: Address) -> Result<(), Failure> {
     if &address.name.len() > &NAME_LIMIT {
         return Err(Failure::BadParameters);
-    }
-
-    if address.description.is_some() {
+    } else if address.description.is_some() {
         let description = address.clone().description.unwrap();
 
         if &description.len() > &DESCRIPTION_LIMIT {
             return Err(Failure::BadParameters);
         }
-    }
-
-    if address.emoji.is_some() {
+    } else if address.emoji.is_some() {
         let emojis: Vec<char> = address.clone().emoji.unwrap().chars().take(1).collect();
 
         if !is_emoji(emojis[0]) {
@@ -172,22 +148,24 @@ async fn add(address: Address) -> Result<(), Failure> {
         }
     }
 
+    let caller = ic::caller();
+
     let address_book = ic::get_mut::<AddressBook>();
     address_book
         .validate_address_type(address.value.clone())
         .await?;
-    address_book.add(ic::caller(), address.clone());
+    address_book.add(caller.clone(), address.clone());
     return Ok(());
 }
 
 #[update]
-fn remove(address_name: String) -> Result<(), Failure> {
+pub fn remove(address_name: String) -> Result<(), Failure> {
     let address_book = ic::get_mut::<AddressBook>();
     return address_book.remove(ic::caller(), address_name);
 }
 
 #[update]
-fn get_all() -> Vec<&'static Address> {
+pub fn get_all() -> Vec<&'static Address> {
     let address_book = ic::get_mut::<AddressBook>();
     address_book
         .get_all(ic::caller())
@@ -196,187 +174,21 @@ fn get_all() -> Vec<&'static Address> {
         .collect()
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[update]
+pub fn get_all_paginated(
+    offset: Option<usize>,
+    limit: Option<usize>,
+) -> Result<Vec<&'static Address>, Failure> {
+    let address_book = ic::get_mut::<AddressBook>();
+    let addresses = address_book
+        .get_all_paginated(
+            ic::caller(),
+            offset.unwrap_or(0),
+            limit.unwrap_or(DEFAULT_LIMIT),
+        )?
+        .iter()
+        .map(|entry| entry.1)
+        .collect();
 
-//     #[test]
-//     fn test_add_address_successfully() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         let address_info = Address {
-//             name: String::from("Bob"),
-//             description: Some(String::from("Friend")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let addition_result = add(address_info.clone()).await;
-//         assert!(addition_result.is_ok());
-
-//         let addresses = get_all();
-//         assert_eq!(addresses.len(), 1);
-//         assert_eq!(
-//             addresses[0].value,
-//             address_info.value
-//         );
-//     }
-
-//     #[test]
-//     fn test_add_address_fails_because_of_long_description_param() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         let address_info = Address {
-//             name: String::from("Bob"),
-//             description: Some(
-//                 std::iter::repeat("X")
-//                     .take(DESCRIPTION_LIMIT + 1)
-//                     .collect::<String>(),
-//             ),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let addition_result = add(address_info.clone());
-//         assert!(addition_result.is_err());
-//         assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
-//     }
-
-//     #[test]
-//     fn test_add_address_fails_because_of_long_name_param() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         let address_info = Address {
-//             name: std::iter::repeat("X").take(25).collect::<String>(),
-//             description: Some(String::from("description")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let addition_result = add(address_info.clone());
-//         assert!(addition_result.is_err());
-//         assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
-//     }
-
-//     #[test]
-//     fn test_add_address_fails_because_of_bad_emoji_param() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         let address_info = Address {
-//             name: String::from("Bob"),
-//             description: Some(String::from("description")),
-//             emoji: Some(String::from("a")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let addition_result = add(address_info.clone());
-//         assert!(addition_result.is_err());
-//         assert_eq!(addition_result.unwrap_err(), Failure::BadParameters);
-//     }
-
-//     #[test]
-//     fn test_remove_address_successfully() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         let address_info = Address {
-//             name: String::from("Bob"),
-//             description: Some(String::from("Friend")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let addition_result = add(address_info.clone());
-//         assert!(addition_result.is_ok());
-
-//         let removal_result = remove(String::from("Bob"));
-//         assert!(removal_result.is_ok());
-
-//         let get_all_result = get_all();
-//         assert_eq!(get_all_result.len(), 0);
-//     }
-
-//     #[test]
-//     fn test_users_get_their_own_addresses() {
-//         let context = MockContext::new().inject();
-
-//         let bob_address_info = Address {
-//             name: String::from("Bob"),
-//             description: Some(String::from("Friend")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let alice_address_info = Address {
-//             name: String::from("Alice"),
-//             description: Some(String::from("Friend")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::alice().to_text()))
-//         };
-
-//         //Alice adds Bob as her contact
-//         context.update_caller(mock_principals::alice());
-//         add(bob_address_info);
-
-//         let alice_addresses = get_all();
-
-//         assert_eq!(alice_addresses.len(), 1);
-//         assert_eq!(alice_addresses[0].name, String::from("Bob"));
-
-//         //Bob adds Alison as his contact
-//         context.update_caller(mock_principals::bob());
-//         add(alice_address_info);
-
-//         let bob_addresses = get_all();
-
-//         assert_eq!(bob_addresses.len(), 1);
-//         assert_eq!(bob_addresses[0].name, String::from("Alice"));
-//     }
-
-//     #[test]
-//     fn test_addresses_are_added_alphabetically_successfully() {
-//         MockContext::new()
-//             .with_caller(mock_principals::alice())
-//             .inject();
-
-//         let bob_address_info = Address {
-//             name: String::from("Bob"),
-//             description: Some(String::from("Friend")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::bob().to_text())),
-//         };
-
-//         let andrew_address_info = Address {
-//             name: String::from("Andrew"),
-//             description: Some(String::from("Friend")),
-//             emoji: Some(String::from("😚")),
-//             value: AddressType::Principal(String::from(mock_principals::alice().to_text()))
-//         };
-
-//         add(bob_address_info);
-//         add(andrew_address_info);
-
-//         let addresses = get_all();
-
-//         assert_eq!(addresses.len(), 2);
-//         assert_eq!(addresses[0].name, String::from("Andrew"));
-//         assert_eq!(
-//             addresses[0].value,
-//             AddressType::Principal(mock_principals::alice().to_text())
-//         );
-//         assert_eq!(addresses[1].name, String::from("Bob"));
-//         assert_eq!(
-//             addresses[1].value,
-//             AddressType::Principal(String::from(mock_principals::bob().to_text()))
-//         );
-//     }
-// }
+    return Ok(addresses);
+}

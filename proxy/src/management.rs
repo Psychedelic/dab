@@ -18,18 +18,9 @@ pub fn is_admin(account: &Principal) -> bool {
 
 #[update]
 pub fn add_admin(new_admin: Principal) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) {
-        ic::get_mut::<Admins>().0.push(new_admin);
-        return Ok(());
+    if !is_admin(&new_admin) {
+        return Err(OperationError::NotAuthorized);
     }
-    Err(OperationError::NotAuthorized)
-}
-
-#[update]
-pub fn remove_admin(admin: Principal) -> Result<(), OperationError> {
-    if is_admin(&ic::caller()) {
-        ic::get_mut::<Admins>().0.retain(|x| *x != admin);
-        return Ok(());
-    }
-    Err(OperationError::NotAuthorized)
+    ic::get_mut::<Admins>().0.push(new_admin);
+    return Ok(());
 }

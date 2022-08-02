@@ -19,12 +19,25 @@ pub const DESCRIPTION_LIMIT: usize = 1200;
 pub const NAME_LIMIT: usize = 120;
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub struct AddNftInput {
+    pub name: String,
+    pub description: String,
+    pub thumbnail: String,
+    pub frontend: Option<String>,
+    pub principal_id: Principal,
+    pub details: Vec<(String, DetailValue)>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct NftCanister {
     pub name: String,
     pub description: String,
     pub thumbnail: String,
     pub frontend: Option<String>,
     pub principal_id: Principal,
+    pub submitter: Principal,
+    pub last_updated_by: Principal,
+    pub last_updated_at: u64,
     pub details: Vec<(String, DetailValue)>,
 }
 

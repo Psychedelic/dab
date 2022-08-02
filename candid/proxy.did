@@ -1,0 +1,103 @@
+type add_trusted_source_input = record {
+    principal_id: principal;
+    accessible_registries: vec principal;
+};
+
+type trusted_source = record {
+    added_by              : principal;
+    principal_id          : principal;
+    last_call             : nat64;
+    accessible_registries : vec principal;
+};
+
+type detail_value = variant {
+  True;
+  False;
+  I64       : int64;
+  U64       : nat64;
+  Vec       : vec detail_value;
+  Slice     : vec nat8;
+  Text      : text;
+  Float     : float64;
+  Principal : principal;
+};
+
+type add_canister_metadata_input = record {
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    principal_id : principal;
+    details     : vec record { text; detail_value };
+};
+
+type canister_metadata = record {
+    name        : text;
+    description : text;
+    thumbnail   : text;
+    frontend    : opt text;
+    principal_id : principal;
+    details     : vec record { text; detail_value };
+};
+
+type addition = record {
+        time: nat64;
+        by: principal;
+        registry: principal;
+        metadata: canister_metadata;
+};
+
+type deletion = record {
+        time: nat64;
+        by: principal;
+        registry: principal;
+        canister: principal;
+};
+
+type trusted_source_addition = record {
+    time: nat64;
+    by: principal;
+    trusted_source: principal;
+    accessible_registries: vec principal;
+};
+
+type trusted_source_deletion= record {
+    time: nat64;
+    by: principal;
+    trusted_source: principal;
+};
+
+type event = variant {
+    Addition: addition;
+    Deletion: deletion;
+    TrustedSourceAddition: trusted_source_addition;
+    TrustedSourceDeletion: trusted_source_deletion;
+};
+
+type error = variant {
+    NotAuthorized;
+    NonExistentItem;
+    BadParameters : text;
+    Unknown : text;
+};
+
+type response = variant {
+    Ok  : opt text;
+    Err : error;
+};
+
+service : {
+    "name"   : () -> (text) query;
+    
+    "add_trusted_source"    : (add_trusted_source_input) -> (response);
+    "get_trusted_source"    : (principal) -> (opt trusted_source) query;
+    "get_trusted_sources": () -> (vec trusted_source) query;
+    "remove_trusted_source" : (principal) -> (response);
+
+    "add": (canister_id: principal, add_canister_metadata_input) -> (response);
+    "remove": (canister_id: principal, registry_id: principal) -> (response);
+    "get_all": (canister_id: principal) -> (vec canister_metadata);
+    "get": (canister_id: principal, registry_id: principal) -> (canister_metadata) query;
+
+    "get_history": () -> (vec trusted_source_addition) query;
+}

@@ -27,18 +27,71 @@ impl TokenRegistry {
         self.0 = archive.into_iter().collect();
     }
 
-    pub fn add(&mut self, token_info: Token) -> Result<(), OperationError> {
-        self.0.insert(token_info.principal_id, token_info);
+    pub fn add(
+        &mut self,
+        caller: &Principal,
+        token_info: AddTokenInput,
+    ) -> Result<(), OperationError> {
+        let token = self.0.get(&token_info.principal_id);
+
+        // If its an update, check if the caller matches the submitter or if its an admin
+        if token.is_some() && !is_admin(caller) && token.unwrap().submitter != *caller {
+            return Err(OperationError::NotAuthorized);
+        }
+        // An admin can update any entry
+        else if token.is_some() && is_admin(caller) {
+            let updated_token = Token {
+                name: token_info.name,
+                description: token_info.description,
+                thumbnail: token_info.thumbnail,
+                frontend: token_info.frontend,
+                principal_id: token_info.principal_id,
+                submitter: token.unwrap().submitter,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: token_info.details.clone(),
+            };
+
+            self.0.insert(token_info.principal_id, updated_token);
+        }
+        // Its a new entry
+        else {
+            let new_token = Token {
+                name: token_info.name,
+                description: token_info.description,
+                thumbnail: token_info.thumbnail,
+                frontend: token_info.frontend,
+                principal_id: token_info.principal_id,
+                submitter: *caller,
+                last_updated_by: *caller,
+                last_updated_at: ic::time(),
+                details: token_info.details.clone(),
+            };
+
+            self.0.insert(token_info.principal_id, new_token);
+        }
+
         Ok(())
     }
 
-    pub fn remove(&mut self, principal_id: &Principal) -> Result<(), OperationError> {
-        if self.0.contains_key(principal_id) {
-            self.0.remove(principal_id);
-            return Ok(());
+    pub fn remove(
+        &mut self,
+        caller: &Principal,
+        principal_id: &Principal,
+    ) -> Result<(), OperationError> {
+        if !self.0.contains_key(principal_id) {
+            return Err(OperationError::NonExistentItem);
         }
 
-        Err(OperationError::NonExistentItem)
+        let token = self.0.get(principal_id).unwrap();
+
+        if token.submitter != *caller && !is_admin(caller) {
+            return Err(OperationError::NotAuthorized);
+        }
+
+        self.0.remove(principal_id);
+
+        return Ok(());
     }
 
     pub fn get_info(&self, principal_id: &Principal) -> Option<&Token> {
@@ -61,9 +114,14 @@ pub fn name() -> String {
 }
 
 #[update]
-pub async fn add(token: Token) -> Result<(), OperationError> {
+pub async fn add(
+    trusted_source: Option<Principal>,
+    token: AddTokenInput,
+) -> Result<(), OperationError> {
     // Check authorization
-    if !is_admin(&ic::caller()) {
+    let caller = ic::caller();
+
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     }
 
@@ -75,23 +133,25 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
 
     // Check Character Limits
     let name = token.name.clone();
-    if name.len() > 120 && &token.description.len() > &1200 {
+    if name.len() > 120 && token.description.len() > 1200 {
         return Err(OperationError::BadParameters);
     }
 
     // Check details
-    if token.details.len() != 4
+    if token.details.len() != 6
         || token.details[0].0 != String::from("symbol")
         || token.details[1].0 != String::from("standard")
         || token.details[2].0 != String::from("total_supply")
         || token.details[3].0 != String::from("verified")
         || (token.details[3].1 != DetailValue::True && token.details[3].1 != DetailValue::False)
+        || token.details[4].0 != String::from("decimals")
+        || token.details[5].0 != String::from("fee")
     {
         return Err(OperationError::BadParameters);
     }
 
     // Add the collection to the canister registry
-    let mut call_arg: Token = token.clone();
+    let mut call_arg = token.clone();
     call_arg.details = vec![(
         "category".to_string(),
         DetailValue::Text("Token".to_string()),
@@ -100,7 +160,7 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
     let _registry_add_response: RegistryResponse = match ic::call(
         Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
         "add",
-        (call_arg,),
+        (trusted_source.unwrap_or(ic::id()), call_arg),
     )
     .await
     {
@@ -111,17 +171,22 @@ pub async fn add(token: Token) -> Result<(), OperationError> {
     };
 
     let db = ic::get_mut::<TokenRegistry>();
-    return db.add(token);
+    return db.add(&trusted_source.unwrap_or(caller), token);
 }
 
 #[update]
-pub fn remove(principal_id: Principal) -> Result<(), OperationError> {
-    if !is_admin(&ic::caller()) {
+pub fn remove(
+    trusted_source: Option<Principal>,
+    principal_id: Principal,
+) -> Result<(), OperationError> {
+    let caller = ic::caller();
+
+    if !is_admin(&caller) {
         return Err(OperationError::NotAuthorized);
     }
 
     let db = ic::get_mut::<TokenRegistry>();
-    db.remove(&principal_id)
+    return db.remove(&trusted_source.unwrap_or(caller), &principal_id);
 }
 
 #[query]

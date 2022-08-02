@@ -1,11 +1,10 @@
-use crate::address_book::{Address, AddressBook};
+use crate::address_book::AddressBook;
+use crate::common_types::{Address, Key};
 
-use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use ic_cdk::export::candid::{CandidType, Deserialize};
 use ic_kit::ic::*;
 use ic_kit::macros::*;
 use ic_kit::*;
-
-type Key = (Principal, String);
 
 #[derive(CandidType, Deserialize)]
 struct StableStorage {
