@@ -1,49 +1,42 @@
 {
   "canisters": {
     "address_book": {
-      "build": "node build.js address_book",
+      "package": "address_book",
       "candid": "candid/address_book.did",
-      "wasm": "target/wasm32-unknown-unknown/release/address_book-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "profile": {
-      "build": "node build.js profile",
+      "package": "profile",
       "candid": "candid/profile.did",
-      "wasm": "target/wasm32-unknown-unknown/release/profile-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "registry": {
-      "build": "node build.js registry",
+      "package": "registry",
       "candid": "candid/registry.did",
-      "wasm": "target/wasm32-unknown-unknown/release/registry-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "nft": {
-      "build": "node build.js nft",
+      "package": "nft",
       "candid": "candid/nft.did",
-      "wasm": "target/wasm32-unknown-unknown/release/nft-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "tokens": {
-      "build": "node build.js tokens",
+      "package": "tokens",
       "candid": "candid/tokens.did",
-      "wasm": "target/wasm32-unknown-unknown/release/tokens-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "router": {
-      "build": "node build.js router",
+      "package": "router",
       "candid": "candid/router.did",
-      "wasm": "target/wasm32-unknown-unknown/release/router-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "template_registry": {
-      "build": "node build.js template_registry",
+      "package": "template_registry",
       "candid": "candid/standard.did",
-      "wasm": "target/wasm32-unknown-unknown/release/template_registry-opt.wasm",
-      "type": "custom"
+      "type": "rust"
     }
   },
-  "dfx": "0.8.4",
+  "dfx": "0.11.0",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",
