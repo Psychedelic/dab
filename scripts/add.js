@@ -137,7 +137,7 @@ function add_nft(stream) {
 function add_token(stream) {
   stream
     .on("data", (data) => {
-      if (data.Name != '' && data.Symbol != '' && data.Total_supply != '' && data.Standard != '' && data.Description != '' && data.ID != '' && data.Thumbnail != '') {
+      if (data.Name != '' && data.Fee != '' && data.Decimals != '' && data.Symbol != '' && data.Total_supply != '' && data.Standard != '' && data.Description != '' && data.ID != '' && data.Thumbnail != '') {
         let v = data.Verified == 'yes' ? 'True' : 'False';
         let item = {
           name: data.Name,
@@ -148,6 +148,8 @@ function add_token(stream) {
           frontend: data.Frontend,
           total_supply: data.Total_supply,
           symbol: data.Symbol,
+          fee: data.Fee,
+          decimals: data.Decimals,
           verified: v
         };
         results.push(item);
@@ -181,17 +183,18 @@ function add_token(stream) {
                 frontend = canister.frontend,
                 total_supply = canister.total_supply,
                 symbol = canister.symbol,
+                fee = canister.fee,
+                decimals = canister.decimals,
                 verified = canister.verified;
 
               const command = [
                 'dfx',
                 'canister',
                 '--network=ic',
-                '--no-wallet',
                 'call',
                 answers.address,
                 'add',
-                `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"symbol\\"; variant { Text= \\"${symbol}\\" } }; record {\\"standard\\"; variant { Text= \\"${standard}\\" } }; record {\\"total_supply\\"; variant { U64= ${total_supply} } }; record {\\"verified\\"; variant { ${verified} } } } })"`,
+                `'(null, record {principal_id= principal "${id}"; name= "${name}"; description= "${description}"; thumbnail= "${thumbnail}"; frontend= opt "${frontend}"; details= vec { record {"symbol"; variant { Text= "${symbol}" } }; record {"standard"; variant { Text= "${standard}" } }; record {"total_supply"; variant { U64= ${total_supply} } }; record {"verified"; variant { ${verified} } }; record {"decimals"; variant { U64=${decimals} } }; record {"fee"; variant { U64=${fee} } } } })'`,
               ];
               console.log(command.join(' '));
               try {
