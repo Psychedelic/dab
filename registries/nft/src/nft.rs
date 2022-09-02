@@ -10,20 +10,16 @@ use crate::management::*;
 #[init]
 pub fn init(canister_registry: Option<Principal>) {
     ic::store(Admins(vec![ic::caller()]));
-    ic::store(Registry(
-        HashMap::new(),
-        canister_registry.unwrap_or(CANISTER_REGISTRY_ID.try_into().unwrap()),
-    ));
+    if let Some(canister_registry) = canister_registry {
+        ic::store(Registry(HashMap::new(), canister_registry));
+    }
 }
 
 // (registry map, canister registry id)
 pub struct Registry(HashMap<Principal, NftCanister>, Principal);
 impl Default for Registry {
     fn default() -> Self {
-        Registry(
-            HashMap::new(),
-            Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
-        )
+        Registry(HashMap::new(), CANISTER_REGISTRY_ID.try_into().unwrap())
     }
 }
 
