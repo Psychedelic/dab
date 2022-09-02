@@ -43,7 +43,7 @@ type operation_response = variant {
     Err : operation_error;
 };
 
-service : {
+service : (opt principal) -> {
     // DRS methods
     "name"   : () -> (text) query;
     "get"    : (nft_id: principal) -> (opt nft_canister) query;

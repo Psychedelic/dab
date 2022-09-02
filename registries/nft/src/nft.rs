@@ -8,12 +8,24 @@ use crate::common_types::*;
 use crate::management::*;
 
 #[init]
-pub fn init() {
+pub fn init(canister_registry: Option<Principal>) {
     ic::store(Admins(vec![ic::caller()]));
+    ic::store(Registry(
+        HashMap::new(),
+        canister_registry.unwrap_or(CANISTER_REGISTRY_ID.try_into().unwrap()),
+    ));
 }
 
-#[derive(Default)]
-pub struct Registry(HashMap<Principal, NftCanister>);
+// (registry map, canister registry id)
+pub struct Registry(HashMap<Principal, NftCanister>, Principal);
+impl Default for Registry {
+    fn default() -> Self {
+        Registry(
+            HashMap::new(),
+            Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
+        )
+    }
+}
 
 impl Registry {
     pub fn archive(&mut self) -> Vec<(Principal, NftCanister)> {
@@ -133,19 +145,23 @@ pub async fn add(
         // Add the collection to the canister registry
         let mut call_arg = canister_info.clone();
         call_arg.details = vec![("category".to_string(), DetailValue::Text("NFT".to_string()))];
+        let canister_registry = ic::get::<Registry>().1;
 
-        let _registry_add_response: RegistryResponse = match ic::call(
-            Principal::from_str(CANISTER_REGISTRY_ID).unwrap(),
-            "add",
-            (trusted_source.unwrap_or(ic::id()), call_arg),
-        )
-        .await
-        {
-            Ok((x,)) => x,
-            Err((_code, msg)) => {
-                return Err(OperationError::Unknown(msg));
-            }
-        };
+        // set canister registry to `aaaaa-aa` to skip canister registry insertion
+        if canister_registry != Principal::management_canister() {
+            let _registry_add_response: RegistryResponse = match ic::call(
+                canister_registry,
+                "add",
+                (trusted_source.unwrap_or(ic::id()), call_arg),
+            )
+            .await
+            {
+                Ok((x,)) => x,
+                Err((_code, msg)) => {
+                    return Err(OperationError::Unknown(msg));
+                }
+            };
+        }
 
         let db = ic::get_mut::<Registry>();
         return db.add(&trusted_source.unwrap_or(caller), canister_info);
