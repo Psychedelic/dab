@@ -29,9 +29,9 @@ impl AddressBook {
         self.0 = archive.into_iter().collect();
     }
 
-    fn validate_account_id(&mut self, account_id: String) -> bool {
+    fn validate_account_id(&mut self, account_id: String) -> Result<(), Failure> {
         if account_id.clone().len() != ACCOUNT_ID_LENGTH {
-            return false;
+            return Err(Failure::BadParameters);
         }
 
         let crc = u32::from_str_radix(&account_id.clone()[..8], 16).unwrap();
@@ -39,13 +39,13 @@ impl AddressBook {
             crc32fast::hash(&(<[u8; 28]>::from_hex(&account_id.clone()[8..]).unwrap()));
 
         if crc != checksum {
-            return false;
+            return Err(Failure::BadParameters);
         }
 
-        return true;
+        return Ok(());
     }
 
-    async fn validate_icns(&mut self, icns: String) -> bool {
+    async fn validate_icns(&mut self, icns: String) -> Result<(), Failure> {
         let result: (Option<GetRecordResponse>,) = call(
             Principal::from_text(ICNS_REGISTRY_PRINCIPAL_ID).unwrap(),
             "getRecord",
@@ -54,21 +54,18 @@ impl AddressBook {
         .await
         .unwrap();
 
-        return result.0.is_some();
+        if result.0.is_none() {
+            return Err(Failure::BadParameters);
+        }
+
+        return Ok(());
     }
 
     pub async fn validate_address_type(&mut self, address: AddressType) -> Result<(), Failure> {
         match address {
-            AddressType::Icns(s) => match self.validate_icns(s).await {
-                true => return Ok(()),
-                false => return Err(Failure::BadParameters),
-            },
-            AddressType::AccountId(s) => match self.validate_account_id(s) {
-                true => return Ok(()),
-                false => return Err(Failure::BadParameters),
-            },
+            AddressType::Icns(s) => self.validate_icns(s).await,
+            AddressType::AccountId(s) => self.validate_account_id(s),
             AddressType::PrincipalId(_s) => Ok(()),
-            _ => Err(Failure::BadParameters),
         }
     }
 
