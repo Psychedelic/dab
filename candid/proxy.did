@@ -97,7 +97,7 @@ service : {
     "add": (canister_id: principal, add_canister_metadata_input) -> (response);
     "remove": (canister_id: principal, registry_id: principal) -> (response);
     "get_all": (canister_id: principal) -> (vec canister_metadata);
-    "get": (canister_id: principal, registry_id: principal) -> (canister_metadata) query;
+    "get": (canister_id: principal, registry_id: principal) -> (canister_metadata);
 
     "get_history": () -> (vec trusted_source_addition) query;
 }
