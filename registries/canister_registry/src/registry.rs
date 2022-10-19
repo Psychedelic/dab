@@ -114,10 +114,10 @@ pub fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
 
 #[query]
 pub fn get_multiple(canister_ids: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>> {
-    let response = vec![];
-    let canister_db = ic::get_mut::<CanisterDB>();
+    let mut response = vec![];
 
     for canister_id in canister_ids {
+        let canister_db = ic::get_mut::<CanisterDB>();
         let canister = canister_db.get_info(canister_id);
         response.push(canister);
     }
