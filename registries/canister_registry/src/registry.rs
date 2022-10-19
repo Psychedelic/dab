@@ -112,6 +112,19 @@ pub fn get(canister: Principal) -> Option<&'static CanisterMetadata> {
     canister_db.get_info(canister)
 }
 
+#[query]
+pub fn get_multiple(canister_ids: Vec<Principal>) -> Vec<Option<&'static CanisterMetadata>> {
+    let response = vec![];
+    let canister_db = ic::get_mut::<CanisterDB>();
+
+    for canister_id in canister_ids {
+        let canister = canister_db.get_info(canister_id);
+        response.push(canister);
+    }
+
+    return response;
+}
+
 #[update]
 pub fn add(
     trusted_source: Option<Principal>,
