@@ -1,10 +1,17 @@
 #!/usr/bin/env node
-
 const fs = require("fs"),
   csv = require("csv-parser"),
   createCsvWriter = require('csv-writer').createObjectCsvWriter,
   program = require("inquirer"),
   { execSync } = require('child_process');
+
+var canister_ids = require('../canister_ids.json');
+
+var registries = {
+  "nft": canister_ids['nft']['ic'],
+  "token": canister_ids['tokens']['ic'],
+  "canister_registry": canister_ids['registry']['ic'],
+};
 
 var results = [],
   inputFile = process.argv[2],
@@ -15,34 +22,38 @@ function main() {
     .prompt([
       {
         type: 'list',
-        name: 'functionality',
+        name: 'action',
         message: 'What do you want to do?',
         choices: [
-          'Add / Update the NFT registry',
-          'Add / Update the tokens registry',
-          'Add / Update the canister registry',
-          'Export a csv file from NFT registry',
-          'Export a csv file from tokens registry',
-          'Export a csv file from canister registry',
+          'Update the NFT registry',
+          'Update the token registry',
+          'Update the canister registry',
+          'Export a csv file from the NFT registry',
+          'Export a csv file from the token registry',
+          'Export a csv file from the canister registry',
         ]
       }
     ])
     .then((answer) => {
       let stream = fs.createReadStream(inputFile)
         .pipe(csv());
-      if (answer.functionality == 'Add / Update the NFT registry') {
-        add_nft(stream);
-      } else if (answer.functionality == 'Add / Update the canister registry') {
-        add_canister(stream);
-      } else if (answer.functionality == 'Add / Update the tokens registry') {
-        add_token(stream);
-      } else if (answer.functionality == 'Export a csv file from canister registry') {
+      if (answer.action == 'Update the NFT registry') {
+        update_nft(stream);
+      } else if (answer.action == 'Update the token registry') {
+        update_token(stream);
+      } else if (answer.action == 'Update the canister registry') {
+        update_canister(stream);
+      } else if (answer.action == 'Export a csv file from the NFT registry') {
+        nft_csv(stream);
+      } else if (answer.action == 'Export a csv file from the token registry') {
+        token_csv(stream);
+      } else if (answer.action == 'Export a csv file from the canister registry') {
         canister_csv(stream);
       }
     });
 }
 
-function add_nft(stream) {
+function update_nft(stream) {
   stream
     .on("data", (data) => {
       if (data.name != '' && data.standard != '' && data.id != '' && data.description != '' && data.thumbnail != '') {
@@ -66,75 +77,60 @@ function add_nft(stream) {
         .prompt([
           {
             type: 'confirm',
-            name: 'isThisOk',
+            name: 'parsingConfirmation',
             message: 'Does this parsing look okay?',
             default: false,
-          },
-          {
-            type: 'input',
-            name: 'address',
-            message: "Please enter canister's principal ID: "
           }
         ])
         .then((answers) => {
-          if (answers.isThisOk) {
-            for (let i = 0; i < results.length; i++) {
-              let canister = results[i],
-                name = canister.name,
-                standard = canister.standard,
-                id = canister.id,
-                description = canister.description,
-                thumbnail = canister.thumbnail,
-                frontend = canister.frontend;
-
-              if (frontend == '') {
-                const command = [
-                  'dfx',
-                  'canister',
-                  '--network=ic',
-                  '--no-wallet',
-                  'call',
-                  answers.address,
-                  'add',
-                  `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= null; details= vec { record {\\"standard\\"; variant { Text= \\"${standard}\\" } } } })"`,
-                ];
-                try {
-                  execSync(command.join(' '));
-                } catch (e) {
-                  ui.log.write(`FAILED: ${name} because ${e}`);
-                  continue;
-                }
-                ui.log.write(`ADDED: ${name}`);
-                ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
-              } else {
-                const command = [
-                  'dfx',
-                  'canister',
-                  '--network=ic',
-                  '--no-wallet',
-                  'call',
-                  answers.address,
-                  'add',
-                  `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"standard\\"; variant { Text= \\"${standard}\\" } } } })"`,
-                ];
-                try {
-                  execSync(command.join(' '));
-                } catch (e) {
-                  ui.log.write(`FAILED: ${name} because ${e}`);
-                  continue;
-                }
-                ui.log.write(`ADDED: ${name}`);
-                ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
-              }
+          if (!answers.parsingConfirmation) {
+            console.log("Operation aborted.")
+            return;  
+        }
+        for (let i = 0; i < results.length; i++) {
+          let entry = results[i];
+          if (entry.frontend == '') {
+            const command = [
+              'dfx',
+              'canister',
+              '--network=ic',
+              'call',
+              registries.nft,
+              'add',
+              `"(null, record {principal_id= principal \\"${entry.id}\\"; name= \\"${entry.name}\\"; description= \\"${entry.description}\\"; thumbnail= \\"${entry.thumbnail}\\"; frontend= null; details= vec { record {\\"standard\\"; variant { Text= \\"${entry.standard}\\" } } } })"`,
+            ];
+            try {
+              execSync(command.join(' '));
+            } catch (e) {
+              ui.log.write(`FAILED: ${entry.name} because ${e}`);
+              continue;
             }
-            ui.updateBottomBar('FINISHED');
+          } else {
+            const command = [
+              'dfx',
+              'canister',
+              '--network=ic',
+              'call',
+              registries.nft,
+              'add',
+              `"(null, record {principal_id= principal \\"${entry.id}\\"; name= \\"${entry.name}\\"; description= \\"${entry.description}\\"; thumbnail= \\"${entry.thumbnail}\\"; frontend= opt \\"${entry.frontend}\\"; details= vec { record {\\"standard\\"; variant { Text= \\"${entry.standard}\\" } } } })"`,
+            ];
+            try {
+              execSync(command.join(' '));
+            } catch (e) {
+              ui.log.write(`FAILED: ${entry.name} because ${e}`);
+              continue;
+            }
           }
-        });
+          ui.log.write(`ADDED: ${entry.name}`);
+          ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
+        }
+        ui.updateBottomBar('FINISHED');
     });
-
+  });
 }
 
-function add_token(stream) {
+function update_token(stream) {
   stream
     .on("data", (data) => {
       if (data.Name != '' && data.Fee != '' && data.Decimals != '' && data.Symbol != '' && data.Total_supply != '' && data.Standard != '' && data.Description != '' && data.ID != '' && data.Thumbnail != '') {
@@ -161,59 +157,43 @@ function add_token(stream) {
         .prompt([
           {
             type: 'confirm',
-            name: 'isThisOk',
+            name: 'parsingConfirmation',
             message: 'Does this parsing look okay?',
             default: false,
-          },
-          {
-            type: 'input',
-            name: 'address',
-            message: "Please enter canister's principal ID: "
           }
         ])
         .then((answers) => {
-          if (answers.isThisOk) {
+          if (!answers.parsingConfirmation) {
+            console.log("Operation aborted.");
+            return;
+          }
             for (let i = 0; i < results.length; i++) {
-              let canister = results[i],
-                name = canister.name,
-                standard = canister.standard,
-                id = canister.id,
-                description = canister.description,
-                thumbnail = canister.thumbnail,
-                frontend = canister.frontend,
-                total_supply = canister.total_supply,
-                symbol = canister.symbol,
-                fee = canister.fee,
-                decimals = canister.decimals,
-                verified = canister.verified;
+              let entry = results[i];
 
               const command = [
                 'dfx',
                 'canister',
                 '--network=ic',
                 'call',
-                answers.address,
+                registries.token,
                 'add',
-                `'(null, record {principal_id= principal "${id}"; name= "${name}"; description= "${description}"; thumbnail= "${thumbnail}"; frontend= opt "${frontend}"; details= vec { record {"symbol"; variant { Text= "${symbol}" } }; record {"standard"; variant { Text= "${standard}" } }; record {"total_supply"; variant { U64= ${total_supply} } }; record {"verified"; variant { ${verified} } }; record {"decimals"; variant { U64=${decimals} } }; record {"fee"; variant { U64=${fee} } } } })'`,
+                `'(null, record {principal_id= principal "${entry.id}"; name= "${entry.name}"; description= "${entry.description}"; thumbnail= "${entry.thumbnail}"; frontend= opt "${entry.frontend}"; details= vec { record {"symbol"; variant { Text= "${entry.symbol}" } }; record {"standard"; variant { Text= "${entry.standard}" } }; record {"total_supply"; variant { U64= ${entry.total_supply} } }; record {"verified"; variant { ${entry.verified} } }; record {"decimals"; variant { U64=${entry.decimals} } }; record {"fee"; variant { U64=${entry.fee} } } } })'`,
               ];
-              console.log(command.join(' '));
               try {
                 execSync(command.join(' '));
               } catch (e) {
-                ui.log.write(`FAILED: ${name}`);
+                ui.log.write(`FAILED: ${entry.name}`);
                 continue;
               }
-              ui.log.write(`ADDED: ${name}`);
+              ui.log.write(`ADDED: ${entry.name}`);
               ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
             }
             ui.updateBottomBar('FINISHED');
-          }
         });
     });
-
 }
 
-function add_canister(stream) {
+function update_canister(stream) {
   stream
     .on("data", (data) => {
       if (data.Category != '' && data.Name != '' && data.Description != '' && data.Thumbnail != '' && data.ID != '') {
@@ -234,69 +214,55 @@ function add_canister(stream) {
         .prompt([
           {
             type: 'confirm',
-            name: 'isThisOk',
+            name: 'parsingConfirmation',
             message: 'Does this parsing look okay?',
             default: false,
-          },
-          {
-            type: 'input',
-            name: 'address',
-            message: "Please enter canister's principal ID: "
           }
         ])
         .then((answers) => {
-          if (answers.isThisOk) {
+          if (!answers.parsingConfirmation) {
+            console.log("Operation aborted.");
+          }
             for (let i = 0; i < results.length; i++) {
-              let canister = results[i],
-                name = canister.name,
-                description = canister.description,
-                id = canister.id,
-                frontend = canister.frontend,
-                thumbnail = canister.thumbnail,
-                category = canister.category;
+              let entry = results[i];
 
               if (thumbnail != '') {
                 const command = [
                   'dfx',
                   'canister',
                   '--network=ic',
-                  '--no-wallet',
                   'call',
-                  answers.address,
+                  registries.canister_registry,
                   'add',
-                  `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= opt \\"${frontend}\\"; details= vec { record {\\"category\\"; variant { Text= \\"${category}\\" } } } })"`,
+                  `"(null, record {principal_id= principal \\"${entry.id}\\"; name= \\"${entry.name}\\"; description= \\"${entry.description}\\"; thumbnail= \\"${entry.thumbnail}\\"; frontend= opt \\"${entry.frontend}\\"; details= vec { record {\\"category\\"; variant { Text= \\"${entry.category}\\" } } } })"`,
                 ];
                 try {
                   execSync(command.join(' '));
                 } catch (e) {
-                  ui.log.write(`FAILED: ${name}`);
+                  ui.log.write(`FAILED: ${entry.name}`);
                   continue;
                 }
-                ui.log.write(`ADDED: ${name}`);
-                ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
               } else {
                 const command = [
                   'dfx',
                   'canister',
                   '--network=ic',
-                  '--no-wallet',
                   'call',
-                  answers.address,
+                  registries.canister_registry,
                   'add',
-                  `"(record {principal_id= principal \\"${id}\\"; name= \\"${name}\\"; description= \\"${description}\\"; thumbnail= \\"${thumbnail}\\"; frontend= null; details= vec { record {\\"category\\"; variant { Text= \\"${category}\\" } } } })"`,
+                  `"(null, record {principal_id= principal \\"${entry.id}\\"; name= \\"${entry.name}\\"; description= \\"${entry.description}\\"; thumbnail= \\"${entry.thumbnail}\\"; frontend= null; details= vec { record {\\"category\\"; variant { Text= \\"${entry.category}\\" } } } })"`,
                 ];
                 try {
                   execSync(command.join(' '));
                 } catch (e) {
-                  ui.log.write(`FAILED: ${name}`);
+                  ui.log.write(`FAILED: ${entry.name}`);
                   continue;
                 }
-                ui.log.write(`ADDED: ${name}`);
-                ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
               }
+              ui.log.write(`ADDED: ${entry.name}`);
+              ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
             }
             ui.updateBottomBar('FINISHED');
-          }
         });
     });
 }
@@ -305,10 +271,14 @@ const csvWriter = createCsvWriter({
   path: 'out.csv',
   header: [
     { id: 'name', title: 'name' },
-    { id: 'id', title: 'principal_id' },
+    { id: 'principal_id', title: 'principal_id' },
     { id: 'description', title: 'description' },
-    { id: 'url', title: 'url' },
-    { id: 'logo', title: 'logo_url' },
+    { id: 'frontend', title: 'frontend' },
+    { id: 'thumbnail', title: 'thumbnail' },
+    { id: 'submitter', title: 'submitter' },
+    { id: 'last_updated_by', title: 'last_updated_by' },
+    { id: 'last_updated_at', title: 'last_updated_at' },
+    { id: 'details', title: 'details' },
   ]
 });
 
