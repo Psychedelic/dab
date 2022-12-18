@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+
+/*
+ * Please, bear in mind that this script was never meant to be used by non-Psychedelic parties and was only and only used for automation purposes.
+ * This is truly an abomination of code. It should never be used for production.
+ */
+
 const fs = require("fs"),
   csv = require("csv-parser"),
   createCsvWriter = require('csv-writer').createObjectCsvWriter,
@@ -11,6 +17,7 @@ var registries = {
   "nft": canister_ids['nft']['ic'],
   "token": canister_ids['tokens']['ic'],
   "canister_registry": canister_ids['registry']['ic'],
+  "proxy": canister_ids['proxy']['ic']
 };
 
 var results = [],
@@ -28,6 +35,7 @@ function main() {
           'Update the NFT registry',
           'Update the token registry',
           'Update the canister registry',
+          'Update registries through the proxy canister',
           'Export a csv file from the NFT registry',
           'Export a csv file from the token registry',
           'Export a csv file from the canister registry',
@@ -43,6 +51,8 @@ function main() {
         update_token(stream);
       } else if (answer.action == 'Update the canister registry') {
         update_canister(stream);
+      } else if (answer.action == 'Update registries through the proxy canister') {
+        proxy_canister(stream);
       } else if (answer.action == 'Export a csv file from the NFT registry') {
         nft_csv(stream);
       } else if (answer.action == 'Export a csv file from the token registry') {
@@ -265,6 +275,169 @@ function update_canister(stream) {
             ui.updateBottomBar('FINISHED');
         });
     });
+}
+
+function proxy_canister(stream) {
+  program
+  .prompt([
+    {
+      type: 'list',
+      name: 'registry',
+      message: 'What registry do you want to update?',
+      choices: [
+        'NFT',
+        'Token',
+        'Canister',
+      ]
+    }
+  ])
+  .then((answers) => {
+    if (answers.registry == 'NFT') {
+
+      stream
+      .on("data", (data) => {
+        if (data.name != '' && data.standard != '' && data.id != '' && data.description != '' && data.thumbnail != '') {
+          let item = {
+            name: data.name,
+            id: data.id,
+            standard: data.standard,
+            description: data.description,
+            thumbnail: data.thumbnail,
+            frontend: data.frontend
+          };
+          results.push(item);
+        } else {
+          console.log(`Can't parse ${data.name}`);
+        }
+      })
+      .on("end", () => {
+        console.log(results);
+        console.log(`Total amount of entries: ${results.length}`);
+        program
+          .prompt([
+            {
+              type: 'confirm',
+              name: 'parsingConfirmation',
+              message: 'Does this parsing look okay?',
+              default: false,
+            }
+          ])
+          .then((answers) => {
+            if (!answers.parsingConfirmation) {
+              console.log("Operation aborted.")
+              return;  
+          }
+          for (let i = 0; i < results.length; i++) {
+            let entry = results[i];
+            if (entry.frontend == '') {
+              const command = [
+                'dfx',
+                'canister',
+                '--network=ic',
+                'call',
+                registries.proxy,
+                'add',
+                `"(principal \\"${registries.nft}\\", record {principal_id= principal \\"${entry.id}\\"; name= \\"${entry.name}\\"; description= \\"${entry.description}\\"; thumbnail= \\"${entry.thumbnail}\\"; frontend= null; details= vec { record {\\"standard\\"; variant { Text= \\"${entry.standard}\\" } } } })"`,
+              ];
+              try {
+                execSync(command.join(' '));
+              } catch (e) {
+                ui.log.write(`FAILED: ${entry.name} because ${e}`);
+                continue;
+              }
+            } else {
+              const command = [
+                'dfx',
+                'canister',
+                '--network=ic',
+                'call',
+                registries.proxy,
+                'add',
+                `"(principal \\"${registries.nft}\\", record {principal_id= principal \\"${entry.id}\\"; name= \\"${entry.name}\\"; description= \\"${entry.description}\\"; thumbnail= \\"${entry.thumbnail}\\"; frontend= opt \\"${entry.frontend}\\"; details= vec { record {\\"standard\\"; variant { Text= \\"${entry.standard}\\" } } } })"`,
+              ];
+              try {
+                execSync(command.join(' '));
+              } catch (e) {
+                ui.log.write(`FAILED: ${entry.name} because ${e}`);
+                continue;
+              }
+            }
+            ui.log.write(`ADDED: ${entry.name}`);
+            ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
+          }
+          ui.updateBottomBar('FINISHED');
+      });
+    });
+  
+
+    } else if (answers.registry == 'Token') {
+
+      stream
+    .on("data", (data) => {
+      if (data.Name != '' && data.Fee != '' && data.Decimals != '' && data.Symbol != '' && data.Total_supply != '' && data.Standard != '' && data.Description != '' && data.ID != '' && data.Thumbnail != '') {
+        let v = data.Verified == 'yes' ? 'True' : 'False';
+        let item = {
+          name: data.Name,
+          id: data.ID,
+          standard: data.Standard,
+          description: data.Description,
+          thumbnail: data.Thumbnail,
+          frontend: data.Frontend,
+          total_supply: data.Total_supply,
+          symbol: data.Symbol,
+          fee: data.Fee,
+          decimals: data.Decimals,
+          verified: v
+        };
+        results.push(item);
+      }
+    })
+    .on("end", () => {
+      console.log(results);
+      program
+        .prompt([
+          {
+            type: 'confirm',
+            name: 'parsingConfirmation',
+            message: 'Does this parsing look okay?',
+            default: false,
+          }
+        ])
+        .then((answers) => {
+          if (!answers.parsingConfirmation) {
+            console.log("Operation aborted.");
+            return;
+          }
+            for (let i = 0; i < results.length; i++) {
+              let entry = results[i];
+
+              const command = [
+                'dfx',
+                'canister',
+                '--network=ic',
+                'call',
+                registries.proxy,
+                'add',
+                `'(principal "${registries.token}", record {principal_id= principal "${entry.id}"; name= "${entry.name}"; description= "${entry.description}"; thumbnail= "${entry.thumbnail}"; frontend= opt "${entry.frontend}"; details= vec { record {"symbol"; variant { Text= "${entry.symbol}" } }; record {"standard"; variant { Text= "${entry.standard}" } }; record {"total_supply"; variant { U64= ${entry.total_supply} } }; record {"verified"; variant { ${entry.verified} } }; record {"decimals"; variant { U64=${entry.decimals} } }; record {"fee"; variant { U64=${entry.fee} } } } })'`,
+              ];
+              try {
+                execSync(command.join(' '));
+              } catch (e) {
+                ui.log.write(`FAILED: ${entry.name}`);
+                continue;
+              }
+              ui.log.write(`ADDED: ${entry.name}`);
+              ui.updateBottomBar(`${i + 1}/${results.length + 1}`);
+            }
+            ui.updateBottomBar('FINISHED');
+        });
+    });
+
+    } else if (answers.registry == 'Canister') {
+
+    }
+  });
+      
 }
 
 const csvWriter = createCsvWriter({
