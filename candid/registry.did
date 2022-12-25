@@ -50,6 +50,7 @@ service : {
     "add"     : (trusted_source: opt principal, canister: add_canister_input) -> (operation_response);
     "remove"  : (trusted_source: opt principal, canister: principal) -> (operation_response);
     "get_all" : () -> (vec canister_metadata) query;
+    "get_multiple": (vec principal) -> (vec opt canister_metadata) query;
 
     "add_admin" : (admin: principal) -> (operation_response);
 }
